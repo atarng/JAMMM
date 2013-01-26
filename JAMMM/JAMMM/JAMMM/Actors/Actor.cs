@@ -16,11 +16,6 @@ namespace JAMMM
     /// </summary>
     public class Actor
     {
-        private Circle bounds;
-        private Vector2 acceleration;
-        private Vector2 velocity;
-        private Vector2 center;
-        private float mass;
         /// <summary>
         /// Actors use this enum to determine which animation 
         /// is which handleAnimationComplete.
@@ -35,11 +30,11 @@ namespace JAMMM
             Death
         }
 
-        /// <summary>
-        /// Actors override this to determine what happens at
-        /// the end of each animation. 
-        /// </summary>
-        public virtual void handleAnimationComplete(AnimationType t) {}
+        private Circle bounds;
+        private Vector2 acceleration;
+        private Vector2 velocity;
+        private Vector2 center;
+        private float mass;
         private float accMax;
         private float accDashMax;
         private float velMax;
@@ -87,5 +82,11 @@ namespace JAMMM
         {
             return mass;
         }
+
+        /// <summary>
+        /// Actors override this to determine what happens at
+        /// the end of each animation. 
+        /// </summary>
+        public virtual void handleAnimationComplete(AnimationType t) { }
     }
 }
