@@ -22,7 +22,7 @@ namespace JAMMM
         /// </summary>
         public enum AnimationType
         {
-            Idle, 
+            Idle,
             Move,
             Dash,
             Throw,
@@ -31,56 +31,54 @@ namespace JAMMM
         }
 
         private Circle bounds;
+        public Circle Bounds
+        {
+            get { return bounds; }
+            set { bounds = value; }
+        }
+
         private Vector2 acceleration;
+        public Vector2 Acceleration
+        {
+            get { return acceleration; }
+            set { acceleration = value; }
+        }
+
         private Vector2 velocity;
-        private Vector2 center;
+        public Vector2 Velocity
+        {
+            get { return velocity; }
+            set { velocity = value; }
+        }
+
+        private Vector2 position;
+        public Vector2 Position
+        {
+            get { return position; }
+            set { position = value; }
+        }
+
+        private Vector2 offset; ///collision body offset
+        public Vector2 Offset
+        {
+            get { return offset; }
+            set { offset = value; }
+        }
+
         private float mass;
+        public float Mass
+        {
+            get { return mass; }
+            set { mass = value; }
+        }
+
         private float accMax;
         private float accDashMax;
         private float velMax;
 
         public Actor()
         {
-        }
 
-        public void setCenter(Vector2 cen)
-        {
-            center = cen;
-        }
-
-        public Vector2 getCenter()
-        {
-            return center;
-        }
-
-        public void setVelocity(Vector2 vel)
-        {
-            velocity = vel;
-        }
-
-        public Vector2 getVelocity()
-        {
-            return velocity;
-        }
-
-        public void setAcceleration(Vector2 acc)
-        {
-            acceleration = acc;
-        }
-
-        public Vector2 getAcceleration()
-        {
-            return acceleration;
-        }
-
-        public void setMass(float mass)
-        {
-            this.mass = mass;
-        }
-
-        public float getMass()
-        {
-            return mass;
         }
 
         /// <summary>

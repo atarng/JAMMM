@@ -20,17 +20,17 @@ namespace JAMMM
         //http://en.wikipedia.org/wiki/Inelastic_collision
         public static Vector2[] collide(Actor a, Actor b)
         {
-            Vector2 ua = a.getVelocity();
-            Vector2 ub = b.getVelocity();
-            float ma = a.getMass();
-            float mb = b.getMass();
+            Vector2 ua = a.Velocity;
+            Vector2 ub = b.Velocity;
+            float ma = a.Mass;
+            float mb = b.Mass;
 
             //(cr * mb * (ub - ua) + ma * ua + mb * ua) / (ma + mb);
             Vector2 va = (cr * mb * (ub - ua) + ma * ua + mb * ua) / (ma + mb);
             Vector2 vb = (cr * ma * (ua - ub) + ma * ua + mb * ua) / (ma + mb);
 
-            a.setVelocity(va);
-            b.setVelocity(vb);
+            a.Velocity = va;
+            b.Velocity = vb;
 
             Vector2[] res = { va, vb };
             return res;
@@ -42,9 +42,9 @@ namespace JAMMM
         public static Vector2 applyMovement(Actor a, float delta, Boolean applyFric )
         {
 
-            Vector2 acc = a.getAcceleration();
-            Vector2 vel = a.getVelocity();
-            Vector2 pos = a.getCenter();
+            Vector2 acc = a.Acceleration;
+            Vector2 vel = a.Velocity;
+            Vector2 pos = a.Position;
 
             Vector2 accFric = -1 * vel * uk;
             Vector2 accFricNormalize = new Vector2(accFric.X, accFric.Y);
@@ -64,6 +64,10 @@ namespace JAMMM
             }
 
             pos = vel * delta + pos;
+
+            //update the bounds
+            a.Bounds.CenterX = pos.X + a.Offset.X;
+            a.Bounds.CenterY = pos.Y + a.Offset.Y;
             return pos;
         }
     }
@@ -71,8 +75,25 @@ namespace JAMMM
     public class Circle
     {
         private float centerX;
+        public float CenterX
+        {
+            get { return centerX; }
+            set { centerX = value; }
+        }
+
         private float centerY;
+        public float CenterY
+        {
+            get { return centerY; }
+            set { centerY = value; }
+        }
+
         private float radius;
+        public float Radius
+        {
+            get { return radius; }
+            set { radius = value; }
+        }
 
         public void move(float x, float y)
         {

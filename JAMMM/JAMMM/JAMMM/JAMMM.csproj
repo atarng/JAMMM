@@ -76,6 +76,7 @@
     <Compile Include="Actors\Fish.cs" />
     <Compile Include="Actors\Penguin.cs" />
     <Compile Include="Actors\Shark.cs" />
+    <Compile Include="Actors\TestActor.cs" />
     <Compile Include="Animation.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="Vector2.cs" />
