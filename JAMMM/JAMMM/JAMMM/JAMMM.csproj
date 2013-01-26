@@ -79,7 +79,6 @@
     <Compile Include="Actors\TestActor.cs" />
     <Compile Include="Animation.cs" />
     <Compile Include="AudioManager.cs" />
-    <Compile Include="Vector2.cs" />
     <Compile Include="Physics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
@@ -92,7 +91,6 @@
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
-    <Content Include="TestFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JAMMMContent\JAMMMContent.contentproj">
