@@ -64,7 +64,7 @@ namespace JAMMM
 
         public Actor()
         {
-
+            
         }
     }
 }
