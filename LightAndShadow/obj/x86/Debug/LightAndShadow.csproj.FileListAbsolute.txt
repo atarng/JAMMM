@@ -1,0 +1,122 @@
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\ResolveAssemblyReference.cache
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Text.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\basslead1.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\layer1-2.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\BlackBlend.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\WhiteBlend.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOver.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOverBack.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\ShmadowTitle.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend19.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend9.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend19.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend9.xnb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.pdb
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe
+c:\documents and settings\gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.pdb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\deathsound.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\bombExplode.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\enemyBigKill.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\enemyKill.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\laser.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\playerDeath.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\playerHit.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\playerSpawn.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\shot.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\thermo.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\deploy.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackCircle.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.xnb
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.wma
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.wma
+C:\Documents and Settings\Gary\My Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\lighten.xnb
+C:\Documents and Settings\Gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.xnb
+C:\Documents and Settings\Gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.xnb
+C:\Documents and Settings\Gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.wma
+C:\Documents and Settings\Gary\my documents\visual studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Text.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\BlackBlend.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\WhiteBlend.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOver.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOverBack.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\ShmadowTitle.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend19.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend9.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend19.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend9.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackCircle.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.pdb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.pdb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Text.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\BlackBlend.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\WhiteBlend.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOver.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOverBack.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\ShmadowTitle.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend19.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend9.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend19.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend9.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackCircle.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.pdb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.pdb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe.manifest
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.application
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe.manifest
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.application
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Text.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\BlackBlend.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\WhiteBlend.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOver.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\GameOverBack.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\ShmadowTitle.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend19.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackBlend9.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend19.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\whiteBlend9.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\blackCircle.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\proto2-6.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\song2.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\beno.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\Content\Bossfinal.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe.manifest
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.application
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.exe
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\x86\Debug\LightAndShadow.pdb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe.manifest
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.application
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.exe
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\x86\Debug\LightAndShadow.pdb

@@ -1,0 +1,75 @@
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\ResolveAssemblyReference.cache
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Text.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\BlackBlend.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\WhiteBlend.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOver.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOverBack.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\ShmadowTitle.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend19.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend9.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend19.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend9.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackCircle.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.xnb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.wma
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.exe
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.pdb
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.exe
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.pdb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Text.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\BlackBlend.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\WhiteBlend.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOver.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOverBack.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\ShmadowTitle.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend19.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend9.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend19.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend9.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackCircle.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.xnb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.wma
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.exe
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.pdb
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\ResolveAssemblyReference.cache
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.exe
+C:\Users\Robert\Dropbox\Extrokold\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.pdb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Text.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\BlackBlend.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\WhiteBlend.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOver.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOverBack.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\ShmadowTitle.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend19.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend9.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend19.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend9.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackCircle.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.xnb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.wma
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.exe
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.pdb
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\ResolveAssemblyReference.cache
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.exe
+D:\PROJECTS\Shmadow\LightAndShadow\LightAndShadow\LightAndShadow\obj\Xbox 360\Debug\LightAndShadow.pdb

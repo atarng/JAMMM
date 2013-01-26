@@ -1,0 +1,47 @@
+00de6b51480a41cabdb5a4bc70f102c2
+0
+Roberts Xbox
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\
+129735560480000000
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\GameThumbnail.png
+2012-01-29T03:12:07.3906250Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\LightAndShadow.exe
+2012-02-13T03:13:31.5201765Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.wma
+2012-02-12T21:34:01.1271584Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\beno.xnb
+2012-02-12T21:34:01.1781613Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\BlackBlend.xnb
+2012-02-12T21:33:49.8275121Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend19.xnb
+2012-02-12T21:33:51.5796123Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackBlend9.xnb
+2012-02-12T21:33:51.6526165Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\blackCircle.xnb
+2012-02-12T21:33:51.8876299Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.wma
+2012-02-12T21:34:06.0864421Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Bossfinal.xnb
+2012-02-12T21:34:06.1314446Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOver.xnb
+2012-02-12T21:33:50.3885442Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\GameOverBack.xnb
+2012-02-12T21:33:50.9055738Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.wma
+2012-02-12T21:33:55.3638288Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\proto2-6.xnb
+2012-02-12T21:33:55.4038310Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\ShmadowTitle.xnb
+2012-02-12T21:33:51.5046080Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.wma
+2012-02-12T21:33:58.2289926Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\song2.xnb
+2012-02-12T21:33:58.2709950Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\Text.xnb
+2012-02-12T21:33:49.7225061Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\WhiteBlend.xnb
+2012-02-12T21:33:49.9195174Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend19.xnb
+2012-02-12T21:33:51.7256207Z
+C:\Users\Robert\Documents\Visual Studio 2010\Projects\LightAndShadow\LightAndShadow\LightAndShadow\bin\Xbox 360\Debug\Content\whiteBlend9.xnb
+2012-02-12T21:33:51.7986248Z

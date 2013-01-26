@@ -1,0 +1,25 @@
+Content\Text.xnb
+Content\main theme.xnb
+Content\main theme.wma
+Content\soundeffect1.xnb
+Content\soundeffect2.xnb
+Content\soundeffect3.xnb
+Content\soundeffect4.xnb
+Content\TestSong1.xnb
+Content\soundeffect1-2.xnb
+Content\basslead1.xnb
+Content\drum2.xnb
+Content\layer1-2.xnb
+Content\green.xnb
+Content\yellow.xnb
+Content\red.xnb
+Content\blue.xnb
+Content\BlackBlend.xnb
+Content\WhiteBlend.xnb
+Content\GameOver.xnb
+Content\GameOverBack.xnb
+Content\ShmadowTitle.xnb
+Content\blackBlend19.xnb
+Content\blackBlend9.xnb
+Content\whiteBlend19.xnb
+Content\whiteBlend9.xnb
