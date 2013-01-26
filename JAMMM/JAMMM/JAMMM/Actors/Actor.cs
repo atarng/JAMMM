@@ -16,6 +16,20 @@ namespace JAMMM
     /// </summary>
     public class Actor
     {
+        /// <summary>
+        /// Actors use this enum to determine which animation 
+        /// is which handleAnimationComplete.
+        /// </summary>
+        public enum AnimationType
+        {
+            Idle,
+            Move,
+            Dash,
+            Throw,
+            Turn,
+            Death
+        }
+
         private Circle bounds;
         public Circle Bounds
         {
@@ -66,5 +80,11 @@ namespace JAMMM
         {
             
         }
+
+        /// <summary>
+        /// Actors override this to determine what happens at
+        /// the end of each animation. 
+        /// </summary>
+        public virtual void handleAnimationComplete(AnimationType t) { }
     }
 }
