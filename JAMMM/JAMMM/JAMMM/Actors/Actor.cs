@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace JAMMM
 {
@@ -15,6 +16,11 @@ namespace JAMMM
     /// </summary>
     public class Actor
     {
+        private Circle bounds;
+        private Vector2 acceleration;
+        private Vector2 velocity;
+        private Vector2 center;
+        private float mass;
         /// <summary>
         /// Actors use this enum to determine which animation 
         /// is which handleAnimationComplete.
@@ -34,5 +40,52 @@ namespace JAMMM
         /// the end of each animation. 
         /// </summary>
         public virtual void handleAnimationComplete(AnimationType t) {}
+        private float accMax;
+        private float accDashMax;
+        private float velMax;
+
+        public Actor()
+        {
+        }
+
+        public void setCenter(Vector2 cen)
+        {
+            center = cen;
+        }
+
+        public Vector2 getCenter()
+        {
+            return center;
+        }
+
+        public void setVelocity(Vector2 vel)
+        {
+            velocity = vel;
+        }
+
+        public Vector2 getVelocity()
+        {
+            return velocity;
+        }
+
+        public void setAcceleration(Vector2 acc)
+        {
+            acceleration = acc;
+        }
+
+        public Vector2 getAcceleration()
+        {
+            return acceleration;
+        }
+
+        public void setMass(float mass)
+        {
+            this.mass = mass;
+        }
+
+        public float getMass()
+        {
+            return mass;
+        }
     }
 }
