@@ -22,18 +22,16 @@ namespace JAMMM
                 a = u - v;
                 a = Vector2.mul(4,  u);
                 a = Vector2.div(u,  4);
-                */
+
                 Actor actA = new Actor();
-                actA.setVelocity(v);
-                actA.setMass(1);
+                actA.Velocity = v;
+                actA.Mass = 1;
                 Actor actB = new Actor();
-                actB.setVelocity(u);
-                actB.setMass(1);
+                actB.Velocity = u;
+                actB.Mass = 1;
 
                 Vector2[] vs = Physics.collide(actA, actB);
-
-                actA.getVelocity();
-                actB.getVelocity();
+                 *                 */
 
                 game.Run();
             }

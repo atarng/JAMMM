@@ -11,7 +11,6 @@ namespace JAMMM.Actors
         TestActor()
         {
             this.Position = new Vector2(1,1);
-            this.
         }
     }
 }

@@ -15,7 +15,6 @@ namespace JAMMM
     {
         private const float cr = 1; //1 is elastic , 0 inelastic
         private const float uk = 0.3F;
-        private const Vector2 zVec = new Vector2(0, 0);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
         public static Vector2[] collide(Actor a, Actor b)
@@ -60,7 +59,9 @@ namespace JAMMM
                 Vector2 velNormalize = new Vector2(vel.X, vel.Y);
                 velNormalize.Normalize();
                 if (velNormalize.Equals(accFricNormalize))
-                    vel = zVec;
+                {
+                    vel.X = 0; vel.Y = 0;
+                }
             }
 
             pos = vel * delta + pos;
