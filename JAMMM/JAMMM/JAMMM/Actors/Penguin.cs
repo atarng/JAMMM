@@ -94,6 +94,9 @@ namespace JAMMM.Actors
             if (!this.IsAlive)
                 return;
 
+            ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), 3.14f/2.0f, 5, 1, 0, 1, 1.0f, 1.0f);
+
+
             currentAnimation.update(delta);
             
             processInput();

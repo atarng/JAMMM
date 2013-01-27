@@ -147,9 +147,9 @@ namespace JAMMM
             if ( Math.Abs(a.Velocity.Y) < eps)
                 a.velocity.Y = 0;
             //if ( Math.Abs(a.Acceleration.X) < eps)
-                a.acceleration.X = 0;
-            //if ( Math.Abs(a.Acceleration.X) < eps)
-                a.acceleration.X = 0;
+            //    a.acceleration.X = 0;
+            //if ( Math.Abs(a.Acceleration.Y) < eps)
+            //    a.acceleration.Y = 0;
        }
 
         public static float VectorToAngle(Vector2 vector)

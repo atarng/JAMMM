@@ -49,7 +49,7 @@ namespace JAMMM
 
             this.angle = direction;
             this.speed = speed;
-            this.direction = Vector2.Transform(new Vector2(1, 0), Matrix.CreateRotationZ(direction));
+            this.direction = Vector2.Transform(new Vector2(1, 0), Matrix.CreateRotationZ(-direction));
         }
 
         public abstract void loadContent();

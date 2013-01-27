@@ -491,7 +491,7 @@ namespace JAMMM
                 }
             }
 
-            ParticleManager.Instance.update(gameTime);
+           
 
 
             List<Actor> keyList = new List<Actor>(collisions.Keys);
@@ -501,6 +501,7 @@ namespace JAMMM
             }
              * */
 
+            ParticleManager.Instance.update(gameTime);
             base.Update(gameTime);
         }
 
