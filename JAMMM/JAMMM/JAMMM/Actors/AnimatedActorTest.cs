@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace JAMMM.Actors
 {
+
     public class AnimatedActorTest : Actor
     {
         public AnimatedActorTest(float x, float y, float offX, float offY, float radius) 
@@ -34,7 +35,11 @@ namespace JAMMM.Actors
 
         public override void loadContent()
         {
-            this.dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
+            //dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
+            //dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Swim"), 2, true, 0.4f);            
+            //dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Death"), 8, true, 0.25f);
+            //dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Turn"), 3, true, 0.5f);
+            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Kelp_Idle"), 2, true, 0.5f);            
             base.loadContent();
         }
 
@@ -50,8 +55,35 @@ namespace JAMMM.Actors
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
             batch.Begin();
+            Color c = Color.Black;
+            Vector2 loc = Position;
+            Vector2 fontHeight;
+            fontHeight.X = 0;
+            fontHeight.Y = 14;
 
-            dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipHorizontally, this.Rotation, 1.0f);
+            batch.DrawString(Game1.font, "Position " + Position, loc, c);
+            batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
+
+
+            batch.DrawString(Game1.font, "Position " + Position, Bounds.Center, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
+
+            batch.End();
+
+            batch.Begin();
+
+            if (Math.Abs(Rotation) > Math.PI / 2)
+            {
+                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+            }
+            else
+            {
+                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
+            }
 
             batch.End();
         }
