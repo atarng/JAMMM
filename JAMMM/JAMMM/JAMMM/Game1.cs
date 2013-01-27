@@ -101,8 +101,8 @@ namespace JAMMM
                 fishPool.Add(new Fish());
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
-            sharkPool.Add(new Shark(150, 150, true));
-            sharkPool.Add(new Shark(300, 300, false));
+            //sharkPool.Add(new Shark(150, 150, true));
+            //sharkPool.Add(new Shark(300, 300, false));
 
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
             //testAct = new Actor(100, 200, 10, 10, 10);
@@ -165,12 +165,15 @@ namespace JAMMM
             SpriteManager.addTexture("Fish_Swim", Content.Load<Texture2D>("Sprites/Fish_Swim_16_16_Loop"));
             SpriteManager.addTexture("Fish_Death", Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));    
             SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
+            SpriteManager.addTexture("Penguin_Move_Small", Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16"));
 
             // tell each actor to load their content now that the sprite manager has its database
-            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
-                sharkPool[i].loadContent();
-            for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                fishPool[i].loadContent();
+            foreach (Shark s in sharkPool)
+                s.loadContent();
+            foreach (Fish f in fishPool)
+                f.loadContent();
+            foreach (Spear s in spears)
+                s.loadContent();
 
             //testActAnim.loadContent();
 
@@ -191,17 +194,17 @@ namespace JAMMM
 
             // set the text positions 
             player1ReadyTextPosition = new Vector2(player1StartPosition.X +
-                (playerPenguin.Width * 6.0f) / 2.0f - font.MeasureString(readyText).X / 2.0f,
-                player1StartPosition.Y + playerPenguin.Height * 6.0f + 5.0f);
+                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
+                player1StartPosition.Y + playerPenguin.Height + 5.0f);
             player2ReadyTextPosition = new Vector2(player2StartPosition.X +
-                (playerPenguin.Width * 6.0f) - font.MeasureString(readyText).X / 2.0f,
-                player2StartPosition.Y + playerPenguin.Height * 6.0f + 5.0f);
+                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                player2StartPosition.Y + playerPenguin.Height + 5.0f);
             player3ReadyTextPosition = new Vector2(player3StartPosition.X +
-                (playerPenguin.Width * 6.0f) - font.MeasureString(readyText).X / 2.0f,
-                player3StartPosition.Y + playerPenguin.Height * 6.0f + 5.0f);
+                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                player3StartPosition.Y + playerPenguin.Height + 5.0f);
             player4ReadyTextPosition = new Vector2(player4StartPosition.X +
-                (playerPenguin.Width * 6.0f) - font.MeasureString(readyText).X / 2.0f,
-                player4StartPosition.Y + playerPenguin.Height * 6.0f + 5.0f);
+                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                player4StartPosition.Y + playerPenguin.Height + 5.0f);
 
             // set the victory text positions
             player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f - 
@@ -282,7 +285,7 @@ namespace JAMMM
         /// </summary>
         private void changeState(GameState newState)
         {
-            switch (this.currentGameState)
+            switch (newState)
             {
                 case (GameState.FindingPlayers):
                 {
@@ -294,7 +297,12 @@ namespace JAMMM
                 {
                     // play the battle theme
 
-                    // spawn each player
+                    // load content and spawn each player
+                    foreach (Penguin p in players)
+                    {
+                        p.loadContent();
+                        p.respawn();
+                    }
 
                     // spawn some fishies
 
@@ -344,6 +352,8 @@ namespace JAMMM
                 case (GameState.Battle):
                 {
                     // do regular game logic updating
+                    foreach (Penguin p in players)
+                        p.update(gameTime);
                     
                     // for each fishy, check if was alive last frame and is dead this one
                     // if that is the case, spawn a new fishy
@@ -386,6 +396,7 @@ namespace JAMMM
                 Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
             }
 
+            /*
             collisions.Clear();
             for (int i = 0; i < SHARK_POOL_SIZE; i++)
             {
@@ -406,6 +417,7 @@ namespace JAMMM
             {
                 Physics.collide(collisions[keyList[i]],keyList[i]);
             }
+             * */
 
             base.Update(gameTime);
         }
@@ -539,16 +551,16 @@ namespace JAMMM
                     // draw a penguin for each connected controller
                     if (isPlayer1Connected)
                         spriteBatch.Draw(playerPenguin, player1StartPosition, playerPenguinRectangle, 
-                            Color.White, 0.0f, Vector2.Zero, 5.0f, SpriteEffects.None, 0.0f);
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
                     if (isPlayer2Connected)
                         spriteBatch.Draw(playerPenguin, player2StartPosition, playerPenguinRectangle,
-                            Color.White, 0.0f, Vector2.Zero, 6.0f, SpriteEffects.None, 0.0f);
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
                     if (isPlayer3Connected)
                         spriteBatch.Draw(playerPenguin, player3StartPosition, playerPenguinRectangle,
-                            Color.White, 0.0f, Vector2.Zero, 6.0f, SpriteEffects.None, 0.0f);
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
                     if (isPlayer4Connected)
                         spriteBatch.Draw(playerPenguin, player4StartPosition, playerPenguinRectangle,
-                            Color.White, 0.0f, Vector2.Zero, 6.0f, SpriteEffects.None, 0.0f);
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
 
                     // draw a green ready text for each readied player
                     if (isPlayer1Ready)
@@ -567,7 +579,7 @@ namespace JAMMM
                 case (GameState.Battle):
                 {
                     // draw background
-                    GraphicsDevice.Clear(Color.DarkBlue);
+                    GraphicsDevice.Clear(Color.Blue);
 
                     spriteBatch.Begin();
 

@@ -44,14 +44,13 @@ namespace JAMMM
         public override void update(GameTime gameTime)
         {
             if (!dashAnimation.IsPlaying)
-                dashAnimation.play();                        
-
+                dashAnimation.play();     
 
             double time = gameTime.ElapsedGameTime.TotalMilliseconds;
-
             
-            acceleration.X =  (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds*2) * MaxAcc;
-            acceleration.Y = 0;
+            acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
+            //TODO MAKE COOLER
+            acceleration.Y = 0;// (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * MaxAcc;
 
             dashAnimation.update(gameTime);
         }
