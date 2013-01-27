@@ -22,8 +22,13 @@ namespace JAMMM
 
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
+
+
+
         private List<Fish> fishPool;
         private List<Shark> sharkPool;
+
+
         private Dictionary<Actor, Actor> collisions;
 
         // this is our pool of players. we want to add a new player
@@ -43,12 +48,18 @@ namespace JAMMM
             fishPool = new List<Fish>();
             sharkPool = new List<Shark>();
 
+
+
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 fishPool.Add(new Fish());
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
             sharkPool.Add(new Shark(150, 150, true));
             sharkPool.Add(new Shark(300, 300, false));
+
+
+            
+
 
 
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
@@ -143,6 +154,9 @@ namespace JAMMM
                 }
             }
 
+            ParticleManager.Instance.update(gameTime);
+
+
             List<Actor> keyList = new List<Actor>(collisions.Keys);
             for (int i = 0; i < keyList.Count; i++)
             {
@@ -165,6 +179,8 @@ namespace JAMMM
             //testActAnim.draw(gameTime, spriteBatch);
             foreach( Shark s in sharkPool )
                 s.draw(gameTime, spriteBatch);
+            
+            ParticleManager.Instance.draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }

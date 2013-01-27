@@ -36,13 +36,15 @@ namespace JAMMM.Actors
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
+            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.3f);
             base.loadContent();
         }
 
         public override void update(GameTime gameTime)
         {
             processInput();
+            ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), this.Rotation, -5, 1, 0, 1, 1.0f, 1.0f);
+
             dashAnimation.update(gameTime);
         }
 
