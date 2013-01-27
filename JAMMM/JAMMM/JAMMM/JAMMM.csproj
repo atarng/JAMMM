@@ -91,7 +91,6 @@
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
-    <Content Include="TestFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JAMMMContent\JAMMMContent.contentproj">

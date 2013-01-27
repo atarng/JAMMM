@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace JAMMM
 {
@@ -13,6 +15,21 @@ namespace JAMMM
     /// </summary>
     public class SpriteManager
     {
+        private static Dictionary<string, Texture2D> database;
 
+        public static void addTexture(string textureId, ref Texture2D texture)
+        {
+            database.Add(textureId, texture);
+        }
+
+        public static bool getTexture(string textureId, ref Texture2D tex)
+        {
+            if (!database.ContainsKey(textureId))
+                return false;
+
+            tex = database[textureId];
+
+            return true;
+        }
     }
 }
