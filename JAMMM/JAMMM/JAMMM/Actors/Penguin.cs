@@ -10,6 +10,26 @@ namespace JAMMM.Actors
 {
     public class Penguin : Actor
     {
+
+        public const float fireCooldown = 0.5F;
+
+        /// <summary>
+        /// for game to query if this actor has fired
+        /// </summary>
+        private Boolean fire;
+        public Boolean Fire
+        {
+            get { return fire; }
+            set { fire = value; }
+        }
+
+        private float fireTime;
+        public float FireTime
+        {
+            get { return fireTime; }
+            set { fireTime = value; }
+        }
+
         /// <summary>
         /// The penguin's health.
         /// </summary>
@@ -48,7 +68,7 @@ namespace JAMMM.Actors
         /// <param name="pos"></param>
         public Penguin(PlayerIndex playerIndex, Vector2 pos) 
             // going to need better values for the base
-            : base(pos.X, pos.Y, 20, 20, 10)
+            : base(pos.X, pos.Y, 20, 20, 10, 100)
         {
             this.controller = playerIndex;
             this.startingPosition = pos;
@@ -63,24 +83,83 @@ namespace JAMMM.Actors
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
-                if (gamePadState.Triggers.Right > 0.75)
+                if (CurrState == state.DashReady && gamePadState.IsButtonDown(Buttons.A))
                 {
-                    //fire
+                    CurrState = state.Dash;
+                    CurrTime = DashTime;
+                    if (Acceleration.Equals(Vector2.Zero))
+                        Acceleration = Physics.AngleToVector(Rotation);
+                }
+                
+                if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
+                {
+                    fireTime = fireCooldown;
+                    fire = true;
                 }
             }
+
+            KeyboardState kbState = Keyboard.GetState();
+            if (kbState.IsKeyDown(Keys.Space) && fireTime <= 0)
+            {
+                fireTime = fireCooldown;
+                fire = true;
+            }
+
+            if (kbState.IsKeyDown(Keys.W))
+                acceleration.Y = -1 * MaxAcc;
+            if (kbState.IsKeyDown(Keys.A))
+                acceleration.X = -1 * MaxAcc;
+            if (kbState.IsKeyDown(Keys.D))
+                acceleration.X = MaxAcc;
+            if (kbState.IsKeyDown(Keys.S))
+                acceleration.Y = MaxAcc;
         }
 
         public override void loadContent() 
         {
             // need to create the animations
+            moveAnimation = new Animation((Actor)this, AnimationType.Move, 
+                SpriteManager.getTexture("Penguin_Move_Small"), 4, true);
         }
 
         public override void update(GameTime delta)
         {
             if (!this.IsAlive)
                 return;
-            
+
+            currentAnimation.update(delta);
             processInput();
+            switch (CurrState) //deal with dash
+            {
+                case state.Dash:
+                    acceleration.Normalize();
+                    acceleration = acceleration * MaxAccDash;
+                    CurrTime = DashTime;
+                    CurrState = state.Dashing;
+                    break;
+                case state.Dashing:
+                    CurrTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+                    if (CurrTime <= 0)
+                    {
+                        CurrTime = DashCooldownTime;
+                        CurrState = state.DashCooldown;
+                    }
+                    break;
+                case state.DashCooldown:
+                    CurrTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+                    if (CurrTime <= 0)
+                    {
+                        CurrState = state.DashReady;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (fireTime > 0)
+            {
+                fireTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+            }
         }
 
         public override void draw(GameTime delta, SpriteBatch batch)
@@ -90,32 +169,63 @@ namespace JAMMM.Actors
                 batch.Begin();
                 currentAnimation.draw(batch, this.Position, 
                     Color.White, SpriteEffects.None, this.Rotation, 1.0f);
+                if (printPhysics)
+                    printPhys(batch);
                 batch.End();
             }
-            /*
-            Boolean printPhysics = true;
-            if (printPhysics)
-            {
-                batch.Begin();
+        }
+
+        public void printPhys(SpriteBatch batch)
+        {
                 Color c = Color.Black;
                 Vector2 loc = Position;
                 Vector2 fontHeight;
                 fontHeight.X = 0;
                 fontHeight.Y = 14;
 
-                batch.DrawString(Game1.font, "Position " + Position, loc, c);
+                //batch.DrawString(Game1.font, "Position " + Position, loc, c);
+                //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "[>]", Bounds.center, c);
                 batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
                 batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
-                batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
+                /*
+                String s = "";
+                switch (CurrState)
+                {
+                    case state.Dash:
+                        s = "dash";
+                        break;
+                    case state.Dashing:
+                        s = "dashing";
+                        break;
+                    case state.DashCooldown:
+                        s = "dashcooldown";
+                        break;
+                    case state.DashReady:
+                        s = "dashready";
+                        break;
+                }
+                 */
+                //batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
 
+                //batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
+                /*if (fire)
+                {
+                    batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
+                    fire = false;
+                }*/
+                //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
 
-                batch.DrawString(Game1.font, "Position " + Position, Bounds.Center, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+                batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+                //batch.DrawString(Game1.font, "Position " + Position, loc, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
-                batch.End();
-            }
-             * */
         }
 
         /// <summary>
@@ -133,7 +243,7 @@ namespace JAMMM.Actors
         public override void respawn()
         {
             base.respawn();
-            this.currentAnimation = idleAnimation;
+            this.currentAnimation = moveAnimation;
             currentAnimation.play();
         }
 

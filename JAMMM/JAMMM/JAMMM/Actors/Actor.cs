@@ -168,13 +168,23 @@ namespace JAMMM
         }
 
         /// <summary>
-        /// Whether or not this penguin is alive.
+        /// Whether or not this actor is alive.
         /// </summary>
         private bool isAlive;
         public bool IsAlive
         {
             get { return isAlive; }
             set { isAlive = value; }
+        }
+
+        /// <summary>
+        /// Setting the scale for this actor.
+        /// </summary>
+        private float scale;
+        public float Scale
+        {
+            get { return scale; }
+            set { scale = value; }
         }
 
         protected Vector2 startingPosition;
