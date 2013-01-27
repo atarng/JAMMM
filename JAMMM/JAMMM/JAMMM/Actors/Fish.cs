@@ -23,17 +23,8 @@ namespace JAMMM
             this.Bounds = new Circle(0 + this.Offset.X, 0 + this.Offset.Y, 8);
         }
 
-        public Fish(float x, float y, float offX, float offY, float radius) 
-        {
-            this.MaxAcc = 200;
-            this.MaxAccDash = 500;
-            this.MaxVel = 300;
-
-            this.Position = new Vector2(x, y);
-            this.Offset = new Vector2(x, y);
-            this.Bounds = new Circle(x + offX, y + offY, radius);
-
-        }
+        //(float x, float y, float offX, float offY, float radius, mass)
+        public Fish(float x, float y) : base(x,y,0,0,10,10){}
 
         public override void loadContent()
         {

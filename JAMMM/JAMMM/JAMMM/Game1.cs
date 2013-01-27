@@ -101,14 +101,12 @@ namespace JAMMM
 
 
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                fishPool.Add(new Fish((float)(200 + rng.NextDouble() * 100), (float)(200 + rng.NextDouble() * 100), 10, 10, 10));
+                fishPool.Add(new Fish((float)(200 + rng.NextDouble() * 100), (float)(200 + rng.NextDouble() * 100)));
+
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
-            //sharkPool.Add(new Shark(150, 150, true));
-            //sharkPool.Add(new Shark(300, 300, false));
-
-            
-
+            sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
+            sharkPool.Add(new Shark(300, 300));
 
 
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
@@ -350,12 +348,13 @@ namespace JAMMM
             if (a.Fire)
             {
                 a.Fire = false;
-                Shark projectile = new Shark(a.Position.X, a.Position.Y, false);
+                //Spear projectile = new Spear(a.Position.X, a.Position.Y, a.CurrentSize);
+                Spear projectile = new Spear(a.Position.X, a.Position.Y);
                 projectile.loadContent();
-                projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 10000F;
+                projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 50000F;
                 projectile.velocity.X = a.Velocity.X;
                 projectile.velocity.Y = a.Velocity.Y;
-                sharkPool.Add(projectile); //TODO change type to spear
+                spears.Add(projectile); //TODO change type to spear
                 //projectilePool.Add(projectile);
             }
         }
@@ -401,6 +400,20 @@ namespace JAMMM
             }
 
             this.currentGameState = newState;
+        }
+
+        protected Boolean isOffScreen(Actor a)
+        {
+            float x = a.Position.X;
+            float y = a.Position.Y;
+            float buffer = 300;
+
+            if (x > graphics.PreferredBackBufferWidth + buffer || x < -1 * buffer)
+                return true;
+            if (y > graphics.PreferredBackBufferHeight + buffer || y < -1 * buffer)
+                return true;
+
+            return false;
         }
 
         /// <summary>
@@ -492,13 +505,19 @@ namespace JAMMM
 
             for (int i = 0; i < spears.Count; i++)
             {
-                spears[i].update(gameTime);
-                Physics.applyMovement(spears[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-                //TODO SEE if outside of world
+                Spear spear = spears[i];
+                spear.update(gameTime);
+                Physics.applyMovement(spear, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+
+                if (isOffScreen(spear))
+                {
+                    spears.Remove(spear);
+                }
             }
             
-            /*
+            //////COLLISIONS///////
             collisions.Clear();
+            /*
             for (int i = 0; i < SHARK_POOL_SIZE; i++)
             {
                 for (int j = 0; j < SHARK_POOL_SIZE; j++)
@@ -512,18 +531,47 @@ namespace JAMMM
                     }
                 }
             }
+            */
+
+            for (int i = 0; i < spears.Count; i++)
+            {
+                for (int j = 0; j < sharkPool.Count; j++)
+                {
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds))
+                        collisions.Add(spears[i], sharkPool[j]);
+                }
+            }
 
             ParticleManager.Instance.update(gameTime);
-
 
             List<Actor> keyList = new List<Actor>(collisions.Keys);
             for (int i = 0; i < keyList.Count; i++)
             {
-                Physics.collide(collisions[keyList[i]],keyList[i]);
+                Actor a = collisions[keyList[i]];
+                Actor b = keyList[i];
+
+                a.collideWith(b);
+                b.collideWith(a);
+
+                if( a is Penguin && b is Penguin )
+                    Physics.collide(collisions[keyList[i]],keyList[i]);
+
+                if (a.RemoveMe)
+                    removeActor(a);
+                if (b.RemoveMe)
+                    removeActor(b);
             }
-            */
+            
 
             base.Update(gameTime);
+        }
+
+        private void removeActor(Actor a)
+        {
+            if (a is Spear)
+                spears.Remove((Spear)a);
+            if (a is Shark)
+                sharkPool.Remove((Shark)a);
         }
 
         /// <summary>

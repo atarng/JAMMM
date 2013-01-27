@@ -59,6 +59,13 @@ namespace JAMMM
 
         public static bool printPhysics = true;
 
+        private bool removeMe;
+        public bool RemoveMe
+        {
+            get { return removeMe; }
+            set { removeMe = value; }
+        }
+
         private state currState;
         public state CurrState
         {
