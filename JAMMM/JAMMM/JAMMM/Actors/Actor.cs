@@ -57,6 +57,8 @@ namespace JAMMM
         protected Animation turnAnimation;
         #endregion
 
+        public static bool printPhysics = true;
+
         private state currState;
         public state CurrState
         {
@@ -198,7 +200,7 @@ namespace JAMMM
 
             this.Position = new Vector2(x,y);
             this.startingPosition = this.Position;
-            this.Offset = new Vector2(x, y);
+            this.Offset = new Vector2(offX, offY);
             this.Bounds = new Circle(x + offX, y + offY, radius);
             this.isAlive = false;
         }
@@ -228,44 +230,15 @@ namespace JAMMM
             this.isAlive = true;
         }
 
-        public virtual void processInput()
-        {
-            GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
-            if (gamePadState.IsConnected)
-            {
-                // then it is connected, and we can do stuff here
-                acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
-                acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
-
-                if (gamePadState.Triggers.Right > 0.75)
-                {
-                    //fire
-                }
-            }
-
-            /*
-            KeyboardState kbState = Keyboard.GetState();
-            if( kbState.IsKeyDown(Keys.W))
-                acceleration.Y = -1 * MaxAcc;
-            if (kbState.IsKeyDown(Keys.A))
-                acceleration.X = -1 * MaxAcc;
-            if (kbState.IsKeyDown(Keys.D))
-                acceleration.X = MaxAcc;
-            if (kbState.IsKeyDown(Keys.S))
-                acceleration.Y = MaxAcc;
-            */
-        }
+        public virtual void processInput(){}
 
         public virtual void update(GameTime delta)
         {
             processInput();
-            //Physics.applyMovement(this, delta.ElapsedGameTime.Seconds, false);
         }
 
         public virtual void draw(GameTime delta, SpriteBatch batch)
         {
-            /*
-            Boolean printPhysics = true;
             if (printPhysics)
             {
                 batch.Begin();
@@ -287,7 +260,6 @@ namespace JAMMM
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
                 batch.End();
             }
-             * */
         }
 
         public virtual void loadContent() { }

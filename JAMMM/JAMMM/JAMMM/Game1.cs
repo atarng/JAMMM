@@ -345,6 +345,21 @@ namespace JAMMM
             }
         }
 
+        protected void trySpear(Penguin a) //TODO change the penguin
+        {
+            if (a.Fire)
+            {
+                a.Fire = false;
+                Shark projectile = new Shark(a.Position.X, a.Position.Y, false);
+                projectile.loadContent();
+                projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 10000F;
+                projectile.velocity.X = a.Velocity.X;
+                projectile.velocity.Y = a.Velocity.Y;
+                sharkPool.Add(projectile); //TODO change type to spear
+                //projectilePool.Add(projectile);
+            }
+        }
+
         /// <summary>
         /// This is called any time we change states. This needs
         /// to do some initialization for that state likely. Just
@@ -420,7 +435,11 @@ namespace JAMMM
                 {
                     // do regular game logic updating
                     foreach (Penguin p in players)
+                    {
                         p.update(gameTime);
+                        Physics.applyMovement(p, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                        trySpear(p);
+                    }
                     
                     // for each fishy, check if was alive last frame and is dead this one
                     // if that is the case, spawn a new fishy
@@ -465,16 +484,19 @@ namespace JAMMM
                 }
             }
 
-            //testAct.update(gameTime);
-            //testActAnim.update(gameTime);
-            //Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
             foreach (Shark s in sharkPool)
             {
                 s.update(gameTime);
                 Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
             }
 
+            for (int i = 0; i < spears.Count; i++)
+            {
+                spears[i].update(gameTime);
+                Physics.applyMovement(spears[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                //TODO SEE if outside of world
+            }
+            
             /*
             collisions.Clear();
             for (int i = 0; i < SHARK_POOL_SIZE; i++)
@@ -499,7 +521,7 @@ namespace JAMMM
             {
                 Physics.collide(collisions[keyList[i]],keyList[i]);
             }
-             * */
+            */
 
             ParticleManager.Instance.update(gameTime);
             base.Update(gameTime);
@@ -625,7 +647,6 @@ namespace JAMMM
                 {
                     // draw the finding players screen
                     GraphicsDevice.Clear(Color.DarkSeaGreen);
-
                     spriteBatch.Begin();
 
                     // draw the title
@@ -752,6 +773,9 @@ namespace JAMMM
             //    s.draw(gameTime, spriteBatch);
             
             ParticleManager.Instance.draw(gameTime, spriteBatch);
+
+            //for (int i = 0; i < projectilePool.Count; ++i)
+            //    projectilePool[i].draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }
