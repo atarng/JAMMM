@@ -142,7 +142,7 @@ namespace JAMMM
             if (!isPlaying)
                 return;
 
-            this.frameTime += gameTime.ElapsedGameTime.Seconds;
+            this.frameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (this.frameTime >= this.frameDuration)
             {
@@ -166,21 +166,24 @@ namespace JAMMM
         }
 
         public void draw(SpriteBatch   spriteBatch, 
-                         Vector2       position, 
-                         SpriteEffects spriteEffects,
+                         Vector2       position,
                          Color         color,
-                         Vector2       origin,
+                         SpriteEffects   effects = SpriteEffects.None,
                          float rotation   = 0.0f,
-                         float layerDepth = 0.0f,
                          float scale      = 1.0f)
         {
+            Vector2 origin = Vector2.Zero;
+
+            origin.X = this.frameWidth / 2.0f;
+            origin.Y = this.frameHeight / 2.0f;
+
             spriteBatch.Draw(this.texture, 
                              position, 
                              this.currentFrame, 
                              color, rotation, 
                              origin, scale, 
-                             spriteEffects, 
-                             layerDepth);
+                             effects, 
+                             0.0f);
         }
     }
 }

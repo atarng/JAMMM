@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace JAMMM
 {
@@ -108,6 +109,12 @@ namespace JAMMM
             this.Acceleration = new Vector2();
             rotation = 0;
         }
+
+        public virtual void update(GameTime gameTime) { }
+
+        public virtual void loadContent() { }
+
+        public virtual void draw(GameTime gameTime, SpriteBatch spriteBatch) { }
 
         /// <summary>
         /// Actors override this to determine what happens at
