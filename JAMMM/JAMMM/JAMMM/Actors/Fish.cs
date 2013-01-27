@@ -45,10 +45,10 @@ namespace JAMMM
         {
             if (!dashAnimation.IsPlaying)
                 dashAnimation.play();
-            
-                //double time = gameTime.ElapsedGameTime.TotalMilliseconds;
-                //acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
-                //acceleration.Y = 0;
+
+            double time = gameTime.ElapsedGameTime.TotalMilliseconds;
+            acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
+            acceleration.Y = 0;
             
             
             dashAnimation.update(gameTime);

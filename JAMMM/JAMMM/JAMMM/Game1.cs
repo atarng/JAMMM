@@ -144,11 +144,7 @@ namespace JAMMM
         {
             changeState(GameState.FindingPlayers);
 
-            base.Initialize();
-            
-            graphics.PreferredBackBufferHeight = 800;
-            graphics.PreferredBackBufferWidth = 800;
-            graphics.ApplyChanges();            
+            base.Initialize();          
         }
 
         /// <summary>
@@ -435,7 +431,7 @@ namespace JAMMM
             }
 
             // TODO: Add your update logic here
-            if (false)
+            if (true)
             {
                 for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 {

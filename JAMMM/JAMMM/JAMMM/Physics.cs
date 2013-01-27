@@ -94,7 +94,8 @@ namespace JAMMM
             */
             a.Position = pos = vel * delta + pos;
 
-           
+            //uncomment for boundry checks
+            /*
             if (pos.X > 800)
             {
                 pos.X = 800;
@@ -117,7 +118,7 @@ namespace JAMMM
             }
             a.Position = pos;
             a.Velocity = vel;
-                
+              */  
 
             //Rotations
             //if ( !finalVelNormalize.Equals(Vector2.Zero))
