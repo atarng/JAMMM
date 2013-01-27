@@ -55,6 +55,8 @@ namespace JAMMM
         protected Animation turnAnimation;
         #endregion
 
+        public static bool printPhysics = true;
+
         private state currState;
         public state CurrState
         {
@@ -186,7 +188,7 @@ namespace JAMMM
 
             this.Position = new Vector2(x,y);
             this.startingPosition = this.Position;
-            this.Offset = new Vector2(x, y);
+            this.Offset = new Vector2(offX, offY);
             this.Bounds = new Circle(x + offX, y + offY, radius);
             this.isAlive = false;
         }
@@ -225,7 +227,6 @@ namespace JAMMM
 
         public virtual void draw(GameTime delta, SpriteBatch batch)
         {
-            Boolean printPhysics = true;
             if (printPhysics)
             {
                 batch.Begin();

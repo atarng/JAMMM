@@ -131,7 +131,7 @@ namespace JAMMM
             }
         }
 
-        protected void trySpear(Shark a) //TOD change the penguin
+        protected void trySpear(Shark a) //TODO change the penguin
         {
             if (a.Fire)
             {
@@ -139,6 +139,8 @@ namespace JAMMM
                 Shark projectile = new Shark(a.Position.X, a.Position.Y, false);
                 projectile.loadContent();
                 projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 10000F;
+                projectile.velocity.X = a.Velocity.X;
+                projectile.velocity.Y = a.Velocity.Y;
                 projectilePool.Add(projectile);
             }
         }

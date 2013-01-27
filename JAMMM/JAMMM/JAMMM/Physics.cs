@@ -18,6 +18,7 @@ namespace JAMMM
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
         private const float smallForce = 5;
+        private const float accDecay = 0.95F; //1 is no decay
         //private static Vector2 smallForce = new Vector2(50,50);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
@@ -112,11 +113,17 @@ namespace JAMMM
             */
 
             //update the bounds
-            a.bounds.center.X = a.Position.X + a.Offset.X;
-            a.bounds.center.Y = a.Position.Y + a.Offset.Y;
+            float s = (float)Math.Sin(a.Rotation);
+            float c = (float)Math.Cos(a.Rotation);
+            //rotate about the origin then add to position
+            a.bounds.center.X = c * (a.Offset.X) - s * (a.Offset.Y) + a.Position.X;
+            a.bounds.center.Y = s * (a.Offset.X) + c * (a.Offset.Y) + a.Position.Y;
+
+
+            a.acceleration = accDecay * a.acceleration;
 
             //zero if too small
-            if ( Math.Abs(a.Velocity.X) < eps)
+            if ( Math.Abs(a.Velocity.X) < eps) 
                 a.velocity.X = 0;
             if ( Math.Abs(a.Velocity.Y) < eps)
                 a.velocity.Y = 0;
