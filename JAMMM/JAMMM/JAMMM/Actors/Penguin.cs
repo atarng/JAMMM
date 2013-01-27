@@ -85,12 +85,16 @@ namespace JAMMM.Actors
         public override void loadContent() 
         {
             // need to create the animations
+            moveAnimation = new Animation((Actor)this, AnimationType.Move, 
+                SpriteManager.getTexture("Penguin_Move_Small"), 4, true);
         }
 
         public override void update(GameTime delta)
         {
             if (!this.IsAlive)
                 return;
+
+            currentAnimation.update(delta);
             
             processInput();
         }
@@ -145,7 +149,7 @@ namespace JAMMM.Actors
         public override void respawn()
         {
             base.respawn();
-            this.currentAnimation = idleAnimation;
+            this.currentAnimation = moveAnimation;
             currentAnimation.play();
         }
 

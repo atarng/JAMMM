@@ -31,6 +31,21 @@ namespace JAMMM.Actors
 
                 if (gamePadState.Triggers.Right == 1)
                     fire = true;
+
+                if (CurrState == state.DashReady && gamePadState.IsButtonDown(Buttons.A))
+                {
+                    CurrState = state.Dash;
+                    CurrTime = DashTime;
+                    if (Acceleration.Equals(Vector2.Zero))
+                        Acceleration = Physics.AngleToVector(Rotation);
+                }
+                /* stop dashing
+                else if (CurrState == state.Dashing && gamePadState.IsButtonUp(Buttons.A))
+                {
+                    CurrTime = DashCooldownTime;
+                    CurrState = state.DashCooldown;
+                }
+                */
             }
         }
 
@@ -43,9 +58,35 @@ namespace JAMMM.Actors
         public override void update(GameTime gameTime)
         {
             processInput();
-            ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), this.Rotation, -5, 1, 0, 1, 1.0f, 1.0f);
+            //ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), this.Rotation, -5, 1, 0, 1, 1.0f, 1.0f);
 
             dashAnimation.update(gameTime);
+            switch(CurrState)
+            {
+                case state.Dash:
+                    acceleration.Normalize();
+                    acceleration = acceleration * MaxAccDash;
+                    CurrTime = DashTime;
+                    CurrState = state.Dashing;
+                    break;
+                case state.Dashing:
+                    CurrTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    if( CurrTime <= 0 )
+                    {
+                        CurrTime = DashCooldownTime;
+                        CurrState = state.DashCooldown;
+                    }
+                    break;
+                case state.DashCooldown:
+                    CurrTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    if( CurrTime <= 0 )
+                    {
+                        CurrState = state.DashReady;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
@@ -61,10 +102,30 @@ namespace JAMMM.Actors
             fontHeight.Y = 14;
 
             batch.DrawString(Game1.font, "Position " + Position, loc, c);
-            batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+
+            String s = "";
+            switch (CurrState)
+            {
+                case state.Dash:
+                    s = "dash";
+                    break;
+                case state.Dashing:
+                    s = "dashing";
+                    break;
+                case state.DashCooldown:
+                    s = "dashcooldown";
+                    break;
+                case state.DashReady:
+                    s = "dashready";
+                    break;
+            }
+            batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
             if (fire)
             {
                 batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
