@@ -20,7 +20,7 @@ namespace JAMMM
         GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private const int FISH_POOL_SIZE = 20;
+        private const int FISH_POOL_SIZE = 50;
         private const int SHARK_POOL_SIZE = 2;
         private List<Fish> fishPool;
         private List<Shark> sharkPool;
@@ -69,6 +69,10 @@ namespace JAMMM
         {
             // TODO: Add your initialization logic here
             base.Initialize();
+            
+            graphics.PreferredBackBufferHeight = 800;
+            graphics.PreferredBackBufferWidth = 800;
+            graphics.ApplyChanges();            
         }
 
         /// <summary>
@@ -121,10 +125,10 @@ namespace JAMMM
             float maxSpeed = _boids[0].MaxVel;
             float maxAccel = _boids[0].MaxAcc;
             float desiredSeparation = 50.0f;
-            float neighborRadius = 150.0f;
-            float separationFactor = 20.0f;
-            float alignmentFactor  = 10.0f;
-            float cohesionFactor  = 10.0f;
+            float neighborRadius = 100.0f;
+            float separationFactor = 30.0f;
+            float alignmentFactor  = 4.0f;
+            float cohesionFactor  = 1.0f;
 
             float elapsedTime = (float)gametime.ElapsedGameTime.TotalSeconds;            
             for (int i = 0; i < _boids.Count; i++)
@@ -138,15 +142,18 @@ namespace JAMMM
                 for (int j = 0; j < _boids.Count; j++)
                 {
                     Vector2 vecTo = _boids[j].Position - _boids[i].Position;
-                    if (vecTo.Length() < neighborRadius)
+                    if (vecTo.Length() > 0 && vecTo.Length() < neighborRadius)
                     {
                         cohesion += _boids[j].Position;
                         alignment += _boids[j].Velocity;
                         count++;                        
                     }
                     if (vecTo.Length() > 0 && vecTo.Length() < desiredSeparation)
-                    {                        
-                        separation -= vecTo;
+                    {
+                        Vector2 temp = -vecTo;
+                        temp.Normalize();
+                        temp /= vecTo.Length();
+                        separation += temp;                        
                         count0++;
                     }
                 }
@@ -170,7 +177,7 @@ namespace JAMMM
                 {
                     float temp = cohesion.Length();
                     cohesion.Normalize();
-                    if (temp < (desiredSeparation + neighborRadius) / 2.0f)
+                    if ( temp < (desiredSeparation + neighborRadius) / 2.0f)
                     {
                         cohesion *= maxSpeed * (temp / neighborRadius);
                     }
@@ -178,6 +185,7 @@ namespace JAMMM
                     {                        
                         cohesion *= maxSpeed;
                     }
+                    cohesion -= _boids[i].velocity;
                 }
                 _boids[i].acceleration = cohesion * cohesionFactor + separation * separationFactor + alignment * alignmentFactor;                
 
@@ -197,7 +205,7 @@ namespace JAMMM
                 this.Exit();
 
             // TODO: Add your update logic here
-            if (true)
+            if (false)
             {
                 for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 {
@@ -210,7 +218,7 @@ namespace JAMMM
                 Flock(fishPool, gameTime);
                 for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 {
-                    fishPool[i].update(null);
+                    fishPool[i].update(gameTime);
                     Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
                 }
             }
