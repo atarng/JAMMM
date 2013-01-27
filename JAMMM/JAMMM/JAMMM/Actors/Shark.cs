@@ -11,7 +11,20 @@ namespace JAMMM.Actors
     public class Shark : Actor
     {
         private Boolean useInput; //delete this later
-        private Boolean fire;
+        private Boolean fire; //this too
+        public Boolean Fire
+        {
+            get { return fire; }
+            set { fire = value; }
+        }
+
+        public const float fireCooldown = 0.5F;
+        private float fireTime;
+        public float FireTime
+        {
+            get { return fireTime; }
+            set { fireTime = value; }
+        }
 
         //public Shark() {}
 
@@ -47,6 +60,13 @@ namespace JAMMM.Actors
                 }
                 */
             }
+
+            KeyboardState kbState = Keyboard.GetState();
+            if (kbState.IsKeyDown(Keys.Space) && fireTime <= 0)
+            {
+                fireTime = fireCooldown;
+                fire = true;
+            }
         }
 
         public override void loadContent()
@@ -59,7 +79,7 @@ namespace JAMMM.Actors
         {
             processInput();
             dashAnimation.update(gameTime);
-            switch(CurrState)
+            switch(CurrState) //deal with dash
             {
                 case state.Dash:
                     acceleration.Normalize();
@@ -84,6 +104,11 @@ namespace JAMMM.Actors
                     break;
                 default:
                     break;
+            }
+
+            if (fireTime > 0)
+            {
+                fireTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
         }
 

@@ -68,18 +68,6 @@ namespace JAMMM.Actors
                     //fire
                 }
             }
-
-            /*
-            KeyboardState kbState = Keyboard.GetState();
-            if( kbState.IsKeyDown(Keys.W))
-                acceleration.Y = -1 * MaxAcc;
-            if (kbState.IsKeyDown(Keys.A))
-                acceleration.X = -1 * MaxAcc;
-            if (kbState.IsKeyDown(Keys.D))
-                acceleration.X = MaxAcc;
-            if (kbState.IsKeyDown(Keys.S))
-                acceleration.Y = MaxAcc;
-            */
         }
 
         public override void loadContent() 

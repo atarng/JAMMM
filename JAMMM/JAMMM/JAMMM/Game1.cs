@@ -24,6 +24,7 @@ namespace JAMMM
         private const int SHARK_POOL_SIZE = 2;
         private List<Fish> fishPool;
         private List<Shark> sharkPool;
+        private List<Shark> projectilePool; //TODO change this
         private Dictionary<Actor, Actor> collisions;
 
         // this is our pool of players. we want to add a new player
@@ -42,6 +43,7 @@ namespace JAMMM
 
             fishPool = new List<Fish>();
             sharkPool = new List<Shark>();
+            projectilePool = new List<Shark>();
 
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 fishPool.Add(new Fish());
@@ -129,6 +131,18 @@ namespace JAMMM
             }
         }
 
+        protected void trySpear(Shark a) //TOD change the penguin
+        {
+            if (a.Fire)
+            {
+                a.Fire = false;
+                Shark projectile = new Shark(a.Position.X, a.Position.Y, false);
+                projectile.loadContent();
+                projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 10000F;
+                projectilePool.Add(projectile);
+            }
+        }
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -147,14 +161,18 @@ namespace JAMMM
                 Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
             }
 
-            //testAct.update(gameTime);
-            //testActAnim.update(gameTime);
-            //Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
             foreach (Shark s in sharkPool)
             {
                 s.update(gameTime);
                 Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                trySpear(s);
+            }
+
+            for (int i = 0; i < projectilePool.Count; i++)
+            {
+                projectilePool[i].update(gameTime);
+                Physics.applyMovement(projectilePool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                //SEE if outside of world
             }
 
             collisions.Clear();
@@ -188,7 +206,6 @@ namespace JAMMM
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             
             Vector2 loc;
             loc.X = 50;
@@ -206,6 +223,9 @@ namespace JAMMM
             //testActAnim.draw(gameTime, spriteBatch);
             foreach( Shark s in sharkPool )
                 s.draw(gameTime, spriteBatch);
+
+            for (int i = 0; i < projectilePool.Count; ++i)
+                projectilePool[i].draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }
