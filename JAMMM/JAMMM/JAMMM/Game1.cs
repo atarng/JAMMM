@@ -33,6 +33,8 @@ namespace JAMMM
         private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
+        SoundEffect underwaterTheme;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -62,6 +64,8 @@ namespace JAMMM
             // TODO: Add your initialization logic here
             testAct = new TestActor(100, 100, 10, 10, 10);
 
+
+
             base.Initialize();
         }
 
@@ -78,6 +82,7 @@ namespace JAMMM
             // load the content for the sprite manager
             SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
 
+            underwaterTheme = Content.Load<SoundEffect>("Music/03-underwater");
 
             // tell each actor to load their content now that the sprite manager has its database
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
@@ -86,6 +91,8 @@ namespace JAMMM
                 fishPool[i].loadContent();
 
             testActAnim.loadContent();
+
+            underwaterTheme.Play();
         }
 
         /// <summary>
@@ -111,7 +118,7 @@ namespace JAMMM
             // TODO: Add your update logic here
             //testAct.update(gameTime);
             testActAnim.update(gameTime);
-            Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+            Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
             //Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
 
             base.Update(gameTime);

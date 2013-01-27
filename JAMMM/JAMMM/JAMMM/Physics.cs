@@ -13,9 +13,11 @@ namespace JAMMM
     /// </summary>
     public class Physics
     {
-        private const float cr = 1; //1 is elastic , 0 inelastic
-        private const float uk = 0.5F; // coefficient of friction increase for more friction
+        public const float cr = 1; //1 is elastic , 0 inelastic
+        private const float uk = 0.985F; // 1 is frictionless
+        //= 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
+        private static Vector2 fricForce = new Vector2(100,100);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
         public static Vector2[] collide(Actor a, Actor b)
@@ -42,47 +44,47 @@ namespace JAMMM
             Vector2 vel = a.Velocity;
             Vector2 pos = a.Position;
             
-            //Vector2 accFric = -1 * vel * uk;
-            //Vector2 accFricNormalize = accFric;
-            //if( !accFricNormalize.Equals(Vector2.Zero))
-            //    accFricNormalize.Normalize();
+            //this is not used currently
+            Vector2 accFric = -1 * vel;
+            Vector2 accFricNormalize = accFric;
+            if (!accFricNormalize.Equals(Vector2.Zero))
+                accFricNormalize.Normalize();
+            else
+            {
+                accFricNormalize.X = (float) Math.Cos(a.Rotation);
+                accFricNormalize.Y = (float)Math.Sin(a.Rotation);
+                accFricNormalize.Normalize();
+                accFricNormalize = -1 * accFricNormalize;
+            }
 
             Vector2 initVelNormalize = vel; //initial velocity
             if (!initVelNormalize.Equals(Vector2.Zero))
                 initVelNormalize.Normalize();
 
             //if (applyFric)
-            //    acc = acc + accFric;
+            //{
+            //    acc = acc + -1 * vel * 0.5F;
+            //}
 
             a.Velocity = acc * delta + vel;
 
-            /*
-            if (applyFric) //set velocity to zero if the friction is making it go backwards
-            {
-                if (initVelNormalize.Equals(accFricNormalize) && !initVelNormalize.Equals(Vector2.Zero))
-                {
-                    a.Velocity = Vector2.Zero;
-                }
-            }
-             */
-
-
             if (applyFric)
-                vel = 0.95F * vel;
+                a.Velocity = 0.985F * a.Velocity;
             
             a.Position = vel * delta + pos;
 
-            //Rotations
             //initial velocity is vel, final velocity is a.velocity
             Vector2 finalVelNormalize = a.Velocity;
             if (!finalVelNormalize.Equals(Vector2.Zero))
                 finalVelNormalize.Normalize();
-            
-            if (!finalVelNormalize.Equals(Vector2.Zero) && !initVelNormalize.Equals(Vector2.Zero))
+
+            //Rotations
+            if ( !acc.Equals(Vector2.Zero) && !finalVelNormalize.Equals(Vector2.Zero))
             {
                 //float angle = (float)Math.Atan2(finalVelNormalize.Y - initVelNormalize.Y, finalVelNormalize.X - initVelNormalize.X);
-                float angle = (float) Math.Acos(Vector2.Dot(finalVelNormalize, initVelNormalize));
-                a.Rotation += angle;
+                //float angle = (float) Math.Acos(Vector2.Dot(finalVelNormalize, initVelNormalize));
+                //a.Rotation += angle;
+                a.Rotation = VectorToAngle(finalVelNormalize);
             }
 
             //update the bounds
@@ -99,22 +101,45 @@ namespace JAMMM
             if ( Math.Abs(a.Acceleration.X) < eps)
                 a.acceleration.X = 0;
        }
+
+        public static float VectorToAngle(Vector2 vector)
+        {
+            return (float)Math.Atan2(vector.Y, vector.X);
+        }
+
+        Vector2 AngleToVector(float angle)
+        {
+            return new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+        }
+
     }
 
     public class Circle
     {
+        private Vector2 center;
+        public Vector2 Center
+        {
+            get { return center; }
+            set
+            {
+                center = value;
+                CenterX = value.X;
+                CenterY = value.Y;
+            }
+        }
+
         private float centerX;
         public float CenterX
         {
             get { return centerX; }
-            set { centerX = value; }
+            set { centerX = value; center.X = value; }
         }
 
         private float centerY;
         public float CenterY
         {
             get { return centerY; }
-            set { centerY = value; }
+            set { centerY = value; center.Y = value; }
         }
 
         private float radius;
