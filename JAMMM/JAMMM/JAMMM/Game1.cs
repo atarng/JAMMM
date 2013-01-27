@@ -189,6 +189,15 @@ namespace JAMMM
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            
+            Vector2 loc;
+            loc.X = 50;
+            loc.Y = 50;
+            spriteBatch.Begin();
+            spriteBatch.DrawString(Game1.font, "time" + gameTime.TotalGameTime.TotalSeconds, loc, Color.Black);
+            spriteBatch.End();
+
+            
             // TODO: Add your drawing code here
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 fishPool[i].draw(gameTime, spriteBatch);
