@@ -18,7 +18,10 @@ namespace JAMMM
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private SpriteBatch spriteBatch;
+
+        private TestActor testAct;
+        public static SpriteFont font;
 
         public Game1()
         {
@@ -35,7 +38,7 @@ namespace JAMMM
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            testAct = new TestActor(100,100,10,10,10);
             base.Initialize();
         }
 
@@ -47,7 +50,7 @@ namespace JAMMM
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            font = Content.Load<SpriteFont>("Peric");
             // TODO: use this.Content to load your game content here
         }
 
@@ -72,6 +75,8 @@ namespace JAMMM
                 this.Exit();
 
             // TODO: Add your update logic here
+            testAct.update(gameTime);
+            Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
             base.Update(gameTime);
         }
@@ -85,6 +90,7 @@ namespace JAMMM
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            testAct.draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }
