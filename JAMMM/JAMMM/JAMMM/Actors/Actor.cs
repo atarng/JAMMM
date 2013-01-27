@@ -102,7 +102,7 @@ namespace JAMMM
             set { rotation = value; }
         }
 
-        public void processInput()
+        public virtual void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
             if (gamePadState.IsConnected)
@@ -131,13 +131,13 @@ namespace JAMMM
 
         }
 
-        public void update(GameTime delta)
+        public virtual void update(GameTime delta)
         {
             processInput();
             //Physics.applyMovement(this, delta.ElapsedGameTime.Seconds, false);
         }
 
-        public void draw(GameTime delta, SpriteBatch batch)
+        public virtual void draw(GameTime delta, SpriteBatch batch)
         {
             Boolean printPhysics = true;
             if (printPhysics)
@@ -182,11 +182,7 @@ namespace JAMMM
             rotation = 0;
         }
 
-        public virtual void update(GameTime gameTime) { }
-
         public virtual void loadContent() { }
-
-        public virtual void draw(GameTime gameTime, SpriteBatch spriteBatch) { }
 
         /// <summary>
         /// Actors override this to determine what happens at

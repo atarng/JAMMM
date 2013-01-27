@@ -23,7 +23,7 @@ namespace JAMMM.Actors
             this.Bounds = new Circle(x + offX, y + offY, radius);
         }
 
-        public void processInput()
+        public override void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
             if (gamePadState.IsConnected)

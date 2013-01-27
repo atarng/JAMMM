@@ -14,7 +14,7 @@ namespace JAMMM.Actors
 
         public Shark() {}
 
-        public void processInput()
+        public override void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
             if (gamePadState.IsConnected)
