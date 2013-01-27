@@ -14,10 +14,11 @@ namespace JAMMM
             using (Game1 game = new Game1())
             {
                 //vector test
+                /*
                 Vector2 v = new Vector2(-1, 0);
                 Vector2 u = new Vector2(2, 0);
 
-                /*
+
                 Vector2 a = u + v;
                 a = u - v;
                 a = Vector2.mul(4,  u);
