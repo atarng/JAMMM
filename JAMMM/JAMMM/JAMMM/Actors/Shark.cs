@@ -10,11 +10,9 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        private Animation dashAnimation;
-
         public Shark() {}
 
-        public void processInput()
+        public override void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
             if (gamePadState.IsConnected)

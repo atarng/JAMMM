@@ -30,7 +30,6 @@ namespace JAMMM
         // to the list each time a new controller readies up
         private List<Tuple<Penguin, Spear>> players;
 
-        private TestActor testAct;
         private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
