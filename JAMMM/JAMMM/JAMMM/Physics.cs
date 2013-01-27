@@ -13,7 +13,7 @@ namespace JAMMM
     /// </summary>
     public class Physics
     {
-        private const float cr = 1; //1 is elastic , 0 inelastic
+        private const float cr = 0.98F; //1 is elastic , 0 inelastic
         private const float uk = 0.990F; // 1 is frictionless .985
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
@@ -60,21 +60,30 @@ namespace JAMMM
             }
             */
 
-            Vector2 initVelNormalize = vel; //initial velocity
-            if (!initVelNormalize.Equals(Vector2.Zero))
-                initVelNormalize.Normalize();
+            //Vector2 initVelNormalize = vel; //initial velocity
+            //if (!initVelNormalize.Equals(Vector2.Zero))
+            //    initVelNormalize.Normalize();
 
             a.Velocity = acc * delta + vel;
+
+            //if not dashing and sqrt then cap the magnitude
+            if (a.CurrState != Actor.state.Dashing  && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
+            {
+                a.Velocity = a.MaxVel * Vector2.Normalize(a.Velocity);
+            }
+            else if( a.CurrState == Actor.state.Dashing && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
+            {
+                a.Velocity = a.MaxVelDash * Vector2.Normalize(a.Velocity);
+            }
 
             //relative friction
             if (applyFric)
                 a.Velocity = uk * a.Velocity;
 
-
             //initial velocity is vel, final velocity is a.velocity
-            Vector2 finalVelNormalize = a.Velocity;
-            if (!finalVelNormalize.Equals(Vector2.Zero))
-                finalVelNormalize.Normalize();
+            //Vector2 finalVelNormalize = a.Velocity;
+            //if (!finalVelNormalize.Equals(Vector2.Zero))
+            //    finalVelNormalize.Normalize();
 
             /*
             Vector2 temp = a.Velocity + accFricNormalize * uk;
@@ -111,9 +120,9 @@ namespace JAMMM
                 a.velocity.X = 0;
             if ( Math.Abs(a.Velocity.Y) < eps)
                 a.velocity.Y = 0;
-            if ( Math.Abs(a.Acceleration.X) < eps)
+            //if ( Math.Abs(a.Acceleration.X) < eps)
                 a.acceleration.X = 0;
-            if ( Math.Abs(a.Acceleration.X) < eps)
+            //if ( Math.Abs(a.Acceleration.X) < eps)
                 a.acceleration.X = 0;
        }
 

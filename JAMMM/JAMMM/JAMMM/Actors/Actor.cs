@@ -32,6 +32,14 @@ namespace JAMMM
             Death
         }
 
+        public enum state
+        {
+            Dash,
+            Dashing,
+            DashCooldown,
+            DashReady
+        }
+
         /// <summary>
         /// These are all of the animations for each actor. 
         /// Actors need to instantiate these within their
@@ -46,6 +54,13 @@ namespace JAMMM
         protected Animation throwAnimation;
         protected Animation turnAnimation;
         #endregion
+
+        private state currState;
+        public state CurrState
+        {
+            get { return currState; }
+            set { currState = value; }
+        }
 
         public Circle bounds;
         public Circle Bounds
@@ -113,6 +128,33 @@ namespace JAMMM
             set { maxVel = value; }
         }
 
+        private float maxVelDash;
+        public float MaxVelDash
+        {
+            get { return maxVelDash; }
+            set { maxVelDash = value; }
+        }
+
+        private float dashTime;
+        public float DashTime
+        {
+            get { return dashTime; }
+            set { dashTime = value; }
+        }
+
+        private float dashCooldownTime;
+        public float DashCooldownTime
+        {
+            get { return dashCooldownTime; }
+            set { dashCooldownTime = value; }
+        }
+
+        private float currTime;
+        public float CurrTime
+        {
+            get { return currTime; }
+            set { currTime = value; }
+        }
         /// <summary>
         /// rotation in radians
         /// </summary>
@@ -138,8 +180,9 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 500;
-            this.MaxVel = 500;
+            this.MaxAccDash = 100000;
+            this.MaxVel = 300;
+            this.MaxVelDash = 400;
 
             this.Position = new Vector2(x,y);
             this.startingPosition = this.Position;
@@ -238,9 +281,13 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 500;
-            this.MaxVel = 500;
+            this.MaxAccDash = 15000;
+            this.MaxVel = 200;
+            this.MaxVelDash = 400;
             this.Mass = mass;
+            this.dashTime = 1;
+            this.dashCooldownTime = 3;
+            CurrState = state.DashReady;
 
             this.Position = new Vector2(x,y);
             this.Offset = new Vector2(offX, offY);
