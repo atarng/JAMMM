@@ -43,9 +43,9 @@ namespace JAMMM
             Vector2 pos = a.Position;
             
             //Vector2 accFric = -1 * vel * uk;
-            Vector2 accFricNormalize = accFric;
-            if( !accFricNormalize.Equals(Vector2.Zero))
-                accFricNormalize.Normalize();
+            //Vector2 accFricNormalize = accFric;
+            //if( !accFricNormalize.Equals(Vector2.Zero))
+            //    accFricNormalize.Normalize();
 
             Vector2 initVelNormalize = vel; //initial velocity
             if (!initVelNormalize.Equals(Vector2.Zero))

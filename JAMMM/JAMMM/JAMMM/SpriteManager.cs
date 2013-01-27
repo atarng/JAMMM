@@ -15,21 +15,16 @@ namespace JAMMM
     /// </summary>
     public class SpriteManager
     {
-        private static Dictionary<string, Texture2D> database;
+        private static Dictionary<string, Texture2D> database = new Dictionary<string, Texture2D>();
 
-        public static void addTexture(string textureId, ref Texture2D texture)
+        public static void addTexture(string textureId, Texture2D texture)
         {
             database.Add(textureId, texture);
         }
 
-        public static bool getTexture(string textureId, ref Texture2D tex)
+        public static Texture2D getTexture(string textureId)
         {
-            if (!database.ContainsKey(textureId))
-                return false;
-
-            tex = database[textureId];
-
-            return true;
+            return database[textureId];
         }
     }
 }

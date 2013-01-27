@@ -32,13 +32,13 @@ namespace JAMMM.Actors
             }
         }
 
-        public void update(GameTime delta)
+        public override void update(GameTime delta)
         {
             processInput();
             //Physics.applyMovement(this, delta.ElapsedGameTime.Seconds, false);
         }
 
-        public void draw(GameTime delta, SpriteBatch batch)
+        public override void draw(GameTime delta, SpriteBatch batch)
         {
             batch.Begin();
             Color c = Color.Black;
