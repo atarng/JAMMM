@@ -20,6 +20,7 @@ namespace JAMMM
         GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        private Actor testAct;
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
         private List<Fish> fishPool;
@@ -29,7 +30,6 @@ namespace JAMMM
         // to the list each time a new controller readies up
         private List<Tuple<Penguin, Spear>> players;
 
-        private TestActor testAct;
         private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
@@ -62,10 +62,7 @@ namespace JAMMM
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            testAct = new TestActor(100, 100, 10, 10, 10);
-
-
-
+            testAct = new Actor(100,100,10,10,10);
             base.Initialize();
         }
 

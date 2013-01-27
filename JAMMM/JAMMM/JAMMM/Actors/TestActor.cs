@@ -21,7 +21,7 @@ namespace JAMMM.Actors
             this.Bounds = new Circle(x + offX, y + offY, radius);
         }
 
-        public void processInput()
+        public override void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
             if (gamePadState.IsConnected)
@@ -29,6 +29,11 @@ namespace JAMMM.Actors
                 // then it is connected, and we can do stuff here
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
+
+                if (gamePadState.Triggers.Right > 0.75)
+                {
+                    //fire
+                }
             }
 
             /*

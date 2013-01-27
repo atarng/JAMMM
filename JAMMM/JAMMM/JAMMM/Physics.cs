@@ -17,7 +17,8 @@ namespace JAMMM
         //private const float uk = 0.985F; // 1 is frictionless
         private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
-        private static Vector2 fricForce = new Vector2(50,50);
+        private const float smallForce = 5;
+        //private static Vector2 smallForce = new Vector2(50,50);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
         public static Vector2[] collide(Actor a, Actor b)
@@ -86,7 +87,7 @@ namespace JAMMM
 
             //Rotations
             //if ( !finalVelNormalize.Equals(Vector2.Zero))
-            if (!acc.Equals(Vector2.Zero))
+            if (!acc.Equals(Vector2.Zero)) // turn direction to mirror controller
             {
                 a.Rotation = VectorToAngle(a.Acceleration);
             }
