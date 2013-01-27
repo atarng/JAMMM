@@ -30,6 +30,19 @@ namespace JAMMM.Actors
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
             }
+
+            /*
+            KeyboardState kbState = Keyboard.GetState();
+            if( kbState.IsKeyDown(Keys.W))
+                acceleration.Y = -1 * MaxAcc;
+            if (kbState.IsKeyDown(Keys.A))
+                acceleration.X = -1 * MaxAcc;
+            if (kbState.IsKeyDown(Keys.D))
+                acceleration.X = MaxAcc;
+            if (kbState.IsKeyDown(Keys.S))
+                acceleration.Y = MaxAcc;
+            */
+
         }
 
         public void update(GameTime delta)
