@@ -21,12 +21,37 @@ namespace JAMMM
         private SpriteBatch spriteBatch;
 
         private Actor testAct;
+        private const int FISH_POOL_SIZE = 20;
+        private const int SHARK_POOL_SIZE = 2;
+        private List<Fish> fishPool;
+        private List<Shark> sharkPool;
+
+        // this is our pool of players. we want to add a new player
+        // to the list each time a new controller readies up
+        private List<Tuple<Penguin, Spear>> players;
+
+        private TestActor testAct;
+        private AnimatedActorTest testActAnim;
         public static SpriteFont font;
+
+        SoundEffect underwaterTheme;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            fishPool = new List<Fish>();
+            sharkPool = new List<Shark>();
+
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                fishPool.Add(new Fish());
+            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+                sharkPool.Add(new Shark());
+
+            testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
+
+            players = new List<Tuple<Penguin, Spear>>();
         }
 
         /// <summary>
@@ -51,7 +76,21 @@ namespace JAMMM
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Peric");
-            // TODO: use this.Content to load your game content here
+
+            // load the content for the sprite manager
+            SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
+
+            underwaterTheme = Content.Load<SoundEffect>("Music/03-underwater");
+
+            // tell each actor to load their content now that the sprite manager has its database
+            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+                sharkPool[i].loadContent();
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                fishPool[i].loadContent();
+
+            testActAnim.loadContent();
+
+            underwaterTheme.Play();
         }
 
         /// <summary>
@@ -75,8 +114,10 @@ namespace JAMMM
                 this.Exit();
 
             // TODO: Add your update logic here
-            testAct.update(gameTime);
-            Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+            //testAct.update(gameTime);
+            testActAnim.update(gameTime);
+            Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+            //Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
 
             base.Update(gameTime);
         }
@@ -90,7 +131,8 @@ namespace JAMMM
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-            testAct.draw(gameTime, spriteBatch);
+            //testAct.draw(gameTime, spriteBatch);
+            testActAnim.draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }

@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Actor.cs" />
+    <Compile Include="Actors\AnimatedActorTest.cs" />
     <Compile Include="Actors\Fish.cs" />
     <Compile Include="Actors\Penguin.cs" />
     <Compile Include="Actors\Shark.cs" />

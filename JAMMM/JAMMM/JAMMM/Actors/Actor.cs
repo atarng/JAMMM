@@ -182,6 +182,12 @@ namespace JAMMM
             rotation = 0;
         }
 
+        public virtual void update(GameTime gameTime) { }
+
+        public virtual void loadContent() { }
+
+        public virtual void draw(GameTime gameTime, SpriteBatch spriteBatch) { }
+
         /// <summary>
         /// Actors override this to determine what happens at
         /// the end of each animation. 
