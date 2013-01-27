@@ -177,6 +177,7 @@ namespace JAMMM
             origin.X = this.frameWidth / 2.0f;
             origin.Y = this.frameHeight / 2.0f;
 
+           
             spriteBatch.Draw(this.texture, 
                              position, 
                              this.currentFrame, 

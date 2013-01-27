@@ -82,8 +82,18 @@ namespace JAMMM
             font = Content.Load<SpriteFont>("Peric");
 
             // load the content for the sprite manager
+           
+            SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
+            SpriteManager.addTexture("Shark_Turn", Content.Load<Texture2D>("Sprites/Shark_Turn_80_48"));
+            SpriteManager.addTexture("Shark_Death", Content.Load<Texture2D>("Sprites/Shark_Death_80_48"));
+            
 
+            SpriteManager.addTexture("Fish_Swim", Content.Load<Texture2D>("Sprites/Fish_Swim_16_16_Loop"));
+            SpriteManager.addTexture("Fish_Death", Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));            
+            
+            SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
+            
             underwaterTheme = Content.Load<SoundEffect>("Music/03-underwater");
 
             // tell each actor to load their content now that the sprite manager has its database
@@ -106,6 +116,19 @@ namespace JAMMM
             // TODO: Unload any non ContentManager content here
         }
 
+        protected void Flock(List<Fish> _boids)
+        {
+            float neighborRadius = 30.0f;
+            float separation = 1.0f;
+            float alignment  = 1.0f;
+            float cohesion  = 1.0f;
+            List<Fish> boids = _boids;
+            for (int i = 0; i < boids.Count; i++)
+            {
+
+            }
+        }
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -118,6 +141,12 @@ namespace JAMMM
                 this.Exit();
 
             // TODO: Add your update logic here
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            {
+                fishPool[i].update(gameTime);
+                Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+            }
+
             //testAct.update(gameTime);
             //testActAnim.update(gameTime);
             //Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
@@ -160,7 +189,19 @@ namespace JAMMM
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            
+            Vector2 loc;
+            loc.X = 50;
+            loc.Y = 50;
+            spriteBatch.Begin();
+            spriteBatch.DrawString(Game1.font, "time" + gameTime.TotalGameTime.TotalSeconds, loc, Color.Black);
+            spriteBatch.End();
+
+            
             // TODO: Add your drawing code here
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                fishPool[i].draw(gameTime, spriteBatch);
+
             //testAct.draw(gameTime, spriteBatch);
             //testActAnim.draw(gameTime, spriteBatch);
             foreach( Shark s in sharkPool )
