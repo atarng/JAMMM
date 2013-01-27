@@ -32,7 +32,7 @@ namespace JAMMM
             Death
         }
 
-        private Circle bounds;
+        public Circle bounds;
         public Circle Bounds
         {
             get { return bounds; }
@@ -163,14 +163,15 @@ namespace JAMMM
             }
         }
 
-        public Actor(float x, float y, float offX, float offY, float radius)
+        public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
             this.MaxAccDash = 500;
             this.MaxVel = 500;
+            this.Mass = mass;
 
             this.Position = new Vector2(x,y);
-            this.Offset = new Vector2(x, y);
+            this.Offset = new Vector2(offX, offY);
             this.Bounds = new Circle(x + offX, y + offY, radius);
         }
 

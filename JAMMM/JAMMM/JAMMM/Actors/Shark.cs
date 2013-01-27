@@ -11,13 +11,19 @@ namespace JAMMM.Actors
     public class Shark : Actor
     {
         private Animation dashAnimation;
+        private Boolean useInput;
 
-        public Shark() {}
+        //public Shark() {}
+
+        public Shark(float x, float y, Boolean useInput) : base(x, y, 40, 24, 20, 100)
+        {
+            this.useInput = useInput;
+        }
 
         public override void processInput()
         {
             GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
-            if (gamePadState.IsConnected)
+            if (gamePadState.IsConnected && useInput )
             {
                 // then it is connected, and we can do stuff here
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
@@ -43,7 +49,7 @@ namespace JAMMM.Actors
 
             dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
 
-            /*
+            
             Color c = Color.Black;
             Vector2 loc = Position;
             Vector2 fontHeight;
@@ -51,16 +57,20 @@ namespace JAMMM.Actors
             fontHeight.Y = 14;
 
             batch.DrawString(Game1.font, "Position " + Position, loc, c);
-            batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
 
 
-            batch.DrawString(Game1.font, "Position " + Position, loc, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //batch.DrawString(Game1.font, "Position " + Position, loc, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
             //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
             //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
             //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
-             */
+             
 
             batch.End();
         }
