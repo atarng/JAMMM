@@ -158,7 +158,13 @@ namespace JAMMM
             playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
 
             // load the content for the sprite manager
+            SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
+            SpriteManager.addTexture("Shark_Turn", Content.Load<Texture2D>("Sprites/Shark_Turn_80_48"));
+            SpriteManager.addTexture("Shark_Death", Content.Load<Texture2D>("Sprites/Shark_Death_80_48"));
+            SpriteManager.addTexture("Fish_Swim", Content.Load<Texture2D>("Sprites/Fish_Swim_16_16_Loop"));
+            SpriteManager.addTexture("Fish_Death", Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));    
+            SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
 
             // tell each actor to load their content now that the sprite manager has its database
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
@@ -218,30 +224,30 @@ namespace JAMMM
             // set the player name text positions
             player1TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f - 
                                               font.MeasureString(player1Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.05f);
+                                              graphics.PreferredBackBufferHeight * 0.01f);
             player2TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
                                               font.MeasureString(player2Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.05f);
+                                              graphics.PreferredBackBufferHeight * 0.01f);
             player3TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
                                               font.MeasureString(player3Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.05f);
+                                              graphics.PreferredBackBufferHeight * 0.01f);
             player4TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
                                               font.MeasureString(player4Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.05f);
+                                              graphics.PreferredBackBufferHeight * 0.01f);
 
             // set the player calorie label text positions
             player1CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.07f);
+                                              graphics.PreferredBackBufferHeight * 0.03f);
             player2CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.07f);
+                                              graphics.PreferredBackBufferHeight * 0.03f);
             player3CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.07f);
+                                              graphics.PreferredBackBufferHeight * 0.03f);
             player4CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.07f);
+                                              graphics.PreferredBackBufferHeight * 0.03f);
 
             // set the finding player penguin rectangle
             playerPenguinRectangle = new Rectangle(0, 0, playerPenguin.Width, playerPenguin.Height);
@@ -254,6 +260,19 @@ namespace JAMMM
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+        }
+
+        protected void Flock(List<Fish> _boids)
+        {
+            float neighborRadius = 30.0f;
+            float separation = 1.0f;
+            float alignment  = 1.0f;
+            float cohesion  = 1.0f;
+            List<Fish> boids = _boids;
+            for (int i = 0; i < boids.Count; i++)
+            {
+
+            }
         }
 
         /// <summary>
@@ -351,6 +370,12 @@ namespace JAMMM
             }
 
             // TODO: Add your update logic here
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            {
+                fishPool[i].update(gameTime);
+                Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+            }
+
             //testAct.update(gameTime);
             //testActAnim.update(gameTime);
             //Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
@@ -425,7 +450,7 @@ namespace JAMMM
         }
 
         /// <summary>
-        /// Readies up a player.
+        /// Readies up a player if they're pressing A on the corresponding controller.
         /// </summary>
         private void TryToReadyPlayers()
         {
@@ -622,6 +647,9 @@ namespace JAMMM
                     break;
                 }
             }
+
+            //for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            //    fishPool[i].draw(gameTime, spriteBatch);
 
             //testAct.draw(gameTime, spriteBatch);
             //testActAnim.draw(gameTime, spriteBatch);

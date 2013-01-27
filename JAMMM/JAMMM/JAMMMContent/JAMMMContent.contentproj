@@ -79,7 +79,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Sprites\Penguin_fat_swim_32_32 .png">
+    <Compile Include="Sprites\Penguin_fat_swim_32_32.png">
       <Name>penguin_fat_swim_32_32</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
