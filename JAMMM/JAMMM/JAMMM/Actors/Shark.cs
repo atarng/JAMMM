@@ -42,8 +42,11 @@ namespace JAMMM.Actors
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
-                if (gamePadState.Triggers.Right == 1)
+                if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
+                {
+                    fireTime = fireCooldown;
                     fire = true;
+                }
 
                 if (CurrState == state.DashReady && gamePadState.IsButtonDown(Buttons.A))
                 {
@@ -68,8 +71,6 @@ namespace JAMMM.Actors
                 fire = true;
             }
 
-
-            
             if (kbState.IsKeyDown(Keys.W))
                 acceleration.Y = -1*MaxAcc;
             if (kbState.IsKeyDown(Keys.A))
@@ -165,11 +166,11 @@ namespace JAMMM.Actors
                 //batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
-                if (fire)
+                /*if (fire)
                 {
                     batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
                     fire = false;
-                }
+                }*/
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
