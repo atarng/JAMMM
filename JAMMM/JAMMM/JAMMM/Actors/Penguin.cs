@@ -133,7 +133,10 @@ namespace JAMMM.Actors
             if (!this.IsAlive)
                 return;
 
-            ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), 3.14f/2.0f, 5, 1, 0, 1, 1.0f, 1.0f);
+            Random rnd = new Random();
+            
+            if(  (this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1,400) )
+                ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), 3.14f/2.0f, 0.5f, 1, 0, 1, 1.0f, 3f);
 
 
             currentAnimation.update(delta);
