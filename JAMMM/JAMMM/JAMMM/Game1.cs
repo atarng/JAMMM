@@ -20,7 +20,7 @@ namespace JAMMM
         GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private TestActor testAct;
+        private Actor testAct;
         public static SpriteFont font;
 
         public Game1()
@@ -38,7 +38,7 @@ namespace JAMMM
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            testAct = new TestActor(100,100,10,10,10);
+            testAct = new Actor(100,100,10,10,10);
             base.Initialize();
         }
 
