@@ -78,7 +78,7 @@ namespace JAMMM
 
             //relative friction
             if (applyFric)
-                a.Velocity = uk * a.Velocity;
+                a.Velocity = vel = uk * a.Velocity;
 
             //initial velocity is vel, final velocity is a.velocity
             //Vector2 finalVelNormalize = a.Velocity;
@@ -92,7 +92,33 @@ namespace JAMMM
                 a.Velocity += accFricNormalize * uk;
             
             */
-            a.Position = vel * delta + pos;
+            a.Position = pos = vel * delta + pos;
+
+            //uncomment for boundry checks
+            /*
+            if (pos.X > 800)
+            {
+                pos.X = 800;
+                vel.X *= -1; 
+            }
+            else if (pos.X < 0)
+            {
+                pos.X = 0;
+                vel.X *= -1; 
+            }
+            if (pos.Y > 800)
+            {
+                pos.Y = 800;
+                vel.Y *= -1; 
+            }
+            else if (pos.Y < 0)
+            {
+                pos.Y = 0;
+                vel.Y *= -1; 
+            }
+            a.Position = pos;
+            a.Velocity = vel;
+              */  
 
             //Rotations
             //if ( !finalVelNormalize.Equals(Vector2.Zero))
