@@ -11,7 +11,9 @@ namespace JAMMM.Actors
     public class Shark : Actor
     {
         private Animation dashAnimation;
-        private Boolean useInput;
+
+        private Boolean useInput; //delete this later
+        private Boolean fire;
 
         //public Shark() {}
 
@@ -28,6 +30,9 @@ namespace JAMMM.Actors
                 // then it is connected, and we can do stuff here
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
+
+                if (gamePadState.Triggers.Right == 1)
+                    fire = true;
             }
         }
 
@@ -48,7 +53,6 @@ namespace JAMMM.Actors
             batch.Begin();
 
             dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
-
             
             Color c = Color.Black;
             Vector2 loc = Position;
@@ -61,6 +65,11 @@ namespace JAMMM.Actors
             batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
             batch.DrawString(Game1.font, "Mass " + Mass, loc += fontHeight, c);
             batch.DrawString(Game1.font, "Radi " + Bounds.Radius, loc += fontHeight, c);
+            if (fire)
+            {
+                batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
+                fire = false;
+            }
             //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
             //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
             //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
