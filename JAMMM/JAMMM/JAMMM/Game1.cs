@@ -42,9 +42,9 @@ namespace JAMMM
 
             fishPool = new List<Fish>();
             sharkPool = new List<Shark>();
-
+            Random rng = new Random();
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                fishPool.Add(new Fish());
+                fishPool.Add(new Fish((float)(200 + rng.NextDouble() * 100), (float)(200 + rng.NextDouble() * 100), 10, 10, 10));
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
             sharkPool.Add(new Shark(150, 150, true));
@@ -116,15 +116,71 @@ namespace JAMMM
             // TODO: Unload any non ContentManager content here
         }
 
-        protected void Flock(List<Fish> _boids)
+        protected void Flock(List<Fish> _boids, GameTime gametime)
         {
-            float neighborRadius = 30.0f;
-            float separation = 1.0f;
-            float alignment  = 1.0f;
-            float cohesion  = 1.0f;
-            List<Fish> boids = _boids;
-            for (int i = 0; i < boids.Count; i++)
+            float maxSpeed = _boids[0].MaxVel;
+            float maxAccel = _boids[0].MaxAcc;
+            float desiredSeparation = 50.0f;
+            float neighborRadius = 150.0f;
+            float separationFactor = 20.0f;
+            float alignmentFactor  = 10.0f;
+            float cohesionFactor  = 10.0f;
+
+            float elapsedTime = (float)gametime.ElapsedGameTime.TotalSeconds;            
+            for (int i = 0; i < _boids.Count; i++)
             {
+                float count = 0;
+                float count0 = 0;
+                Vector2 cohesion = new Vector2(0, 0);
+                Vector2 separation = new Vector2(0, 0);
+                Vector2 alignment = new Vector2(0, 0);                
+
+                for (int j = 0; j < _boids.Count; j++)
+                {
+                    Vector2 vecTo = _boids[j].Position - _boids[i].Position;
+                    if (vecTo.Length() < neighborRadius)
+                    {
+                        cohesion += _boids[j].Position;
+                        alignment += _boids[j].Velocity;
+                        count++;                        
+                    }
+                    if (vecTo.Length() > 0 && vecTo.Length() < desiredSeparation)
+                    {                        
+                        separation -= vecTo;
+                        count0++;
+                    }
+                }
+
+                if (count > 0)
+                {
+                    cohesion /= count;
+                    cohesion = cohesion - _boids[i].Position;
+                    alignment /= count;
+                    if (alignment.Length() > maxAccel)
+                    {
+                        alignment.Normalize();
+                        alignment *= maxAccel;
+                    }
+                }
+                if (count0 > 0)
+                {
+                    separation /= count0;
+                }
+                if (cohesion.Length() > 0)
+                {
+                    float temp = cohesion.Length();
+                    cohesion.Normalize();
+                    if (temp < (desiredSeparation + neighborRadius) / 2.0f)
+                    {
+                        cohesion *= maxSpeed * (temp / neighborRadius);
+                    }
+                    else
+                    {                        
+                        cohesion *= maxSpeed;
+                    }
+                }
+                _boids[i].acceleration = cohesion * cohesionFactor + separation * separationFactor + alignment * alignmentFactor;                
+
 
             }
         }
@@ -141,10 +197,22 @@ namespace JAMMM
                 this.Exit();
 
             // TODO: Add your update logic here
-            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            if (true)
             {
-                fishPool[i].update(gameTime);
-                Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                {
+                    fishPool[i].update(gameTime);
+                    Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                }
+            }
+            else
+            {
+                Flock(fishPool, gameTime);
+                for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                {
+                    fishPool[i].update(null);
+                    Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                }
             }
 
             //testAct.update(gameTime);

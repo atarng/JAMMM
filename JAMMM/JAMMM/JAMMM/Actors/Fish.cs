@@ -14,20 +14,20 @@ namespace JAMMM
 
         public Fish() 
         {
-            this.MaxAcc = 400;
+            this.MaxAcc = 200;
             this.MaxAccDash = 500;
-            this.MaxVel = 500;
-
-            this.Position = new Vector2(100, 100);
+            this.MaxVel = 300;
+                                 
+            this.Position = new Vector2(0,0);
             this.Offset = new Vector2(8, 8);
             this.Bounds = new Circle(0 + this.Offset.X, 0 + this.Offset.Y, 8);
         }
 
         public Fish(float x, float y, float offX, float offY, float radius) 
         {
-            this.MaxAcc = 400;
+            this.MaxAcc = 200;
             this.MaxAccDash = 500;
-            this.MaxVel = 500;
+            this.MaxVel = 300;
 
             this.Position = new Vector2(x, y);
             this.Offset = new Vector2(x, y);
@@ -40,19 +40,19 @@ namespace JAMMM
             dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Swim"), 2, true, 0.4f);
             base.loadContent();
         }
-
-        public override void update(GameTime gameTime)
+        
+        public override void update(GameTime gameTime = null)
         {
             if (!dashAnimation.IsPlaying)
-                dashAnimation.play();                        
+                dashAnimation.play();
 
-
-            double time = gameTime.ElapsedGameTime.TotalMilliseconds;
-
+            if (gameTime != null)
+            {
+                double time = gameTime.ElapsedGameTime.TotalMilliseconds;
+                acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
+                acceleration.Y = 0;
+            }
             
-            acceleration.X =  (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds*2) * MaxAcc;
-            acceleration.Y = 0;
-
             dashAnimation.update(gameTime);
         }
 
