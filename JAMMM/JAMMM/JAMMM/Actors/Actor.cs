@@ -29,7 +29,9 @@ namespace JAMMM
             Dash,
             Throw,
             Turn,
-            Death
+            Death,
+            Bubble
+
         }
 
         public enum state

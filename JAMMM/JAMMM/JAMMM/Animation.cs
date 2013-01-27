@@ -91,6 +91,7 @@ namespace JAMMM
         private float frameTime;
         private Actor owner;
 
+        //Constructor for actor
         public Animation(Actor owner, 
                          Actor.AnimationType type, 
                          Texture2D spriteSheet, 
@@ -114,6 +115,31 @@ namespace JAMMM
             this.currentFrame.Height = this.frameHeight;
             this.currentFrame.Y = 0;
         }
+
+        public Animation(
+                 Actor.AnimationType type,
+                 Texture2D spriteSheet,
+                 int frameCount,
+                 bool isLooping = false,
+                 float frameTime = 0.1f)
+        {
+            this.owner = null;
+            this.animationType = type;
+            this.texture = spriteSheet;
+            this.frameDuration = frameTime;
+            this.isLooping = isLooping;
+            this.frameTime = 0.0f;
+            this.frameCount = frameCount;
+            this.isPlaying = false;
+            this.frameIndex = 0;
+            this.frameWidth = spriteSheet.Width / frameCount;
+            this.frameHeight = spriteSheet.Height;
+
+            this.currentFrame.Width = this.frameWidth;
+            this.currentFrame.Height = this.frameHeight;
+            this.currentFrame.Y = 0;
+        }
+        //Constructor for particles
 
         public void play()
         {
@@ -157,9 +183,30 @@ namespace JAMMM
                     else
                     {
                         stop();
+                        
                         owner.handleAnimationComplete(this.animationType);
                     }
                 }
+
+                updateFrameRectangle();
+            }
+        }
+
+        public void updateParticle(GameTime gameTime)
+        {
+            if (!isPlaying)
+                return;
+
+            this.frameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (this.frameTime >= this.frameDuration)
+            {
+                this.frameTime -= this.frameDuration;
+
+                ++this.frameIndex;
+
+                if (this.frameIndex == this.frameCount)
+                   this.frameIndex = 0;
 
                 updateFrameRectangle();
             }
