@@ -37,14 +37,14 @@ namespace JAMMM
             set { bounds = value; }
         }
 
-        private Vector2 acceleration;
+        public Vector2 acceleration;
         public Vector2 Acceleration
         {
             get { return acceleration; }
             set { acceleration = value; }
         }
 
-        private Vector2 velocity;
+        public Vector2 velocity;
         public Vector2 Velocity
         {
             get { return velocity; }
@@ -72,13 +72,41 @@ namespace JAMMM
             set { mass = value; }
         }
 
-        private float accMax;
-        private float accDashMax;
-        private float velMax;
+        private float maxAcc;
+        public float MaxAcc
+        {
+            get { return maxAcc; }
+            set { maxAcc = value; }
+        }
+
+        private float maxAccDash;
+        public float MaxAccDash
+        {
+            get { return maxAccDash; }
+            set { maxAccDash = value; }
+        }
+
+        private float maxVel;
+        public float MaxVel
+        {
+            get { return maxVel; }
+            set { maxVel = value; }
+        }
+
+        private float rotation;///radians
+        public float Rotation
+        {
+            get { return rotation; }
+            set { rotation = value; }
+        }
+
 
         public Actor()
         {
-            
+            this.Position = new Vector2();
+            this.Velocity = new Vector2();
+            this.Acceleration = new Vector2();
+            rotation = 0;
         }
 
         /// <summary>

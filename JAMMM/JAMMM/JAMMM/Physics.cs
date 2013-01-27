@@ -14,7 +14,8 @@ namespace JAMMM
     public class Physics
     {
         private const float cr = 1; //1 is elastic , 0 inelastic
-        private const float uk = 0.3F;
+        private const float uk = 0.5F; // coefficient of friction increase for more friction
+        private const Double eps = 1; //epsilon
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
         public static Vector2[] collide(Actor a, Actor b)
@@ -35,42 +36,69 @@ namespace JAMMM
             return res;
         }
 
-        //a = 
-        //v = a*t + v
-        //p = v*t + p
-        public static Vector2 applyMovement(Actor a, float delta, Boolean applyFric )
+        public static void applyMovement(Actor a, float delta, Boolean applyFric )
         {
-
             Vector2 acc = a.Acceleration;
             Vector2 vel = a.Velocity;
             Vector2 pos = a.Position;
+            
+            //Vector2 accFric = -1 * vel * uk;
+            Vector2 accFricNormalize = accFric;
+            if( !accFricNormalize.Equals(Vector2.Zero))
+                accFricNormalize.Normalize();
 
-            Vector2 accFric = -1 * vel * uk;
-            Vector2 accFricNormalize = new Vector2(accFric.X, accFric.Y);
-            accFricNormalize.Normalize();
+            Vector2 initVelNormalize = vel; //initial velocity
+            if (!initVelNormalize.Equals(Vector2.Zero))
+                initVelNormalize.Normalize();
 
-            if (applyFric)
-                acc = acc + accFric;
+            //if (applyFric)
+            //    acc = acc + accFric;
 
-            vel = acc * delta + vel;
+            a.Velocity = acc * delta + vel;
 
+            /*
             if (applyFric) //set velocity to zero if the friction is making it go backwards
             {
-                Vector2 velNormalize = new Vector2(vel.X, vel.Y);
-                velNormalize.Normalize();
-                if (velNormalize.Equals(accFricNormalize))
+                if (initVelNormalize.Equals(accFricNormalize) && !initVelNormalize.Equals(Vector2.Zero))
                 {
-                    vel.X = 0; vel.Y = 0;
+                    a.Velocity = Vector2.Zero;
                 }
             }
+             */
 
-            pos = vel * delta + pos;
+
+            if (applyFric)
+                vel = 0.95F * vel;
+            
+            a.Position = vel * delta + pos;
+
+            //Rotations
+            //initial velocity is vel, final velocity is a.velocity
+            Vector2 finalVelNormalize = a.Velocity;
+            if (!finalVelNormalize.Equals(Vector2.Zero))
+                finalVelNormalize.Normalize();
+            
+            if (!finalVelNormalize.Equals(Vector2.Zero) && !initVelNormalize.Equals(Vector2.Zero))
+            {
+                //float angle = (float)Math.Atan2(finalVelNormalize.Y - initVelNormalize.Y, finalVelNormalize.X - initVelNormalize.X);
+                float angle = (float) Math.Acos(Vector2.Dot(finalVelNormalize, initVelNormalize));
+                a.Rotation += angle;
+            }
 
             //update the bounds
             a.Bounds.CenterX = pos.X + a.Offset.X;
             a.Bounds.CenterY = pos.Y + a.Offset.Y;
-            return pos;
-        }
+
+            //zero if too small
+            if ( Math.Abs(a.Velocity.X) < eps)
+                a.velocity.X = 0;
+            if ( Math.Abs(a.Velocity.Y) < eps)
+                a.velocity.Y = 0;
+            if ( Math.Abs(a.Acceleration.X) < eps)
+                a.acceleration.X = 0;
+            if ( Math.Abs(a.Acceleration.X) < eps)
+                a.acceleration.X = 0;
+       }
     }
 
     public class Circle
@@ -94,6 +122,13 @@ namespace JAMMM
         {
             get { return radius; }
             set { radius = value; }
+        }
+
+        public Circle(float x, float y, float radius)
+        {
+            this.Radius = radius;
+            this.CenterX = x;
+            this.CenterY = y;
         }
 
         public void move(float x, float y)
