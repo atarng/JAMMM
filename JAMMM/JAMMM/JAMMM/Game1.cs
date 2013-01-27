@@ -76,7 +76,7 @@ namespace JAMMM
 
             // TODO: Add your update logic here
             testAct.update(gameTime);
-            Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+            Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
             base.Update(gameTime);
         }
