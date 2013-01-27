@@ -64,6 +64,8 @@ namespace JAMMM
             //Vector2 initVelNormalize = vel; //initial velocity
             //if (!initVelNormalize.Equals(Vector2.Zero))
             //    initVelNormalize.Normalize();
+            //if (a.CurrState == Actor.state.Dashing && !acc.Equals(Vector2.Zero))
+            //    acc = a.MaxAccDash * Vector2.Normalize(acc);
 
             a.Velocity = acc * delta + vel;
 

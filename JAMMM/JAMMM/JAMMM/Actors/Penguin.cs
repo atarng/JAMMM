@@ -87,8 +87,6 @@ namespace JAMMM.Actors
                 {
                     CurrState = state.Dash;
                     CurrTime = DashTime;
-                    if (Acceleration.Equals(Vector2.Zero))
-                        Acceleration = Physics.AngleToVector(Rotation);
                 }
                 
                 if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
@@ -96,6 +94,14 @@ namespace JAMMM.Actors
                     fireTime = fireCooldown;
                     fire = true;
                 }
+                /*
+                                // stop dashing
+               else if (CurrState == state.Dashing && gamePadState.IsButtonUp(Buttons.A))
+               {
+                   CurrTime = DashCooldownTime;
+                   CurrState = state.DashCooldown;
+               } 
+               */
             }
 
             KeyboardState kbState = Keyboard.GetState();
@@ -135,7 +141,11 @@ namespace JAMMM.Actors
             switch (CurrState) //deal with dash
             {
                 case state.Dash:
-                    acceleration.Normalize();
+                    if (Acceleration.Equals(Vector2.Zero))
+                        Acceleration = Physics.AngleToVector(Rotation);
+                    else
+                        acceleration.Normalize();
+
                     acceleration = acceleration * MaxAccDash;
                     CurrTime = DashTime;
                     CurrState = state.Dashing;
@@ -186,12 +196,11 @@ namespace JAMMM.Actors
                 fontHeight.X = 0;
                 fontHeight.Y = 14;
 
-                //batch.DrawString(Game1.font, "Position " + Position, loc, c);
+                batch.DrawString(Game1.font, "Position " + Position, loc, c);
                 //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
                 batch.DrawString(Game1.font, "[>]", Bounds.center, c);
                 batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
                 batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
-                /*
                 String s = "";
                 switch (CurrState)
                 {
@@ -208,8 +217,7 @@ namespace JAMMM.Actors
                         s = "dashready";
                         break;
                 }
-                 */
-                //batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
 
                 //batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
