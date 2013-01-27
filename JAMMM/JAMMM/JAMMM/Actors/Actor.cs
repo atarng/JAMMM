@@ -166,13 +166,23 @@ namespace JAMMM
         }
 
         /// <summary>
-        /// Whether or not this penguin is alive.
+        /// Whether or not this actor is alive.
         /// </summary>
         private bool isAlive;
         public bool IsAlive
         {
             get { return isAlive; }
             set { isAlive = value; }
+        }
+
+        /// <summary>
+        /// Setting the scale for this actor.
+        /// </summary>
+        private float scale;
+        public float Scale
+        {
+            get { return scale; }
+            set { scale = value; }
         }
 
         protected Vector2 startingPosition;
@@ -252,6 +262,7 @@ namespace JAMMM
 
         public virtual void draw(GameTime delta, SpriteBatch batch)
         {
+            /*
             Boolean printPhysics = true;
             if (printPhysics)
             {
@@ -274,6 +285,7 @@ namespace JAMMM
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
                 batch.End();
             }
+             * */
         }
 
         public virtual void loadContent() { }
