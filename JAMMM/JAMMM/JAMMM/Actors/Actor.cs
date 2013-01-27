@@ -32,6 +32,21 @@ namespace JAMMM
             Death
         }
 
+        /// <summary>
+        /// These are all of the animations for each actor. 
+        /// Actors need to instantiate these within their
+        /// load content method.
+        /// </summary>
+        #region Animations
+        protected Animation currentAnimation;
+        protected Animation dashAnimation;
+        protected Animation moveAnimation;
+        protected Animation idleAnimation;
+        protected Animation deathAnimation;
+        protected Animation throwAnimation;
+        protected Animation turnAnimation;
+        #endregion
+
         public Circle bounds;
         public Circle Bounds
         {
@@ -60,7 +75,10 @@ namespace JAMMM
             set { position = value; }
         }
 
-        private Vector2 offset; ///collision body offset
+        /// <summary>
+        /// collision body offset
+        /// </summary>
+        private Vector2 offset;
         public Vector2 Offset
         {
             get { return offset; }
@@ -95,11 +113,64 @@ namespace JAMMM
             set { maxVel = value; }
         }
 
-        private float rotation;///radians
+        /// <summary>
+        /// rotation in radians
+        /// </summary>
+        private float rotation;
         public float Rotation
         {
             get { return rotation; }
             set { rotation = value; }
+        }
+
+        /// <summary>
+        /// Whether or not this penguin is alive.
+        /// </summary>
+        private bool isAlive;
+        public bool IsAlive
+        {
+            get { return isAlive; }
+            set { isAlive = value; }
+        }
+
+        protected Vector2 startingPosition;
+
+        public Actor(float x, float y, float offX, float offY, float radius)
+        {
+            this.MaxAcc = 250;
+            this.MaxAccDash = 500;
+            this.MaxVel = 500;
+
+            this.Position = new Vector2(x,y);
+            this.startingPosition = this.Position;
+            this.Offset = new Vector2(x, y);
+            this.Bounds = new Circle(x + offX, y + offY, radius);
+            this.isAlive = false;
+        }
+
+        public Actor()
+        {
+            this.Position = new Vector2();
+            this.Velocity = new Vector2();
+            this.Acceleration = new Vector2();
+            rotation = 0;
+        }
+
+        public virtual void die()
+        {
+            this.isAlive = false;
+        }
+
+        public virtual void spawnAt(Vector2 position)
+        {
+            this.position = position;
+            this.isAlive = true;
+        }
+
+        public virtual void respawn()
+        {
+            this.position = startingPosition;
+            this.isAlive = true;
         }
 
         public virtual void processInput()
@@ -128,7 +199,6 @@ namespace JAMMM
             if (kbState.IsKeyDown(Keys.S))
                 acceleration.Y = MaxAcc;
             */
-
         }
 
         public virtual void update(GameTime delta)
@@ -163,6 +233,8 @@ namespace JAMMM
             }
         }
 
+        public virtual void loadContent() { }
+        public virtual void collideWith(Actor other) { }
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
@@ -174,16 +246,6 @@ namespace JAMMM
             this.Offset = new Vector2(offX, offY);
             this.Bounds = new Circle(x + offX, y + offY, radius);
         }
-
-        public Actor()
-        {
-            this.Position = new Vector2();
-            this.Velocity = new Vector2();
-            this.Acceleration = new Vector2();
-            rotation = 0;
-        }
-
-        public virtual void loadContent() { }
 
         /// <summary>
         /// Actors override this to determine what happens at

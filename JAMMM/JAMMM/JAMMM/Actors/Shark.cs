@@ -10,8 +10,6 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        private Animation dashAnimation;
-
         private Boolean useInput; //delete this later
         private Boolean fire;
 

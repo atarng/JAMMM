@@ -10,8 +10,6 @@ namespace JAMMM.Actors
 {
     public class AnimatedActorTest : Actor
     {
-        private Animation dashAnimation;
-
         public AnimatedActorTest(float x, float y, float offX, float offY, float radius) 
         {
             this.MaxAcc = 400;
@@ -36,7 +34,7 @@ namespace JAMMM.Actors
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
+            this.dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
             base.loadContent();
         }
 
