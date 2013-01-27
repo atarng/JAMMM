@@ -18,6 +18,7 @@ namespace JAMMM
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
         private const float smallForce = 5;
+        private const float accDecay = 0.95F; //1 is no decay
         //private static Vector2 smallForce = new Vector2(50,50);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
@@ -78,7 +79,7 @@ namespace JAMMM
 
             //relative friction
             if (applyFric)
-                a.Velocity = uk * a.Velocity;
+                a.Velocity = vel = uk * a.Velocity;
 
             //initial velocity is vel, final velocity is a.velocity
             //Vector2 finalVelNormalize = a.Velocity;
@@ -92,7 +93,33 @@ namespace JAMMM
                 a.Velocity += accFricNormalize * uk;
             
             */
-            a.Position = vel * delta + pos;
+            a.Position = pos = vel * delta + pos;
+
+            //uncomment for boundry checks
+            /*
+            if (pos.X > 800)
+            {
+                pos.X = 800;
+                vel.X *= -1; 
+            }
+            else if (pos.X < 0)
+            {
+                pos.X = 0;
+                vel.X *= -1; 
+            }
+            if (pos.Y > 800)
+            {
+                pos.Y = 800;
+                vel.Y *= -1; 
+            }
+            else if (pos.Y < 0)
+            {
+                pos.Y = 0;
+                vel.Y *= -1; 
+            }
+            a.Position = pos;
+            a.Velocity = vel;
+              */  
 
             //Rotations
             //if ( !finalVelNormalize.Equals(Vector2.Zero))
@@ -112,18 +139,24 @@ namespace JAMMM
             */
 
             //update the bounds
-            a.bounds.center.X = a.Position.X + a.Offset.X;
-            a.bounds.center.Y = a.Position.Y + a.Offset.Y;
+            float s = (float)Math.Sin(a.Rotation);
+            float c = (float)Math.Cos(a.Rotation);
+            //rotate about the origin then add to position
+            a.bounds.center.X = c * (a.Offset.X) - s * (a.Offset.Y) + a.Position.X;
+            a.bounds.center.Y = s * (a.Offset.X) + c * (a.Offset.Y) + a.Position.Y;
+
+
+            a.acceleration = accDecay * a.acceleration;
 
             //zero if too small
-            if ( Math.Abs(a.Velocity.X) < eps)
+            if ( Math.Abs(a.Velocity.X) < eps) 
                 a.velocity.X = 0;
             if ( Math.Abs(a.Velocity.Y) < eps)
                 a.velocity.Y = 0;
-            //if ( Math.Abs(a.Acceleration.X) < eps)
+            if ( Math.Abs(a.Acceleration.X) < eps)
                 a.acceleration.X = 0;
-            //if ( Math.Abs(a.Acceleration.X) < eps)
-                a.acceleration.X = 0;
+            if ( Math.Abs(a.Acceleration.Y) < eps)
+                a.acceleration.Y = 0;
        }
 
         public static float VectorToAngle(Vector2 vector)
