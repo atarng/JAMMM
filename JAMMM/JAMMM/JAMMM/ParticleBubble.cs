@@ -19,7 +19,7 @@ namespace JAMMM
         // WARNING, TEMPORARILY SET TO DASH & Shark_Eat ANIMATION FOR TESTING
         public override void loadContent()
         {
-            this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.2f);
+            this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Fish_Death"), 4, true, 0.2f);
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)

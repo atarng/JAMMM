@@ -25,7 +25,7 @@ namespace JAMMM.Actors
 
         public override void update(GameTime gameTime)
         {
-            //ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), this.Rotation, -5, 1, 0, 1, 1.0f, 1.0f);
+           
             dashAnimation.update(gameTime);
         }
 

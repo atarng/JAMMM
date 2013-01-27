@@ -542,7 +542,7 @@ namespace JAMMM
                 }
             }
 
-            ParticleManager.Instance.update(gameTime);
+           
 
             List<Actor> keyList = new List<Actor>(collisions.Keys);
             for (int i = 0; i < keyList.Count; i++)
@@ -563,6 +563,7 @@ namespace JAMMM
             }
             
 
+            ParticleManager.Instance.update(gameTime);
             base.Update(gameTime);
         }
 
@@ -678,7 +679,6 @@ namespace JAMMM
                 if (player.IsAlive)
                     numAlive++;
 
-            //TODO this is temporary for testing
             //if (numAlive == 1)
             //    changeState(GameState.Victory);
         }
