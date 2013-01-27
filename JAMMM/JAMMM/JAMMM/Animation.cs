@@ -142,7 +142,7 @@ namespace JAMMM
             if (!isPlaying)
                 return;
 
-            this.frameTime += gameTime.ElapsedGameTime.Seconds;
+            this.frameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (this.frameTime >= this.frameDuration)
             {
