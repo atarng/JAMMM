@@ -49,6 +49,18 @@ namespace JAMMM
         private const string player4VictoryText = "Player 4 Wins!";
         private const string caloriesLabelText = "Calories: ";
 
+        public const string PENGUIN_MOVE_SMALL = "Penguin_Move_Small";
+        public const string PENGUIN_MOVE_MEDIUM = "Penguin_Move_Med";
+        public const string PENGUIN_MOVE_LARGE = "Penguin_Move_Large";
+
+        public const string PENGUIN_DASH_SMALL = "Penguin_Dash_Small";
+        public const string PENGUIN_DASH_MEDIUM = "Penguin_Dash_Med";
+        public const string PENGUIN_DASH_LARGE = "Penguin_Dash_Large";
+
+        public const string PENGUIN_DEATH_SMALL = "Penguin_Death_Small";
+        public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
+        public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
+
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
 
@@ -476,7 +488,7 @@ namespace JAMMM
             }
             else
             {
-                Flock(fishPool, gameTime);
+                //Flock(fishPool, gameTime);
                 for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 {
                     fishPool[i].update(gameTime);
@@ -631,8 +643,8 @@ namespace JAMMM
                 if (player.IsAlive)
                     numAlive++;
 
-            if (numAlive == 1)
-                changeState(GameState.Victory);
+            //if (numAlive == 1)
+                //changeState(GameState.Victory);
         }
 
         /// <summary>

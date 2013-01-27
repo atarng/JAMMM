@@ -10,8 +10,6 @@ namespace JAMMM
 {
     public class Fish : Actor
     {
-        private Animation dashAnimation;
-
         public Fish() 
         {
             this.MaxAcc = 200;

@@ -31,7 +31,6 @@ namespace JAMMM
             Turn,
             Death,
             Bubble
-
         }
 
         public enum state
@@ -39,7 +38,8 @@ namespace JAMMM
             Dash,
             Dashing,
             DashCooldown,
-            DashReady
+            DashReady,
+            Dying
         }
 
         /// <summary>
@@ -187,6 +187,23 @@ namespace JAMMM
         {
             get { return scale; }
             set { scale = value; }
+        }
+
+        public enum Size
+        {
+            Small = 0,
+            Medium = 1,
+            Large = 2
+        }
+
+        /// <summary>
+        /// The size of the penguin.
+        /// </summary>
+        private Size currentSize;
+        public Size CurrentSize
+        {
+            get { return currentSize; }
+            set { currentSize = value; }
         }
 
         protected Vector2 startingPosition;
