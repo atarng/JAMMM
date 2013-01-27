@@ -17,8 +17,22 @@ namespace JAMMM
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        enum GameState
+        {
+            FindingPlayers,
+            Battle,
+            Victory
+        }
+
+        private GameState currentGameState;
+
         GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+
+        private Vector2 player1StartPosition,
+                        player2StartPosition,
+                        player3StartPosition,
+                        player4StartPosition;
 
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
@@ -30,6 +44,12 @@ namespace JAMMM
         // to the list each time a new controller readies up
         private List<Tuple<Penguin, Spear>> players;
 
+        private bool isPlayer1Connected, isPlayer2Connected,
+                     isPlayer3Connected, isPlayer4Connected;
+
+        private bool isPlayer1Ready, isPlayer2Ready,
+                     isPlayer3Ready, isPlayer4Ready;
+
         //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
@@ -38,6 +58,7 @@ namespace JAMMM
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.ToggleFullScreen();
             Content.RootDirectory = "Content";
 
             fishPool = new List<Fish>();
@@ -50,13 +71,30 @@ namespace JAMMM
             sharkPool.Add(new Shark(150, 150, true));
             sharkPool.Add(new Shark(300, 300, false));
 
-
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
             //testAct = new Actor(100, 200, 10, 10, 10);
 
             players = new List<Tuple<Penguin, Spear>>();
 
             collisions = new Dictionary<Actor, Actor>();
+
+            isPlayer1Connected = false;
+            isPlayer2Connected = false;
+            isPlayer3Connected = false;
+            isPlayer4Connected = false;
+
+            isPlayer1Ready = false;
+            isPlayer2Ready = false;
+            isPlayer3Ready = false;
+            isPlayer4Ready = false;
+
+            int width = graphics.PreferredBackBufferWidth;
+            int height = graphics.PreferredBackBufferHeight;
+
+            player1StartPosition = new Vector2(width * 0.2f,  height * 0.5f);
+            player2StartPosition = new Vector2(width * 0.4f, height * 0.5f);
+            player3StartPosition = new Vector2(width * 0.6f, height * 0.5f);
+            player4StartPosition = new Vector2(width * 0.8f, height * 0.5f);
         }
 
         /// <summary>
@@ -68,6 +106,8 @@ namespace JAMMM
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            this.currentGameState = GameState.FindingPlayers;
+
             base.Initialize();
         }
 
@@ -107,6 +147,36 @@ namespace JAMMM
         }
 
         /// <summary>
+        /// This is called any time we change states. This needs
+        /// to do some initialization for that state likely. Just
+        /// some logical initialization- no assets.
+        /// </summary>
+        private void changeState(GameState newState)
+        {
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                {
+                    break;
+                }
+                case (GameState.Battle):
+                {
+                    // initialize each player? 
+
+                    break;
+                }
+                case (GameState.Victory):
+                {
+                    // ???? something???
+
+                    break;
+                }
+            }
+
+            this.currentGameState = newState;
+        }
+
+        /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
@@ -114,8 +184,31 @@ namespace JAMMM
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
+
+            // the basic game logic outer switch
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers) :
+                {
+                    TryToAddPlayers();
+                    TryToReadyPlayers();
+                    TryToStartGame();
+                    break;
+                }
+                case (GameState.Battle):
+                {
+
+                    break;
+                }
+                case (GameState.Victory) : 
+                {
+                    TryToRestartGame();
+                    break;
+                }
+            }
 
             // TODO: Add your update logic here
             //testAct.update(gameTime);
@@ -153,6 +246,98 @@ namespace JAMMM
         }
 
         /// <summary>
+        /// Tries to add players to the view.
+        /// </summary>
+        private void TryToAddPlayers()
+        {
+            if (!isPlayer1Connected)
+            {
+                if (GamePad.GetState(PlayerIndex.One).IsConnected)
+                {
+                    players.Add(new Tuple<Penguin, Spear>(new Penguin(PlayerIndex.One, player1StartPosition), new Spear()));
+                    isPlayer1Connected = true;
+                }
+            }
+            if (!isPlayer2Connected)
+            {
+                if (GamePad.GetState(PlayerIndex.Two).IsConnected)
+                {
+                    players.Add(new Tuple<Penguin, Spear>(new Penguin(PlayerIndex.Two, player2StartPosition), new Spear()));
+                    isPlayer2Connected = true;
+                }
+            }
+            if (!isPlayer3Connected)
+            {
+                if (GamePad.GetState(PlayerIndex.Three).IsConnected)
+                {
+                    players.Add(new Tuple<Penguin, Spear>(new Penguin(PlayerIndex.Three, player3StartPosition), new Spear()));
+                    isPlayer3Connected = true;
+                }
+            }
+            if (!isPlayer4Connected)
+            {
+                if (GamePad.GetState(PlayerIndex.Four).IsConnected)
+                {
+                    players.Add(new Tuple<Penguin, Spear>(new Penguin(PlayerIndex.Four, player4StartPosition), new Spear()));
+                    isPlayer4Connected = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Readies up a player.
+        /// </summary>
+        private void TryToReadyPlayers()
+        {
+            if (isPlayer1Connected && !isPlayer1Ready)
+            {
+                if (GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.BigButton))
+                {
+                    isPlayer1Ready = true;
+                }
+            }
+            if (isPlayer2Connected && !isPlayer2Ready)
+            {
+                if (GamePad.GetState(PlayerIndex.Two).IsButtonDown(Buttons.BigButton))
+                {
+                    isPlayer2Ready = true;
+                }
+            }
+            if (isPlayer3Connected && !isPlayer3Ready)
+            {
+                if (GamePad.GetState(PlayerIndex.Three).IsButtonDown(Buttons.BigButton))
+                {
+                    isPlayer3Ready = true;
+                }
+            }
+            if (isPlayer4Connected && !isPlayer4Ready)
+            {
+                if (GamePad.GetState(PlayerIndex.Four).IsButtonDown(Buttons.BigButton))
+                {
+                    isPlayer4Ready = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if player 1 pressed start.
+        /// </summary>
+        private void TryToStartGame()
+        {
+            if (isPlayer1Ready && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
+                changeState(GameState.Battle);
+        }
+
+        /// <summary>
+        /// Checks if player 1 pressed start.
+        /// </summary>
+        private void TryToRestartGame()
+        {
+            if (GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
+                changeState(GameState.Battle);
+        }
+
+        /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
@@ -160,7 +345,34 @@ namespace JAMMM
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                {
+                    // draw the finding players screen
+
+                    // draw a penguin for each connected controller
+
+                    // draw a green blip for each readied player
+
+                    break;
+                }
+                case (GameState.Battle):
+                {
+                    // draw everything
+
+                    break;
+                }
+                case (GameState.Victory):
+                {
+                    // draw victory screen splash
+
+                    // draw victory text (containing the player)
+
+                    break;
+                }
+            }
+
             //testAct.draw(gameTime, spriteBatch);
             //testActAnim.draw(gameTime, spriteBatch);
             foreach( Shark s in sharkPool )
