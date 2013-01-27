@@ -14,8 +14,8 @@ namespace JAMMM
     public class Physics
     {
         private const float cr = 1; //1 is elastic , 0 inelastic
-        //private const float uk = 0.985F; // 1 is frictionless
-        private const float uk = 0.5F; // coefficient of friction increase for more friction
+        private const float uk = 0.990F; // 1 is frictionless .985
+        //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
         private const float smallForce = 5;
         //private static Vector2 smallForce = new Vector2(50,50);
@@ -68,7 +68,7 @@ namespace JAMMM
 
             //relative friction
             if (applyFric)
-                a.Velocity = 0.985F * a.Velocity;
+                a.Velocity = uk * a.Velocity;
 
 
             //initial velocity is vel, final velocity is a.velocity
@@ -103,8 +103,8 @@ namespace JAMMM
             */
 
             //update the bounds
-            a.Bounds.CenterX = pos.X + a.Offset.X;
-            a.Bounds.CenterY = pos.Y + a.Offset.Y;
+            a.bounds.center.X = a.Position.X + a.Offset.X;
+            a.bounds.center.Y = a.Position.Y + a.Offset.Y;
 
             //zero if too small
             if ( Math.Abs(a.Velocity.X) < eps)
@@ -136,30 +136,14 @@ namespace JAMMM
 
     public class Circle
     {
-        private Vector2 center;
+        public Vector2 center;
         public Vector2 Center
         {
             get { return center; }
             set
             {
                 center = value;
-                CenterX = value.X;
-                CenterY = value.Y;
             }
-        }
-
-        private float centerX;
-        public float CenterX
-        {
-            get { return centerX; }
-            set { centerX = value; center.X = value; }
-        }
-
-        private float centerY;
-        public float CenterY
-        {
-            get { return centerY; }
-            set { centerY = value; center.Y = value; }
         }
 
         private float radius;
@@ -172,20 +156,13 @@ namespace JAMMM
         public Circle(float x, float y, float radius)
         {
             this.Radius = radius;
-            this.CenterX = x;
-            this.CenterY = y;
-        }
-
-        public void move(float x, float y)
-        {
-            centerX = x;
-            centerY = y;
+            Center = new Vector2(x, y);
         }
 
         public Boolean isCollision( Circle a )
         {
-            float dx = centerX - a.centerX;
-            float dy = centerY = a.centerY;
+            float dx = center.X - a.center.X;
+            float dy = center.Y - a.center.Y;
             float radii = radius + a.radius;
             if (dx * dx + dy * dy < radii * radii)
                 return true;

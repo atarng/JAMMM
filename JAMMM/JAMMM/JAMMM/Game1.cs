@@ -20,17 +20,17 @@ namespace JAMMM
         GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private Actor testAct;
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
         private List<Fish> fishPool;
         private List<Shark> sharkPool;
+        private Dictionary<Actor, Actor> collisions;
 
         // this is our pool of players. we want to add a new player
         // to the list each time a new controller readies up
         private List<Tuple<Penguin, Spear>> players;
 
-        private AnimatedActorTest testActAnim;
+        //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
         SoundEffect underwaterTheme;
@@ -45,12 +45,18 @@ namespace JAMMM
 
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 fishPool.Add(new Fish());
-            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
-                sharkPool.Add(new Shark());
+            //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+            //    sharkPool.Add(new Shark());
+            sharkPool.Add(new Shark(150, 150, true));
+            sharkPool.Add(new Shark(300, 300, false));
 
-            testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
+
+            //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
+            //testAct = new Actor(100, 200, 10, 10, 10);
 
             players = new List<Tuple<Penguin, Spear>>();
+
+            collisions = new Dictionary<Actor, Actor>();
         }
 
         /// <summary>
@@ -62,7 +68,6 @@ namespace JAMMM
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            testAct = new Actor(100,100,10,10,10);
             base.Initialize();
         }
 
@@ -97,7 +102,7 @@ namespace JAMMM
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
                 fishPool[i].loadContent();
 
-            testActAnim.loadContent();
+            //testActAnim.loadContent();
 
             underwaterTheme.Play();
         }
@@ -143,9 +148,35 @@ namespace JAMMM
             }
 
             //testAct.update(gameTime);
-            testActAnim.update(gameTime);
-            Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-            //Physics.applyMovement(testAct, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+            //testActAnim.update(gameTime);
+            //Physics.applyMovement(testActAnim, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+            foreach (Shark s in sharkPool)
+            {
+                s.update(gameTime);
+                Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+            }
+
+            collisions.Clear();
+            for (int i = 0; i < SHARK_POOL_SIZE; i++)
+            {
+                for (int j = 0; j < SHARK_POOL_SIZE; j++)
+                {
+                    if (i != j && sharkPool[i].Bounds.isCollision(sharkPool[j].Bounds))
+                    {
+                        if( collisions.Count == 0 )
+                            collisions.Add(sharkPool[i], sharkPool[j]);
+                        else if( collisions[sharkPool[j]] != sharkPool[i] )
+                            collisions.Add(sharkPool[i], sharkPool[j]);
+                    }
+                }
+            }
+
+            List<Actor> keyList = new List<Actor>(collisions.Keys);
+            for (int i = 0; i < keyList.Count; i++)
+            {
+                Physics.collide(collisions[keyList[i]],keyList[i]);
+            }
 
             base.Update(gameTime);
         }
@@ -163,7 +194,9 @@ namespace JAMMM
                 fishPool[i].draw(gameTime, spriteBatch);
 
             //testAct.draw(gameTime, spriteBatch);
-            testActAnim.draw(gameTime, spriteBatch);
+            //testActAnim.draw(gameTime, spriteBatch);
+            foreach( Shark s in sharkPool )
+                s.draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }

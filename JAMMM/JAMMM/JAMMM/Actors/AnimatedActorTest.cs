@@ -11,8 +11,6 @@ namespace JAMMM.Actors
 
     public class AnimatedActorTest : Actor
     {
-        private Animation dashAnimation;
-
         public AnimatedActorTest(float x, float y, float offX, float offY, float radius) 
         {
             this.MaxAcc = 400;
