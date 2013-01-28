@@ -284,7 +284,7 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 15000;
+            this.MaxAccDash = 25000;
             this.MaxVel = 200;
             this.MaxVelDash = 400;
             this.Mass = mass;

@@ -12,7 +12,8 @@ namespace JAMMM.Actors
     {
         //public Penguin.Size size;
 
-        public Spear(float x, float y) : base(x, y, 0, 24, 20, 100) {
+        //(float x, float y, float offX, float offY, float radius, mass)
+        public Spear(float x, float y) : base(x, y, 0, 24, 10, 100) {
             MaxVel = 500;
         }
 

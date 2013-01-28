@@ -12,7 +12,8 @@ namespace JAMMM.Actors
     {
         //public Shark() {}
 
-        public Shark(float x, float y) : base(x, y, 40, 24, 20, 100)
+
+        public Shark(float x, float y) : base(x, y, 40, 24, 100, 100)
         { }
 
         public override void processInput(){}
