@@ -30,7 +30,8 @@ namespace JAMMM
             Throw,
             Turn,
             Death,
-            Bubble
+            Bubble,
+            HitSpark,
         }
 
         public enum state

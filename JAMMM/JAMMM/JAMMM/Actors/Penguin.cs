@@ -27,7 +27,7 @@ namespace JAMMM.Actors
         public const int NUMBER_BLINKS_ON_HIT          = 5;
         public const float BLINK_DURATION              = 0.1f;
 
-        public const float fireCooldown     = 0.1F;
+        public const float fireCooldown     = 0.3F;
 
         /// <summary>
         /// for game to query if this actor has fired
@@ -127,6 +127,7 @@ namespace JAMMM.Actors
                     prevStateA = true;
                     currentAnimation = dashAnimation;
                     currentAnimation.play();
+                    AudioManager.getSound("Actor_Dash").Play();
                 }
 
                 if (gamePadState.IsButtonUp(Buttons.A))

@@ -12,9 +12,8 @@ namespace JAMMM.Actors
     {
         //public Shark() {}
 
-z        public Shark(float x, float y) : base(x, y, 40, 24, 20, 100)
-
-        public Shark(float x, float y) : base(x, y, 40, 24, 100, 100)
+        public Shark(float x, float y)
+            : base(x, y, 40, 24, 20, 100)
         { }
 
         public override void processInput(){}
@@ -39,7 +38,14 @@ z        public Shark(float x, float y) : base(x, y, 40, 24, 20, 100)
             if (other is Spear)
             {
                 IsAlive = false;
+
+
                 AudioManager.getSound("Actor_Hit").Play();
+                Random rnd = new Random();
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark, new Vector2(this.Position.X + rnd.Next(-20,20), this.Position.Y + rnd.Next(-20,20)), new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 1 + rnd.Next(1,2), 0.4f, -0.20f, 1, 1.25f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark, new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)), new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 1 + rnd.Next(1, 2), 0.4f, -0.20f, 1, 1.25f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark, new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)), new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 1 + rnd.Next(1, 2), 0.4f, -0.20f, 1, 1.25f, 1f);
+
             }
             else if (other is Penguin)
             {

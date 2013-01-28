@@ -180,7 +180,8 @@ namespace JAMMM
             background = Content.Load<Texture2D>("Sprites/Background");
 
 
-            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_3"));
+            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_5"));
+            AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
 
             // load the content for the sprite manager
