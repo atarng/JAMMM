@@ -679,6 +679,8 @@ namespace JAMMM
                 if (player.IsAlive)
                     numAlive++;
 
+            isPlayer1Connected = true;
+            isPlayer1Ready = true;
             //if (numAlive == 1)
             //    changeState(GameState.Victory);
         }

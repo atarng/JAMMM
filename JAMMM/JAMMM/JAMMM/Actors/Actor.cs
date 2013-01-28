@@ -160,6 +160,13 @@ namespace JAMMM
             set { dashCooldownTime = value; }
         }
 
+        private int dashCost;
+        public int DashCost
+        {
+            get { return dashCost; }
+            set { dashCost = value; }
+        }
+
         private float currTime;
         public float CurrTime
         {
@@ -204,6 +211,7 @@ namespace JAMMM
             this.MaxAccDash = 100000;
             this.MaxVel = 300;
             this.MaxVelDash = 400;
+            this.dashCost = 10;
 
             this.Position = new Vector2(x,y);
             this.startingPosition = this.Position;
@@ -218,6 +226,7 @@ namespace JAMMM
             this.Velocity = new Vector2();
             this.Acceleration = new Vector2();
             rotation = 0;
+            this.dashCost = 10;
         }
 
         public virtual void die()
@@ -271,6 +280,7 @@ namespace JAMMM
 
         public virtual void loadContent() { }
         public virtual void collideWith(Actor other) { }
+
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
@@ -280,6 +290,7 @@ namespace JAMMM
             this.Mass = mass;
             this.dashTime = 1;
             this.dashCooldownTime = 3;
+            this.dashCost = 10;
             CurrState = state.DashReady;
 
             this.Position = new Vector2(x,y);
