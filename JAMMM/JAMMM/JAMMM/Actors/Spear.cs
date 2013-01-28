@@ -25,7 +25,7 @@ namespace JAMMM.Actors
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Swim"), 2, true, 0.4f);
+            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Spear"), 4, true, 0.4f);
             base.loadContent();
         }
 

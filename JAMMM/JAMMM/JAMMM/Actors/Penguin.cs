@@ -134,10 +134,9 @@ namespace JAMMM.Actors
                 return;
 
             Random rnd = new Random();
-            
-            if(  (this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1,400) )
-                ParticleManager.Instance.createParticle(ParticleType.Bubble, this.Position, new Vector2(0, 0), 3.14f/2.0f, 0.5f, 1, 0, 1, 1.0f, 3f);
 
+            if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
+                ParticleManager.Instance.createParticle(ParticleType.Bubble, new Vector2(this.Position.X + rnd.Next(-15,15), this.Position.Y + rnd.Next(-15,15)), new Vector2(0, 0), 3.14f/2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
             currentAnimation.update(delta);
             processInput();
