@@ -216,29 +216,6 @@ namespace JAMMM
 
         protected Vector2 startingPosition;
 
-        public Actor(float x, float y, float offX, float offY, float radius)
-        {
-            this.MaxAcc = 250;
-            this.MaxAccDash = 100000;
-            this.MaxVel = 300;
-            this.MaxVelDash = 400;
-
-            this.Position = new Vector2(x,y);
-            this.startingPosition = this.Position;
-            this.Offset = new Vector2(offX, offY);
-            this.Bounds = new Circle(x + offX, y + offY, radius);
-            this.isAlive = false;
-        }
-
-        public Actor()
-        {
-            this.Position = new Vector2();
-            this.Velocity = new Vector2();
-            this.Acceleration = new Vector2();
-            this.isAlive = false;
-            rotation = 0;
-        }
-
         public virtual void die()
         {
             this.isAlive = false;
@@ -254,7 +231,7 @@ namespace JAMMM
 
         public virtual void respawn()
         {
-            this.position = startingPosition;
+            this.position = this.startingPosition;
             this.isAlive = true;
         }
 
@@ -291,7 +268,9 @@ namespace JAMMM
         }
 
         public virtual void loadContent() { }
+
         public virtual void collideWith(Actor other) { }
+
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
@@ -306,6 +285,8 @@ namespace JAMMM
             this.Position = new Vector2(x,y);
             this.Offset = new Vector2(offX, offY);
             this.Bounds = new Circle(x + offX, y + offY, radius);
+            this.startingPosition = new Vector2(x, y);
+            this.isAlive = false;
         }
 
         /// <summary>

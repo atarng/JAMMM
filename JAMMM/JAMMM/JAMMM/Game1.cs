@@ -97,10 +97,17 @@ namespace JAMMM
                         player3CalorieTextPosition,
                         player4CalorieTextPosition;
 
+        private Vector2 player1CalorieValuePosition,
+                        player2CalorieValuePosition,
+                        player3CalorieValuePosition,
+                        player4CalorieValuePosition;
+
         private Vector2 player1VictoryTextPosition,
                         player2VictoryTextPosition,
                         player3VictoryTextPosition,
                         player4VictoryTextPosition;
+
+        static readonly Random rng = new Random(DateTime.Now.Millisecond);
 
         //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
@@ -113,15 +120,18 @@ namespace JAMMM
             fishPool = new List<Fish>();
             sharkPool = new List<Shark>();
             spears = new List<Spear>();
-            Random rng = new Random();
+            
 
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                fishPool.Add(new Fish((float)(200 + rng.NextDouble() * 100), (float)(200 + rng.NextDouble() * 100)));
+            {
+                fishPool.Add(new Fish(rng.Next(0, screenRectangle.Width), 
+                                      rng.Next(0, screenRectangle.Height)));
+            }
 
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
-            sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
-            sharkPool.Add(new Shark(300, 300));
+            //sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
+            //sharkPool.Add(new Shark(300, 300));
 
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
             //testAct = new Actor(100, 200, 10, 10, 10);
@@ -284,6 +294,20 @@ namespace JAMMM
                                               graphics.PreferredBackBufferHeight * 0.03f);
             player4CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+
+            // set the player calorie value positions
+            player1CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player2CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player3CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player4CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
                                               graphics.PreferredBackBufferHeight * 0.03f);
 
             // set the finding player penguin rectangle
@@ -493,6 +517,12 @@ namespace JAMMM
                         {
                             fishPool[i].update(gameTime);
                             Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                            if (!fishPool[i].IsAlive)
+                            {
+                                fishPool[i].spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                                                (float)(rng.NextDouble() * (double)screenRectangle.Height)));
+                            }
                         }
                     }
                     else
@@ -525,7 +555,7 @@ namespace JAMMM
 
                     doCollisions();
 
-                    ParticleManager.Instance.update(gameTime);
+                    //ParticleManager.Instance.update(gameTime);
                     
                     // for each fishy, check if was alive last frame and is dead this one
                     // if that is the case, spawn a new fishy
@@ -562,6 +592,7 @@ namespace JAMMM
         {
             //////COLLISIONS///////
             collisions.Clear();
+
             /*
             for (int i = 0; i < SHARK_POOL_SIZE; i++)
             {
@@ -791,24 +822,28 @@ namespace JAMMM
                         spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer2Connected)
                     {
                         spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer3Connected)
                     {
                         spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer4Connected)
                     {
                         spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.WhiteSmoke);
                     }
 
                     spriteBatch.End();
@@ -870,7 +905,7 @@ namespace JAMMM
             //foreach (Shark s in sharkPool)
             //    s.draw(gameTime, spriteBatch);
             
-            ParticleManager.Instance.draw(gameTime, spriteBatch);
+            //ParticleManager.Instance.draw(gameTime, spriteBatch);
 
             //for (int i = 0; i < projectilePool.Count; ++i)
             //    projectilePool[i].draw(gameTime, spriteBatch);

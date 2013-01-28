@@ -82,7 +82,7 @@ namespace JAMMM.Actors
         /// <param name="pos"></param>
         public Penguin(PlayerIndex playerIndex, Vector2 pos) 
             // going to need better values for the base
-            : base(pos.X, pos.Y, 20, 20, 10, 100)
+            : base(pos.X, pos.Y, 36, 32, 20, 100)
         {
             this.controller       = playerIndex;
             this.startingPosition = pos;
@@ -144,7 +144,7 @@ namespace JAMMM.Actors
                 acceleration.Y = MaxAcc;
         }
 
-        public override void loadContent() 
+        public override void loadContent()
         {
             // need to create the animations
             moveAnimation = new Animation((Actor)this, AnimationType.Move, 
@@ -398,6 +398,7 @@ namespace JAMMM.Actors
         /// </summary>
         public override void handleAnimationComplete(AnimationType t) 
         {
+
         }
 
         /// <summary>
