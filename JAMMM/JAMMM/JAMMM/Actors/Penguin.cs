@@ -515,6 +515,29 @@ namespace JAMMM.Actors
                     this.calories -= SPEAR_SMALL_DAMAGE;
                 }
 
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+
+                AudioManager.getSound("Actor_Hit").Play();
+
                 this.isHit = true;
                 this.blinkTime = 0.0f; 
                 this.numBlinks = 0;

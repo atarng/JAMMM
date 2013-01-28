@@ -123,9 +123,9 @@ namespace JAMMM
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            fishPool = new List<Fish>();
+            fishPool  = new List<Fish>();
             sharkPool = new List<Shark>();
-            spears = new List<Spear>();
+            spears    = new List<Spear>();
 
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
@@ -149,8 +149,8 @@ namespace JAMMM
             isPlayer3Ready = false;
             isPlayer4Ready = false;
 
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
+            graphics.PreferredBackBufferWidth = 1600;
+            graphics.PreferredBackBufferHeight = 900;
 
             int width = graphics.PreferredBackBufferWidth;
             int height = graphics.PreferredBackBufferHeight;
@@ -504,7 +504,7 @@ namespace JAMMM
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override voi+d Update(GameTime gameTime)
+        protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
