@@ -60,7 +60,7 @@ namespace JAMMM
         #endregion
 
         public static bool printPhysics = true;
-
+        static protected Random rnd = new Random();
         private bool removeMe;
         public bool RemoveMe
         {

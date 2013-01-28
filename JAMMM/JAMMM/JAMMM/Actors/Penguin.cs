@@ -190,8 +190,6 @@ namespace JAMMM.Actors
             if (!this.IsAlive)
                 return;
 
-            Random rnd = new Random();
-
             tryToGrow();
             tryToDie();
             tryToBlink(delta);
@@ -496,6 +494,7 @@ namespace JAMMM.Actors
             {
                 if (other.CurrState == state.Moving)
                 {
+                    AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
                 }

@@ -23,8 +23,8 @@ namespace JAMMM
     {
         private static ParticleManager instance;
 
-        private const int BUBBLE_POOL_SIZE = 100;
-        private const int HITSPARK_POOL_SIZE = 100;
+        private const int BUBBLE_POOL_SIZE = 500;
+        private const int HITSPARK_POOL_SIZE = 200;
 
         private int bubblePoolIndex = 0;
         private int hitSparkPoolIndex = 0;
