@@ -120,13 +120,6 @@ namespace JAMMM
             fishPool = new List<Fish>();
             sharkPool = new List<Shark>();
             spears = new List<Spear>();
-            
-
-            for (int i = 0; i < FISH_POOL_SIZE; ++i)
-            {
-                fishPool.Add(new Fish(rng.Next(0, screenRectangle.Width), 
-                                      rng.Next(0, screenRectangle.Height)));
-            }
 
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
@@ -174,6 +167,13 @@ namespace JAMMM
         {
             changeState(GameState.FindingPlayers);
 
+            // set initial fish positions
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            {
+                fishPool.Add(new Fish((screenRectangle.Width / FISH_POOL_SIZE) * i,
+                                      (screenRectangle.Height / FISH_POOL_SIZE) * i));
+            }
+
             base.Initialize();          
         }
 
@@ -210,6 +210,17 @@ namespace JAMMM
             SpriteManager.addTexture(PENGUIN_DEATH_SMALL, Content.Load<Texture2D>("Sprites/Penguin_small_dead_64_64"));
             SpriteManager.addTexture(PENGUIN_DEATH_MEDIUM, Content.Load<Texture2D>("Sprites/Penguin_med_dead_96_96"));
             SpriteManager.addTexture(PENGUIN_DEATH_LARGE, Content.Load<Texture2D>("Sprites/Penguin_fat_dead_128_128"));
+
+            SpriteManager.addTexture("Particle_Bubble_1", Content.Load<Texture2D>("Sprites/PFX_Bubble_16_16"));
+            SpriteManager.addTexture("Particle_Bubble_2", Content.Load<Texture2D>("Sprites/PFX_Bubble_24_24"));
+            SpriteManager.addTexture("Particle_Bubble_3", Content.Load<Texture2D>("Sprites/PFX_Bubble_36_36"));
+            SpriteManager.addTexture("Particle_Bubble_4", Content.Load<Texture2D>("Sprites/PFX_Bubble_56_56"));
+
+            SpriteManager.addTexture("PFX_Beam", Content.Load<Texture2D>("Sprites/PFX_Beam"));
+            SpriteManager.addTexture("PFX_FireSplosion", Content.Load<Texture2D>("Sprites/PFX_FireSplosion"));
+
+            SpriteManager.addTexture("Spear", Content.Load<Texture2D>("Sprites/spear_move_128_48"));
+
 
             // tell each actor to load their content now that the sprite manager has its database
             foreach (Shark s in sharkPool)
@@ -555,7 +566,7 @@ namespace JAMMM
 
                     doCollisions();
 
-                    //ParticleManager.Instance.update(gameTime);
+                    ParticleManager.Instance.update(gameTime);
                     
                     // for each fishy, check if was alive last frame and is dead this one
                     // if that is the case, spawn a new fishy
@@ -864,6 +875,8 @@ namespace JAMMM
                     foreach (Spear spear in spears)
                         spear.draw(gameTime, spriteBatch);
 
+                    ParticleManager.Instance.draw(gameTime, spriteBatch);
+
                     break;
                 }
                 case (GameState.Victory):
@@ -905,7 +918,7 @@ namespace JAMMM
             //foreach (Shark s in sharkPool)
             //    s.draw(gameTime, spriteBatch);
             
-            //ParticleManager.Instance.draw(gameTime, spriteBatch);
+            
 
             //for (int i = 0; i < projectilePool.Count; ++i)
             //    projectilePool[i].draw(gameTime, spriteBatch);

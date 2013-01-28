@@ -113,6 +113,8 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Sprites\Penguin_fat_dash_128_128.png">
       <Name>Penguin_fat_dash_128_128</Name>
       <Importer>TextureImporter</Importer>

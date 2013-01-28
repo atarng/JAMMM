@@ -144,9 +144,8 @@ namespace JAMMM
             float s = (float)Math.Sin(a.Rotation);
             float c = (float)Math.Cos(a.Rotation);
             //rotate about the origin then add to position
-            a.bounds.center.X = c * (a.Offset.X) - s * (a.Offset.Y) + a.Position.X;
-            a.bounds.center.Y = s * (a.Offset.X) + c * (a.Offset.Y) + a.Position.Y;
-
+            a.bounds.center.X = /*c * (a.Offset.X) - s * (a.Offset.Y) +*/ a.Position.X;
+            a.bounds.center.Y = /* s * (a.Offset.X) + c * (a.Offset.Y) +*/ a.Position.Y;
 
             a.acceleration = accDecay * a.acceleration;
 
