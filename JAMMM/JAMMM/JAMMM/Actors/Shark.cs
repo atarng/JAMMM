@@ -37,6 +37,7 @@ namespace JAMMM.Actors
             if (other is Spear)
             {
                 //TODO don't straight up remove
+                AudioManager.getSound("Actor_Hit").Play();
                 RemoveMe = true;
             }
             else if (other is Penguin)
