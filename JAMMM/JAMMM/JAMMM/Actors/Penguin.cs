@@ -27,7 +27,7 @@ namespace JAMMM.Actors
         public const int NUMBER_BLINKS_ON_HIT          = 5;
         public const float BLINK_DURATION              = 0.1f;
 
-        public const float fireCooldown     = 0.5F;
+        public const float fireCooldown     = 0.1F;
 
         /// <summary>
         /// for game to query if this actor has fired
@@ -136,6 +136,7 @@ namespace JAMMM.Actors
                 
                 if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
                 {
+                    AudioManager.getSound("Spear_Throw").Play();
                     fireTime = fireCooldown;
                     fire = true;
                 }
@@ -461,6 +462,7 @@ namespace JAMMM.Actors
                 // take damage based on the spear's owner's size
                 if (other.CurrentSize == Size.Large)
                 {
+                    AudioManager.getSound("Actor_Hit").Play();
                     this.calories -= SPEAR_MAX_DAMAGE;
                 }
                 else if (other.CurrentSize == Size.Medium)
