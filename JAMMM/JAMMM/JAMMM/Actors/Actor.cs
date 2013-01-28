@@ -31,15 +31,16 @@ namespace JAMMM
             Turn,
             Death,
             Bubble
-
         }
 
         public enum state
         {
+            Moving,
             Dash,
             Dashing,
             DashCooldown,
-            DashReady
+            DashReady,
+            Dying
         }
 
         /// <summary>
@@ -196,6 +197,23 @@ namespace JAMMM
             set { scale = value; }
         }
 
+        public enum Size
+        {
+            Small = 0,
+            Medium = 1,
+            Large = 2
+        }
+
+        /// <summary>
+        /// The size of the penguin.
+        /// </summary>
+        private Size currentSize;
+        public Size CurrentSize
+        {
+            get { return currentSize; }
+            set { currentSize = value; }
+        }
+
         protected Vector2 startingPosition;
 
         public Actor(float x, float y, float offX, float offY, float radius)
@@ -217,6 +235,7 @@ namespace JAMMM
             this.Position = new Vector2();
             this.Velocity = new Vector2();
             this.Acceleration = new Vector2();
+            this.isAlive = false;
             rotation = 0;
         }
 
@@ -224,6 +243,8 @@ namespace JAMMM
         {
             this.isAlive = false;
         }
+
+        public virtual void startDying() {}
 
         public virtual void spawnAt(Vector2 position)
         {

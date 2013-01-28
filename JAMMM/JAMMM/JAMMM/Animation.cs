@@ -23,7 +23,6 @@ namespace JAMMM
         public Texture2D Texture
         {
             get { return texture; }
-            set { texture = value; }
         }
         private Texture2D texture;
 
@@ -140,6 +139,18 @@ namespace JAMMM
             this.currentFrame.Y = 0;
         }
         //Constructor for particles
+
+
+        public void replaceSpriteSheet(Texture2D newSheet, int newFrameCount)
+        {
+            this.texture = newSheet;
+            this.frameCount = newFrameCount;
+            this.frameWidth = newSheet.Width / frameCount;
+            this.frameHeight = newSheet.Height;
+            this.currentFrame.Width = this.frameWidth;
+            this.currentFrame.Height = this.frameHeight;
+            this.currentFrame.Y = 0;
+        }
 
         public void play()
         {
