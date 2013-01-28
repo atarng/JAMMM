@@ -22,7 +22,7 @@ namespace JAMMM
         }
 
         //(float x, float y, float offX, float offY, float radius, mass)
-        public Fish(float x, float y) : base(x,y,0,0,10,10){}
+        public Fish(float x, float y) : base(x, y, 32, 32, 10, 10){}
 
         public override void loadContent()
         {
