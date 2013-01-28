@@ -12,7 +12,8 @@ namespace JAMMM.Actors
     {
         //public Penguin.Size size;
 
-        public Spear(float x, float y) : base(x, y, 0, 24, 20, 100) {
+        //(float x, float y, float offX, float offY, float radius, mass)
+        public Spear(float x, float y) : base(x, y, 0, 24, 10, 100) {
             MaxVel = 500;
         }
 
@@ -25,7 +26,7 @@ namespace JAMMM.Actors
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Swim"), 2, true, 0.4f);
+            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Spear"), 4, true, 0.4f);
             base.loadContent();
         }
 

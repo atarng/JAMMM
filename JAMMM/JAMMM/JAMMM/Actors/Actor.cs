@@ -31,15 +31,16 @@ namespace JAMMM
             Turn,
             Death,
             Bubble
-
         }
 
         public enum state
         {
+            Moving,
             Dash,
             Dashing,
             DashCooldown,
-            DashReady
+            DashReady,
+            Dying
         }
 
         /// <summary>
@@ -160,6 +161,13 @@ namespace JAMMM
             set { dashCooldownTime = value; }
         }
 
+        private int dashCost;
+        public int DashCost
+        {
+            get { return dashCost; }
+            set { dashCost = value; }
+        }
+
         private float currTime;
         public float CurrTime
         {
@@ -196,6 +204,23 @@ namespace JAMMM
             set { scale = value; }
         }
 
+        public enum Size
+        {
+            Small = 0,
+            Medium = 1,
+            Large = 2
+        }
+
+        /// <summary>
+        /// The size of the penguin.
+        /// </summary>
+        private Size currentSize;
+        public Size CurrentSize
+        {
+            get { return currentSize; }
+            set { currentSize = value; }
+        }
+
         protected Vector2 startingPosition;
 
         public Actor(float x, float y, float offX, float offY, float radius)
@@ -204,6 +229,7 @@ namespace JAMMM
             this.MaxAccDash = 100000;
             this.MaxVel = 300;
             this.MaxVelDash = 400;
+            this.dashCost = 10;
 
             this.Position = new Vector2(x,y);
             this.startingPosition = this.Position;
@@ -217,13 +243,17 @@ namespace JAMMM
             this.Position = new Vector2();
             this.Velocity = new Vector2();
             this.Acceleration = new Vector2();
+            this.isAlive = false;
             rotation = 0;
+            this.dashCost = 10;
         }
 
         public virtual void die()
         {
             this.isAlive = false;
         }
+
+        public virtual void startDying() {}
 
         public virtual void spawnAt(Vector2 position)
         {
@@ -271,15 +301,17 @@ namespace JAMMM
 
         public virtual void loadContent() { }
         public virtual void collideWith(Actor other) { }
+
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 15000;
+            this.MaxAccDash = 25000;
             this.MaxVel = 200;
             this.MaxVelDash = 400;
             this.Mass = mass;
             this.dashTime = 1;
             this.dashCooldownTime = 3;
+            this.dashCost = 10;
             CurrState = state.DashReady;
 
             this.Position = new Vector2(x,y);
