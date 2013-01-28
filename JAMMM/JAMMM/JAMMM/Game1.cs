@@ -189,6 +189,9 @@ namespace JAMMM
             playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
             background = Content.Load<Texture2D>("Sprites/Background");
 
+            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_3"));
+            AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
+
             // load the content for the sprite manager
             SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
@@ -407,13 +410,14 @@ namespace JAMMM
             }
         }
 
-        protected void trySpear(Penguin a) //TODO change the penguin
+        protected void trySpear(Penguin a, int id) //TODO change the penguin
         {
             if (a.Fire)
             {
                 a.Fire = false;
                 //Spear projectile = new Spear(a.Position.X, a.Position.Y, a.CurrentSize);
-                Spear projectile = new Spear(a.Position.X, a.Position.Y);
+                Spear projectile = new Spear(a.Position.X, a.Position.Y,a.CurrentSize, id);
+                projectile.respawn();
                 projectile.loadContent();
                 projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 50000F;
                 projectile.velocity.X = a.Velocity.X;
@@ -513,11 +517,11 @@ namespace JAMMM
                 case (GameState.Battle):
                 {
                     // do regular game logic updating
-                    foreach (Penguin p in players)
+                    for( int i = 0; i < players.Count; i++ )
                     {
-                        p.update(gameTime);
-                        Physics.applyMovement(p, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-                        trySpear(p);
+                        players[i].update(gameTime);
+                        Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                        trySpear(players[i], i);
                     }
 
 
@@ -560,7 +564,7 @@ namespace JAMMM
 
                         if (isOffScreen(spear))
                         {
-                            spears.Remove(spear);
+                            spear.IsAlive = false;
                         }
                     }
 
@@ -620,12 +624,34 @@ namespace JAMMM
             }
             */
 
+            // player collisions
+            for (int i = 0; i < players.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (i != j && players[i].IsAlive && players[j].IsAlive &&
+                        players[i].Bounds.isCollision(players[j].Bounds))
+                    {
+                        if (collisions.Count == 0)
+                            collisions.Add(players[i], players[j]);
+                        else if (collisions[players[j]] != players[i])
+                            collisions.Add(players[i], players[j]);
+                    }
+                }
+            }
+
             for (int i = 0; i < spears.Count; i++)
             {
                 for (int j = 0; j < sharkPool.Count; j++)
                 {
-                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds))
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) && spears[i].IsAlive && sharkPool[j].IsAlive)
                         collisions.Add(spears[i], sharkPool[j]);
+                }
+
+                for (int j = 0; j < players.Count; j++)
+                {
+                    if (spears[i].bounds.isCollision(players[j].Bounds) && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id )
+                        collisions.Add(spears[i], players[j]);
                 }
             }
 
@@ -634,7 +660,7 @@ namespace JAMMM
                 for (int j = 0; j < players.Count; ++j)
                 {
                     if (fishPool[i].Bounds.isCollision(players[j].Bounds) 
-                        && fishPool[i].IsAlive && players[j].IsAlive)
+                        && (fishPool[i].CurrState != Actor.state.Dying) && (fishPool[i].IsAlive) && players[j].IsAlive)
                         collisions.Add(fishPool[i], players[j]);
                 }
             }
@@ -650,11 +676,6 @@ namespace JAMMM
 
                 if (a is Penguin && b is Penguin)
                     Physics.collide(collisions[keyList[i]], keyList[i]);
-
-                if (a.RemoveMe)
-                    removeActor(a);
-                if (b.RemoveMe)
-                    removeActor(b);
             }
         }
 
@@ -767,11 +788,11 @@ namespace JAMMM
             int numAlive = 0;
 
             foreach (Penguin player in players)
-                if (player.IsAlive)
+                if (player.CurrState != Actor.state.Dying)
                     numAlive++;
 
-            //if (numAlive == 1)
-            //    changeState(GameState.Victory);
+            if (numAlive == 1)
+                changeState(GameState.Victory);
         }
 
         /// <summary>
@@ -882,7 +903,7 @@ namespace JAMMM
                 case (GameState.Victory):
                 {
                     // draw victory screen splash
-                    GraphicsDevice.Clear(Color.Cyan);
+                    GraphicsDevice.Clear(Color.Blue);
 
                     spriteBatch.Begin();
 

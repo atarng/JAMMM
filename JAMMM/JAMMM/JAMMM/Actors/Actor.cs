@@ -287,7 +287,7 @@ namespace JAMMM
             this.Mass = mass;
             this.dashTime = 1;
             this.dashCooldownTime = 3;
-            this.dashCost = 5;
+            this.dashCost = 1;
             CurrState = state.DashReady;
 
             this.Position = new Vector2(x,y);

@@ -13,16 +13,24 @@ namespace JAMMM.Actors
         //public Penguin.Size size;
 
         //(float x, float y, float offX, float offY, float radius, mass)
-        public Spear(float x, float y) : base(x, y, 0, 24, 10, 100) {
-            MaxVel = 500;
+        //public Spear(float x, float y) : base(x, y, 0, 24, 10, 100) {
+        //    MaxVel = 500;
+        //}
+
+        private int id;
+        public int Id
+        {
+            get { return id; }
+            set{id = value;}
         }
 
-        //public Spear(float x, float y, Penguin.Size s)
-        //    : base(x, y, 0, 24, 20, 100)
-        //{
-        //    MaxVel = 500;
-        //    size = s; 
-        //}
+        public Spear(float x, float y, Size s, int id)
+            : base(x, y, 0, 24, 20, 100)
+        {
+            MaxVel = 500;
+            this.CurrentSize = s;
+            this.id = id;
+        }
 
         public override void loadContent()
         {
@@ -32,18 +40,24 @@ namespace JAMMM.Actors
 
         public override void update(GameTime delta)
         {
-             base.update(delta);
-             double time = delta.ElapsedGameTime.TotalMilliseconds;
+            if (this.IsAlive)
+            {
+                base.update(delta);
+                double time = delta.ElapsedGameTime.TotalMilliseconds;
+            }
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
-            batch.Begin();
+            if (IsAlive)
+            {
+                batch.Begin();
 
-            dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
-            if (printPhysics)
-                printPhys(batch);
-            batch.End();
+                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+                if (printPhysics)
+                    printPhys(batch);
+                batch.End();
+            }
         }
 
         public void printPhys(SpriteBatch batch)
@@ -74,11 +88,11 @@ namespace JAMMM.Actors
             }
             else if (other is Penguin)
             {
-
+                IsAlive = false;
             }
             else if (other is Shark)
             {
-                RemoveMe = true;
+                IsAlive = false;
             }
             else if (other is Fish)
             {

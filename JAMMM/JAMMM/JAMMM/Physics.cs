@@ -13,7 +13,7 @@ namespace JAMMM
     /// </summary>
     public class Physics
     {
-        private const float cr = 0.98F; //1 is elastic , 0 inelastic
+        private const float cr = 1.0F; //1 is elastic , 0 inelastic
         private const float uk = 0.990F; // 1 is frictionless .985
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon

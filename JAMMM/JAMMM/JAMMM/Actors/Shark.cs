@@ -10,9 +10,6 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        //public Shark() {}
-
-
         public Shark(float x, float y) : base(x, y, 40, 24, 100, 100)
         { }
 
@@ -37,8 +34,8 @@ namespace JAMMM.Actors
         {
             if (other is Spear)
             {
-                //TODO don't straight up remove
-                RemoveMe = true;
+                IsAlive = false;
+                AudioManager.getSound("Actor_Hit").Play();
             }
             else if (other is Penguin)
             {

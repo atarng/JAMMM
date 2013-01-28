@@ -27,7 +27,11 @@ namespace JAMMM.Actors
         public const int NUMBER_BLINKS_ON_HIT          = 5;
         public const float BLINK_DURATION              = 0.1f;
 
-        public const float fireCooldown     = 0.5F;
+        public const int SMALL_SIZE = 25;
+        public const int MED_SIZE = 45;
+        public const int LARGE_SIZE = 60;
+
+        public const float fireCooldown                = 0.5F;
 
         /// <summary>
         /// for game to query if this actor has fired
@@ -84,7 +88,7 @@ namespace JAMMM.Actors
         /// <param name="pos"></param>
         public Penguin(PlayerIndex playerIndex, Vector2 pos) 
             // going to need better values for the base
-            : base(pos.X, pos.Y, 36, 32, 20, 100)
+            : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, 100)
         {
             this.controller       = playerIndex;
             this.startingPosition = pos;
@@ -99,6 +103,9 @@ namespace JAMMM.Actors
 
         public override void processInput()
         {
+            if (this.CurrState == state.Dying)
+                return;
+
             GamePadState gamePadState = GamePad.GetState(controller);
             if (gamePadState.IsConnected)
             {
@@ -136,6 +143,7 @@ namespace JAMMM.Actors
                 
                 if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
                 {
+                    AudioManager.getSound("Spear_Throw").Play();
                     fireTime = fireCooldown;
                     fire = true;
                 }
@@ -277,7 +285,7 @@ namespace JAMMM.Actors
                 deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE), 1);
                 currentAnimation.play();
 
-                this.Bounds.Radius = 60;
+                this.Bounds.Radius = LARGE_SIZE;
 
                 return;
 
@@ -294,7 +302,7 @@ namespace JAMMM.Actors
                 deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM), 1);
                 currentAnimation.play();
 
-                this.Bounds.Radius = 40;
+                this.Bounds.Radius = MED_SIZE;
 
                 return;
             }
@@ -310,7 +318,7 @@ namespace JAMMM.Actors
                 deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1);
                 currentAnimation.play();
 
-                this.Bounds.Radius = 20;
+                this.Bounds.Radius = SMALL_SIZE;
 
                 return;
             }
@@ -361,6 +369,7 @@ namespace JAMMM.Actors
                             this.isHit = false;
                             this.isBlink = false;
                             this.blinkTime = 0.0f;
+                            this.numBlinks = 0;
                         }
                     }
                 }
@@ -490,6 +499,7 @@ namespace JAMMM.Actors
                 // take damage based on the spear's owner's size
                 if (other.CurrentSize == Size.Large)
                 {
+                    AudioManager.getSound("Actor_Hit").Play();
                     this.calories -= SPEAR_MAX_DAMAGE;
                 }
                 else if (other.CurrentSize == Size.Medium)
@@ -502,6 +512,8 @@ namespace JAMMM.Actors
                 }
 
                 this.isHit = true;
+                this.blinkTime = 0.0f; 
+                this.numBlinks = 0;
             }
             else if (other is Shark)
             {
