@@ -134,6 +134,7 @@ namespace JAMMM.Actors
                     prevStateA = true;
                     currentAnimation = dashAnimation;
                     currentAnimation.play();
+                    AudioManager.getSound("Actor_Dash").Play();
                 }
 
                 if (gamePadState.IsButtonUp(Buttons.A))
@@ -195,8 +196,6 @@ namespace JAMMM.Actors
         {
             if (!this.IsAlive)
                 return;
-
-            Random rnd = new Random();
 
             tryToGrow();
             tryToDie();
@@ -539,6 +538,7 @@ namespace JAMMM.Actors
             {
                 if (other.CurrState == state.Moving)
                 {
+                    AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
                 }

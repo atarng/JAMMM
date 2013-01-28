@@ -63,6 +63,10 @@ namespace JAMMM
         public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
         public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
 
+        //public const string PENGUIN_DEATH_SMALL = "Penguin_Death_Small";
+        //public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
+        //public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
+
         public const string FISH_SWIM = "Fish_Swim";
         public const string FISH_DEATH = "Fish_Death";
 
@@ -191,8 +195,10 @@ namespace JAMMM
             playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
             background = Content.Load<Texture2D>("Sprites/Background");
 
-            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_3"));
+            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_5"));
+            AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
+            AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
@@ -225,6 +231,7 @@ namespace JAMMM
 
             SpriteManager.addTexture("PFX_Beam", Content.Load<Texture2D>("Sprites/PFX_Beam"));
             SpriteManager.addTexture("PFX_FireSplosion", Content.Load<Texture2D>("Sprites/PFX_FireSplosion"));
+            SpriteManager.addTexture("PFX_Burst", Content.Load<Texture2D>("Sprites/PFX_Burst"));
 
             SpriteManager.addTexture("Spear", Content.Load<Texture2D>("Sprites/spear_move_128_48"));
 
@@ -497,7 +504,7 @@ namespace JAMMM
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
+        protected override voi+d Update(GameTime gameTime)
         {
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
