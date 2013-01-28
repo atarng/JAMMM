@@ -10,8 +10,6 @@ namespace JAMMM
 {
     public class Fish : Actor
     {
-        private Animation dashAnimation;
-
         public Fish() 
         {
             this.MaxAcc = 200;
@@ -24,44 +22,73 @@ namespace JAMMM
         }
 
         //(float x, float y, float offX, float offY, float radius, mass)
-        public Fish(float x, float y) : base(x,y,0,0,10,10){}
+        public Fish(float x, float y) : base(x, y, 32, 32, 10, 10){}
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Fish_Swim"), 2, true, 0.4f);
+            moveAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture(Game1.FISH_SWIM), 4, true, 0.1f);
+            deathAnimation = new Animation((Actor)this, AnimationType.Death, SpriteManager.getTexture(Game1.FISH_DEATH), 8, false, 0.1f);
+            currentAnimation = moveAnimation;
             base.loadContent();
+        }
+
+        public override void spawnAt(Vector2 position)
+        {
+            base.spawnAt(position);
+            this.currentAnimation = moveAnimation;
+            this.currentAnimation.play();
+        }
+
+        public override void respawn()
+        {
+            base.respawn();
+            this.currentAnimation = moveAnimation;
+            this.currentAnimation.play();
         }
         
         public override void update(GameTime gameTime)
         {
-            if (!dashAnimation.IsPlaying)
-                dashAnimation.play();
-
             double time = gameTime.ElapsedGameTime.TotalMilliseconds;
             
             acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
             //TODO MAKE COOLER
             acceleration.Y = 0;// (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * MaxAcc;
             
-            
-            dashAnimation.update(gameTime);
+            currentAnimation.update(gameTime);
+        }
+
+        public override void startDying()
+        {
+            this.CurrState = state.Dying;
+            currentAnimation = deathAnimation;
+            currentAnimation.play();
+        }
+
+        public override void handleAnimationComplete(Actor.AnimationType t)
+        {
+            if (t == Actor.AnimationType.Death)
+            {
+                base.die();
+            }
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
-
-            batch.Begin();
-
-            if (Math.Abs(Rotation) > Math.PI / 2)
+            if (this.IsAlive)
             {
-                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
-            }
-            else
-            {
-                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
-            }
+                batch.Begin();
 
-            batch.End();
+                if (Math.Abs(Rotation) > Math.PI / 2)
+                {
+                    currentAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+                }
+                else
+                {
+                    currentAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
+                }
+
+                batch.End();
+            }
         }
     }
 }

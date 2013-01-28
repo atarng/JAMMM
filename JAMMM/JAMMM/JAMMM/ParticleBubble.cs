@@ -11,6 +11,8 @@ namespace JAMMM
     class ParticleBubble : Particle
     {
 
+        public static int type = 0;
+
         public ParticleBubble() : base()
         {
             loadContent();
@@ -19,7 +21,27 @@ namespace JAMMM
         // WARNING, TEMPORARILY SET TO DASH & Shark_Eat ANIMATION FOR TESTING
         public override void loadContent()
         {
-            this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Fish_Death"), 4, true, 0.2f);
+            Random rnd = new Random();
+            switch (type++ % 4)
+            {
+                case 0:
+                   
+                    this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Particle_Bubble_1"), 1, true, 0.2f);
+                    break;
+                case 1:
+                 
+                    this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Particle_Bubble_2"), 1, true, 0.2f);
+                    break;
+                case 2:
+                    
+                    this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Particle_Bubble_3"), 1, true, 0.2f);
+                    break;
+                default:
+               
+                    this.animation = new Animation(Actor.AnimationType.Bubble, SpriteManager.getTexture("Particle_Bubble_4"), 1, true, 0.2f);
+                    break;
+            }
+
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)

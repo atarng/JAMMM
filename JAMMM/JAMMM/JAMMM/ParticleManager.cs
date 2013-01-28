@@ -35,7 +35,7 @@ namespace JAMMM
                 bubblePool.Add(new ParticleBubble());
 
 
-            for (int i = 0; i < BUBBLE_POOL_SIZE; ++i)
+            for (int i = 0; i < BUBBLE_POOL_SIZE; i++)
                 bubblePool[i].loadContent();
 
         }
