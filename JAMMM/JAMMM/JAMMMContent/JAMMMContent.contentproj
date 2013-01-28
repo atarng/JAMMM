@@ -108,20 +108,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-    <Compile Include="Sprites\PFX_Bubble_24_24.png">
-      <Name>PFX_Bubble_24_24</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-=======
     <Compile Include="Sprites\Background.png">
       <Name>Background</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Sprites\Penguin_fat_dash_128_128.png">
       <Name>Penguin_fat_dash_128_128</Name>
       <Importer>TextureImporter</Importer>
@@ -157,22 +150,16 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
->>>>>>> 23a1922e3ff4cc8a02a4da59378fe37f9aeb45bb
     <Compile Include="Sprites\PFX_Bubble_16_16.png">
       <Name>PFX_Bubble_16_16</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-<<<<<<< HEAD
-  </ItemGroup>
-  <ItemGroup>
-=======
     <Compile Include="Sprites\PFX_Bubble_24_24.png">
       <Name>PFX_Bubble_24_24</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
->>>>>>> 23a1922e3ff4cc8a02a4da59378fe37f9aeb45bb
     <Compile Include="Sprites\PFX_Bubble_36_36.png">
       <Name>PFX_Bubble_36_36</Name>
       <Importer>TextureImporter</Importer>
@@ -183,26 +170,11 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-<<<<<<< HEAD
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Sprites\PFX_Beam.png">
-      <Name>PFX_Beam</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-=======
->>>>>>> 23a1922e3ff4cc8a02a4da59378fe37f9aeb45bb
     <Compile Include="Sprites\PFX_FireSplosion.png">
       <Name>PFX_FireSplosion</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-<<<<<<< HEAD
-  </ItemGroup>
-  <ItemGroup>
-=======
->>>>>>> 23a1922e3ff4cc8a02a4da59378fe37f9aeb45bb
     <Compile Include="Sprites\spear_move_128_48.png">
       <Name>spear_move_128_48</Name>
       <Importer>TextureImporter</Importer>
