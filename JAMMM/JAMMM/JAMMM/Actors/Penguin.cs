@@ -12,7 +12,7 @@ namespace JAMMM.Actors
     {
         public const int SHARK_CALORIES                = 100;
         public const int PENGUIN_CALORIES              = 60;
-        public const int FISH_CALORIES                 = 5;
+        public const int FISH_CALORIES                 = 15;
 
         public const int SHARK_DAMAGE                  = 100;
 
@@ -476,6 +476,9 @@ namespace JAMMM.Actors
         public override void respawn()
         {
             base.respawn();
+            this.isHit = false;
+            this.isBlink = false;
+            this.numBlinks = 0;
             this.Calories = 100;
             this.CurrState = state.Moving;
             this.currentAnimation = moveAnimation;
