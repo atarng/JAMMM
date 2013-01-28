@@ -37,8 +37,7 @@ namespace JAMMM.Actors
         {
             if (other is Spear)
             {
-                //TODO don't straight up remove
-                RemoveMe = true;
+                IsAlive = false;
             }
             else if (other is Penguin)
             {
