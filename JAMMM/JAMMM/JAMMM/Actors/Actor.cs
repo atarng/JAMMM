@@ -30,7 +30,8 @@ namespace JAMMM
             Throw,
             Turn,
             Death,
-            Bubble
+            Bubble,
+            HitSpark,
         }
 
         public enum state
@@ -59,7 +60,7 @@ namespace JAMMM
         #endregion
 
         public static bool printPhysics = true;
-
+        static protected Random rnd = new Random();
         private bool removeMe;
         public bool RemoveMe
         {

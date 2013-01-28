@@ -12,22 +12,46 @@ namespace JAMMM.Actors
     {
         //public Shark() {}
 
-
-        public Shark(float x, float y) : base(x, y, 40, 24, 100, 100)
+        public Shark(float x, float y)
+            : base(x, y, 40, 24, 20, 100)
         { }
 
         public override void processInput(){}
 
         public override void loadContent()
         {
+            // need to create the animations
+            moveAnimation = new Animation((Actor)this, AnimationType.Move,
+                SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL), 4, true);
+            deathAnimation = new Animation((Actor)this, AnimationType.Death,
+                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1, true);
             dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.3f);
             base.loadContent();
         }
 
+        public override void spawnAt(Vector2 position)
+        {
+            base.spawnAt(position);
+            this.currentAnimation = moveAnimation;
+            this.currentAnimation.play();
+        }
+
         public override void update(GameTime gameTime)
         {
-           
+            double time = gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
+            acceleration.Y = 0;// (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * MaxAcc;
+
             dashAnimation.update(gameTime);
+        }
+
+        public override void handleAnimationComplete(Actor.AnimationType t)
+        {
+            if (t == Actor.AnimationType.Death)
+            {
+                base.die();
+            }
         }
 
         /// <summary>
@@ -38,10 +62,15 @@ namespace JAMMM.Actors
             if (other is Spear)
             {
                 IsAlive = false;
+
+                AudioManager.getSound("Actor_Hit").Play();
+                Random rnd = new Random();
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark, new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)), new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f, (float)rnd.NextDouble(), -(float)rnd.NextDouble()*3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+
             }
             else if (other is Penguin)
             {
-
+                tryToEat();
             }
             else if (other is Shark)
             {
@@ -50,6 +79,11 @@ namespace JAMMM.Actors
             {
 
             }
+        }
+
+        private void tryToEat() 
+        {
+        
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
