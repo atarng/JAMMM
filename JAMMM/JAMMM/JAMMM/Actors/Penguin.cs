@@ -476,6 +476,8 @@ namespace JAMMM.Actors
         public override void respawn()
         {
             base.respawn();
+            this.Calories = 100;
+            this.CurrState = state.Moving;
             this.currentAnimation = moveAnimation;
             currentAnimation.play();
         }

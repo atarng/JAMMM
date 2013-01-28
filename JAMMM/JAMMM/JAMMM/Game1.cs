@@ -109,6 +109,8 @@ namespace JAMMM
 
         static readonly Random rng = new Random(DateTime.Now.Millisecond);
 
+        SoundEffectInstance battleTheme;
+
         //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
@@ -191,6 +193,8 @@ namespace JAMMM
 
             AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
+            AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
+            battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
             SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
@@ -445,6 +449,8 @@ namespace JAMMM
                 case (GameState.Battle):
                 {
                     // play the battle theme
+                    if (battleTheme.State != SoundState.Playing)
+                        battleTheme.Play();
 
                     // load content and spawn each player
                     foreach (Penguin p in players)
@@ -908,19 +914,19 @@ namespace JAMMM
                     spriteBatch.Begin();
 
                     // draw victory text (containing the player)
-                    if (players.Count > 0 && players[0].IsAlive)
+                    if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 1 && players[1].IsAlive)
+                    else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 2 && players[2].IsAlive)
+                    else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 3 && players[3].IsAlive)
+                    else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
                     }
