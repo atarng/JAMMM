@@ -10,35 +10,12 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        private Boolean useInput; //delete this later
-
-
         //public Shark() {}
 
-        public Shark(float x, float y, Boolean useInput) : base(x, y, 40, 24, 20, 100)
-        {
-            this.useInput = useInput;
-        }
+        public Shark(float x, float y) : base(x, y, 40, 24, 20, 100)
+        { }
 
-        public override void processInput()
-        {
-            /*
-           GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
-           if (gamePadState.IsConnected && useInput )
-           {
-               then it is connected, and we can do stuff here
-               acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
-               acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
-
-               // stop dashing
-               else if (CurrState == state.Dashing && gamePadState.IsButtonUp(Buttons.A))
-               {
-                   CurrTime = DashCooldownTime;
-                   CurrState = state.DashCooldown;
-               }
-           }
-           */
-        }
+        public override void processInput(){}
 
         public override void loadContent()
         {
@@ -48,9 +25,31 @@ namespace JAMMM.Actors
 
         public override void update(GameTime gameTime)
         {
-            //processInput();
            
             dashAnimation.update(gameTime);
+        }
+
+        /// <summary>
+        /// How the penguin collides with other actors.
+        /// </summary>
+        public override void collideWith(Actor other)
+        {
+            if (other is Spear)
+            {
+                //TODO don't straight up remove
+                RemoveMe = true;
+            }
+            else if (other is Penguin)
+            {
+
+            }
+            else if (other is Shark)
+            {
+            }
+            else if (other is Fish)
+            {
+
+            }
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)

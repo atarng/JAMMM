@@ -35,6 +35,7 @@ namespace JAMMM
 
         public enum state
         {
+            Moving,
             Dash,
             Dashing,
             DashCooldown,
@@ -58,6 +59,13 @@ namespace JAMMM
         #endregion
 
         public static bool printPhysics = true;
+
+        private bool removeMe;
+        public bool RemoveMe
+        {
+            get { return removeMe; }
+            set { removeMe = value; }
+        }
 
         private state currState;
         public state CurrState
@@ -227,6 +235,7 @@ namespace JAMMM
             this.Position = new Vector2();
             this.Velocity = new Vector2();
             this.Acceleration = new Vector2();
+            this.isAlive = false;
             rotation = 0;
         }
 
@@ -234,6 +243,8 @@ namespace JAMMM
         {
             this.isAlive = false;
         }
+
+        public virtual void startDying() {}
 
         public virtual void spawnAt(Vector2 position)
         {
