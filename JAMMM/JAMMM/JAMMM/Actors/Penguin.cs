@@ -66,6 +66,8 @@ namespace JAMMM.Actors
             set { controller = value; }
         }
 
+        private bool prevStateA = false;
+
         /// <summary>
         /// How long to blink for when we're hit.
         /// </summary>
@@ -103,13 +105,33 @@ namespace JAMMM.Actors
                 // then it is connected, and we can do stuff here
                 acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
+                
+                //Vector2 accController = Acceleration;
+                //accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
+                //accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
-                if (CurrState == state.DashReady && gamePadState.IsButtonDown(Buttons.A))
+                /*
+                if (Physics.magnitudeSquared(accController) > Physics.magnitudeSquared(Acceleration))
+                    acceleration = accController;
+                else
+                {
+                    acceleration.X = acceleration.X + accController.X;
+                    acceleration.Y = acceleration.Y + accController.Y;
+                }
+                */
+
+                if ( this.calories > DashCost && gamePadState.IsButtonDown(Buttons.A) && !prevStateA)
                 {
                     CurrState = state.Dash;
-                    CurrTime = DashTime;
+                    this.calories -= DashCost;
+                    prevStateA = true;
                     currentAnimation = dashAnimation;
                     currentAnimation.play();
+                }
+
+                if (gamePadState.IsButtonUp(Buttons.A))
+                {
+                    prevStateA = false;
                 }
                 
                 if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
@@ -133,6 +155,12 @@ namespace JAMMM.Actors
             {
                 fireTime = fireCooldown;
                 fire = true;
+            }
+
+            if (kbState.IsKeyDown(Keys.LeftShift))
+            {
+                CurrState = state.Dash;
+                CurrTime = DashTime;
             }
 
             if (kbState.IsKeyDown(Keys.W))
@@ -172,6 +200,23 @@ namespace JAMMM.Actors
 
             currentAnimation.update(delta);
             processInput();
+            if (CurrState == state.Dash)
+            {
+                if (Acceleration.Equals(Vector2.Zero))
+                    Acceleration = Physics.AngleToVector(Rotation);
+                else
+                    acceleration.Normalize();
+
+                acceleration = acceleration * MaxAccDash;
+                CurrTime = DashTime;
+                CurrState = state.Dashing;
+            }
+            else if (CurrState == state.Dashing)
+            {
+                CurrState = state.DashReady;
+            }
+
+            /*
             switch (CurrState) //deal with dash
             {
                 case state.Dash:
@@ -204,6 +249,7 @@ namespace JAMMM.Actors
                 default:
                     break;
             }
+            */
 
             if (fireTime > 0)
             {
@@ -338,8 +384,9 @@ namespace JAMMM.Actors
                 batch.DrawString(Game1.font, "Position " + Position, loc, c);
                 //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
                 batch.DrawString(Game1.font, "[>]", Bounds.center, c);
-                batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-                batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "Cal " + Calories, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
                 String s = "";
                 switch (CurrState)
                 {
@@ -357,6 +404,7 @@ namespace JAMMM.Actors
                         break;
                 }
                 batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "DashCost " + DashCost, loc += fontHeight, c);
 
                 //batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Offset " + Offset.X + " " + Offset.Y, loc += fontHeight, c);
@@ -367,11 +415,11 @@ namespace JAMMM.Actors
                     batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
                     fire = false;
                 }*/
-                //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-                //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+                batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
 
-                batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+                //batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Position " + Position, loc, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
