@@ -10,16 +10,26 @@ namespace JAMMM.Actors
 {
     public class Penguin : Actor
     {
+        public const int START_CALORIES = 100;
         public const int SMALL_SIZE_CALORIES_THRESHOLD = 1;
-        public const int MED_SIZE_CALORIES_THRESHOLD   = 200;
-        public const int MAX_SIZE_CALORIES_THRESHOLD   = 300;
+        public const int MED_SIZE_CALORIES_THRESHOLD   = 150;
+        public const int MAX_SIZE_CALORIES_THRESHOLD   = 230;
 
         public const int NUMBER_BLINKS_ON_HIT          = 5;
         public const float BLINK_DURATION              = 0.1f;
 
-        public const int SMALL_SIZE = 25;
+        public const int SMALL_SIZE = 35;
         public const int MED_SIZE = 45;
         public const int LARGE_SIZE = 60;
+
+        public const int SPEAR_SMALL_COST = 5;
+        public const int SPEAR_MED_COST = 7;
+        public const int SPEAR_LARGE_COST = 10;
+
+
+        public const int DASH_SMALL_COST = 3;
+        public const int DASH_MED_COST = 4;
+        public const int DASH_LARGE_COST = 5;
 
         public const int SMALL_MASS = 100;
         public const int MEDIUM_MASS = 500;
@@ -90,9 +100,12 @@ namespace JAMMM.Actors
             this.colorCode        = colorCode;
             this.controller       = playerIndex;
             this.startingPosition = pos;
-            this.calories         = 100;
+            this.Calories         = START_CALORIES;
             this.CurrentSize      = Size.Small;
 
+            this.DashCost         = DASH_SMALL_COST;
+            this.SpearCost        =  SPEAR_SMALL_COST;
+ 
             this.blinkTime        = 0.0f;
             this.numBlinks        = 0;
             this.isHit            = false;
@@ -148,11 +161,15 @@ namespace JAMMM.Actors
                     prevStateA = false;
                 }
                 
-                if (gamePadState.Triggers.Right == 1 && fireTime <= 0)
+                if (gamePadState.Triggers.Right == 1 && FireTime <= 0)
                 {
-                    AudioManager.getSound("Spear_Throw").Play();
-                    fireTime = fireCooldown;
-                    fire = true;
+                    if (this.Calories > this.SpearCost)
+                    {
+                        AudioManager.getSound("Spear_Throw").Play();
+                        FireTime = fireCooldown;
+                        fire = true;
+                        this.Calories -= this.SpearCost;
+                    }
                 }
                 /*
                                 // stop dashing
@@ -206,6 +223,7 @@ namespace JAMMM.Actors
             tryToGrow();
             tryToDie();
             tryToBlink(delta);
+            boundaryCheck();
 
             if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble, 
@@ -222,7 +240,7 @@ namespace JAMMM.Actors
                     Acceleration.Normalize();
 
                 //velocity = acceleration * MaxVelDash;
-                acceleration = acceleration * MaxAccDash;
+                acceleration += acceleration * MaxAccDash;
                 CurrTime     = DashTime;
                 CurrState    = state.Dashing;
 
@@ -297,6 +315,9 @@ namespace JAMMM.Actors
             {
                 this.CurrentSize = Size.Large;
 
+                this.DashCost = DASH_LARGE_COST;
+                this.SpearCost = SPEAR_LARGE_COST;
+
                 // switch animations
                 currentAnimation.stop();
                 moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
@@ -316,6 +337,9 @@ namespace JAMMM.Actors
             {
                 this.CurrentSize = Size.Medium;
 
+                this.DashCost = DASH_MED_COST;
+                this.SpearCost = SPEAR_MED_COST;
+
                 // switch animations
                 currentAnimation.stop();
                 moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
@@ -333,6 +357,9 @@ namespace JAMMM.Actors
             else if (calories >= SMALL_SIZE_CALORIES_THRESHOLD && calories < MED_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Small)
             {
                 this.CurrentSize = Size.Small;
+
+                this.DashCost = DASH_SMALL_COST;
+                this.SpearCost = SPEAR_SMALL_COST;
 
                 // switch animations
                 currentAnimation.stop();
@@ -357,6 +384,59 @@ namespace JAMMM.Actors
         {
             if (this.calories <= 0 && this.CurrState != state.Dying)
             {
+
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble() , 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 5, 1, 1 + (float)rnd.NextDouble(), 2f);
+
+
+                AudioManager.getSound("Death_Penguin").Play();
+
                 currentAnimation = deathAnimation;
                 currentAnimation.play();
                 this.CurrState = state.Dying;
@@ -409,7 +489,7 @@ namespace JAMMM.Actors
                 Color c;
 
                 if (this.isBlink)
-                    c = Color.Red;
+                    c = Color.Pink;
                 else
                     c = Color.White;
 
@@ -424,6 +504,9 @@ namespace JAMMM.Actors
                         c, SpriteEffects.None, this.Rotation, 1.0f);
                 }
 
+                c = Color.White;
+                batch.DrawString(Game1.font, "Calories: " + this.Calories, new Vector2(this.Position.X - 75, this.Position.Y + 60), c, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+
                 if (printPhysics)
                     printPhys(batch);
                 batch.End();
@@ -432,7 +515,7 @@ namespace JAMMM.Actors
 
         public void printPhys(SpriteBatch batch)
         {
-                Color c = Color.Black;
+                Color c = Color.White;
                 Vector2 loc = Position;
                 Vector2 fontHeight;
                 fontHeight.X = 0;
@@ -440,10 +523,10 @@ namespace JAMMM.Actors
 
                 //batch.DrawString(Game1.font, "Position " + Position, loc, c);
                 //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
-                batch.DrawString(Game1.font, "[>]", Bounds.center, Color.Red);
+                //batch.DrawString(Game1.font, "[>]", Bounds.center, Color.Red);
                 //batch.DrawString(Game1.font, "Cal " + Calories, loc += fontHeight, c);
-                batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-                batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+                //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
                 String s = "";
                 switch (CurrState)
                 {
@@ -460,7 +543,7 @@ namespace JAMMM.Actors
                         s = "dashready";
                         break;
                 }
-                batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
+               // batch.DrawString(Game1.font, "Dash " + s, loc += fontHeight, c);
                // batch.DrawString(Game1.font, "DashCost " + DashCost, loc += fontHeight, c);
 
                 //batch.DrawString(Game1.font, "Bounds " + Bounds.Center, loc += fontHeight, c);
@@ -470,14 +553,14 @@ namespace JAMMM.Actors
                 /*if (fire)
                 {
                     batch.DrawString(Game1.font, "FIRE", loc += fontHeight, c);
-                    fire = false;
+                    fire = false;f
                 }*/
                // batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
                // batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c);
 
                 //batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
-                //batch.DrawString(Game1.font, "Position " + Position, loc, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
@@ -500,7 +583,7 @@ namespace JAMMM.Actors
             this.isHit = false;
             this.isBlink = false;
             this.numBlinks = 0;
-            this.Calories = 100;
+            this.Calories = START_CALORIES;
             this.CurrState = state.Moving;
             this.currentAnimation = moveAnimation;
             currentAnimation.play();
@@ -523,6 +606,9 @@ namespace JAMMM.Actors
         {
             if (other is Spear)
             {
+                //Set delay so we can't immediately fire a spear after being hit
+                this.FireTime = fireCooldown * 1.5f;
+                this.Fire = false;
                 // take damage based on the spear's owner's size
                 if (other.CurrentSize == Size.Large)
                 {
@@ -578,6 +664,29 @@ namespace JAMMM.Actors
                 {
                     if (CurrState != state.Dying)
                     {
+                        ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                            new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                            new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                            (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                        ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                            new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                            new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                            (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                        ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                            new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                            new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                            (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                        ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                            new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                            new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                            (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                        ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                            new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                            new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                            (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+
+                        AudioManager.getSound("Actor_Hit").Play();
+
                         this.calories -= SHARK_DAMAGE;
 
                         if (this.calories <= 0)
@@ -594,6 +703,20 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
+
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+
                 }
             }
         }

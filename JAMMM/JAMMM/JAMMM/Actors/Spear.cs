@@ -28,9 +28,10 @@ namespace JAMMM.Actors
         public Spear(float x, float y, Size s, int id)
             : base(x, y, 0, 24, 20, 100)
         {
-            MaxVel = 500;
+            MaxVelDash = 500;
             this.CurrentSize = s;
             this.id = id;
+            CurrState = state.Dashing;
         }
 
         public override void loadContent()
@@ -75,8 +76,8 @@ namespace JAMMM.Actors
             //batch.DrawString(Game1.font, "Position " + Position, loc, c);
             //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
             //batch.DrawString(Game1.font, "[>]", Bounds.center, c);
-            //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-            //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+            batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
 
             //batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
         }
