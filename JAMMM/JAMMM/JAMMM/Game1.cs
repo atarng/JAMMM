@@ -30,6 +30,7 @@ namespace JAMMM
         private SpriteBatch spriteBatch;
         private Texture2D playerPenguin;
         private Texture2D background;
+        private Texture2D title;
         private Rectangle playerPenguinRectangle;
         private Rectangle screenRectangle;
 
@@ -39,6 +40,7 @@ namespace JAMMM
                         player4StartPosition;
 
         private Vector2 titlePosition;
+ 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
         private const string player1Text = "Player 1";
@@ -127,14 +129,6 @@ namespace JAMMM
             sharkPool = new List<Shark>();
             spears    = new List<Spear>();
 
-            //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
-            //    sharkPool.Add(new Shark());
-            //sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
-            //sharkPool.Add(new Shark(300, 300));
-
-            //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
-            //testAct = new Actor(100, 200, 10, 10, 10);
-
             players = new List<Penguin>();
 
             collisions = new Dictionary<Actor, Actor>();
@@ -194,6 +188,7 @@ namespace JAMMM
             font = Content.Load<SpriteFont>("Peric");
             playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
             background = Content.Load<Texture2D>("Sprites/Background");
+            title = Content.Load<Texture2D>("Sprites/title");
 
             AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_5"));
             AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
@@ -823,7 +818,9 @@ namespace JAMMM
                     spriteBatch.Begin();
 
                     // draw the title
-                    spriteBatch.DrawString(font, titleText, titlePosition, Color.WhiteSmoke);
+                    spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
+                    spriteBatch.Draw(title, titlePosition, Color.White);
+                    //spriteBatch.DrawString(font, titleText, titlePosition, Color.WhiteSmoke);
 
                     // draw a penguin for each connected controller
                     if (isPlayer1Connected)

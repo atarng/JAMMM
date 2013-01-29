@@ -239,6 +239,158 @@
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sprites\Penguin_fat_dash_128_128_g.png">
+      <Name>Penguin_fat_dash_128_128_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_fat_dash_128_128_p.png">
+      <Name>Penguin_fat_dash_128_128_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_fat_dash_128_128_r.png">
+      <Name>Penguin_fat_dash_128_128_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_dead_128_128_g.png">
+      <Name>penguin_fat_dead_128_128_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_dead_128_128_p.png">
+      <Name>penguin_fat_dead_128_128_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_dead_128_128_r.png">
+      <Name>penguin_fat_dead_128_128_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_swim_32_32_g.png">
+      <Name>penguin_fat_swim_32_32_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_swim_32_32_p.png">
+      <Name>penguin_fat_swim_32_32_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_fat_swim_32_32_r.png">
+      <Name>penguin_fat_swim_32_32_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_med_dash_96_96_g.png">
+      <Name>Penguin_med_dash_96_96_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_med_dash_96_96_p.png">
+      <Name>Penguin_med_dash_96_96_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_med_dash_96_96_r.png">
+      <Name>Penguin_med_dash_96_96_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_dead_96_96_g.png">
+      <Name>penguin_med_dead_96_96_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_dead_96_96_p.png">
+      <Name>penguin_med_dead_96_96_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_dead_96_96_r.png">
+      <Name>penguin_med_dead_96_96_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_swim_24_24_g.png">
+      <Name>penguin_med_swim_24_24_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_swim_24_24_p.png">
+      <Name>penguin_med_swim_24_24_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_med_swim_24_24_r.png">
+      <Name>penguin_med_swim_24_24_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dash_64_64_g.png">
+      <Name>penguin_small_dash_64_64_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dash_64_64_p.png">
+      <Name>penguin_small_dash_64_64_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dash_64_64_r.png">
+      <Name>penguin_small_dash_64_64_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dead_64_64_g.png">
+      <Name>penguin_small_dead_64_64_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dead_64_64_p.png">
+      <Name>penguin_small_dead_64_64_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_dead_64_64_r.png">
+      <Name>penguin_small_dead_64_64_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_Small_Image_g.png">
+      <Name>Penguin_Small_Image_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_Small_Image_p.png">
+      <Name>Penguin_Small_Image_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\Penguin_Small_Image_r.png">
+      <Name>Penguin_Small_Image_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_swim_18_16_g.png">
+      <Name>penguin_small_swim_18_16_g</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_swim_18_16_p.png">
+      <Name>penguin_small_swim_18_16_p</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Sprites\penguin_small_swim_18_16_r.png">
+      <Name>penguin_small_swim_18_16_r</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

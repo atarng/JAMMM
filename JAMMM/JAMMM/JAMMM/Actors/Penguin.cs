@@ -397,13 +397,9 @@ namespace JAMMM.Actors
                 Color c;
 
                 if (this.isBlink)
-                {
                     c = Color.Red;
-                }
                 else
-                {
                     c = Color.White;
-                }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                 {
