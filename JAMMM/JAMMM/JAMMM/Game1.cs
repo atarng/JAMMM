@@ -214,6 +214,7 @@ namespace JAMMM
             AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
+            AudioManager.addSound("Death_Penguin", Content.Load<SoundEffect>("Sounds/death_penguin"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
             AudioManager.addSound("Ready_Sound", Content.Load<SoundEffect>("Sounds/ready"));
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
@@ -875,6 +876,7 @@ namespace JAMMM
                     players.Add(new Penguin(PlayerIndex.Two, player2StartPosition, "_r"));
                     isPlayer2Connected = true;
                 }
+                
             }
             if (!isPlayer3Connected)
             {
@@ -909,7 +911,7 @@ namespace JAMMM
             }
             if (isPlayer2Connected && !isPlayer2Ready)
             {
-                if (GamePad.GetState(PlayerIndex.Two).IsButtonDown(Buttons.A))
+                if (GamePad.GetState(PlayerIndex.Two).IsButtonDown(Buttons.A) || Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
                     isPlayer2Ready = true;
                     AudioManager.getSound("Ready_Sound").Play();
