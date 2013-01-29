@@ -10,16 +10,6 @@ namespace JAMMM.Actors
 {
     public class Penguin : Actor
     {
-        public const int SHARK_CALORIES                = 100;
-        public const int PENGUIN_CALORIES              = 60;
-        public const int FISH_CALORIES                 = 15;
-
-        public const int SHARK_DAMAGE                  = 100;
-
-        public const int SPEAR_SMALL_DAMAGE            = 20;
-        public const int SPEAR_MED_DAMAGE              = 40;
-        public const int SPEAR_MAX_DAMAGE              = 60;
-
         public const int SMALL_SIZE_CALORIES_THRESHOLD = 1;
         public const int MED_SIZE_CALORIES_THRESHOLD   = 200;
         public const int MAX_SIZE_CALORIES_THRESHOLD   = 300;
@@ -30,6 +20,10 @@ namespace JAMMM.Actors
         public const int SMALL_SIZE = 25;
         public const int MED_SIZE = 45;
         public const int LARGE_SIZE = 60;
+
+        public const int SMALL_MASS = 100;
+        public const int MEDIUM_MASS = 500;
+        public const int LARGE_MASS = 1500;
 
         public const float fireCooldown                = 0.5F;
         //Change Dash Constants in Actor Contructor!
@@ -89,7 +83,7 @@ namespace JAMMM.Actors
         /// <param name="pos"></param>
         public Penguin(PlayerIndex playerIndex, Vector2 pos) 
             // going to need better values for the base
-            : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, 100)
+            : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
             this.controller       = playerIndex;
             this.startingPosition = pos;
@@ -118,6 +112,14 @@ namespace JAMMM.Actors
                 accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
+                //if the acceleration is > max acc (means we were dashing)
+                if (!(CurrState == state.Dashing &&
+                    (Vector2.Normalize(accController) == Vector2.Normalize(Acceleration) || Vector2.Zero == accController)))
+                {
+                    Acceleration = accController;
+                }
+
+                /*
                 //if controller acc is greater than old acc, set it to controller acc
                 if (Physics.magnitudeSquared(accController) >= Physics.magnitudeSquared(Acceleration))
                     Acceleration = accController;
@@ -126,6 +128,7 @@ namespace JAMMM.Actors
                     if( accController != Vector2.Zero )
                         Acceleration = Vector2.Normalize(accController) * (float)Math.Sqrt(Physics.magnitudeSquared(Acceleration));
                 }
+                */
 
                 if ( this.calories > DashCost && gamePadState.IsButtonDown(Buttons.A) && !prevStateA)
                 {
@@ -137,7 +140,7 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Actor_Dash").Play();
                 }
 
-                if (gamePadState.IsButtonUp(Buttons.A))
+                if (gamePadState.IsButtonUp(Buttons.A) && CurrState == state.DashReady)
                 {
                     prevStateA = false;
                 }
@@ -187,9 +190,9 @@ namespace JAMMM.Actors
             moveAnimation = new Animation((Actor)this, AnimationType.Move, 
                 SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL), 4, true);
             dashAnimation = new Animation((Actor)this, AnimationType.Dash,
-                SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL), 1, true);
+                SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL), 1, false);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
-                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1, true);
+                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1, false);
         }
 
         public override void update(GameTime delta)
@@ -300,6 +303,8 @@ namespace JAMMM.Actors
 
                 this.Bounds.Radius = LARGE_SIZE;
 
+                this.Mass = LARGE_MASS;
+
                 return;
 
             }
@@ -317,6 +322,8 @@ namespace JAMMM.Actors
 
                 this.Bounds.Radius = MED_SIZE;
 
+                this.Mass = MEDIUM_MASS;
+
                 return;
             }
             // switch to small
@@ -333,6 +340,8 @@ namespace JAMMM.Actors
 
                 this.Bounds.Radius = SMALL_SIZE;
 
+                this.Mass = SMALL_MASS;
+
                 return;
             }
         }
@@ -343,7 +352,7 @@ namespace JAMMM.Actors
         /// </summary>
         private void tryToDie()
         {
-            if (this.calories <= 0)
+            if (this.calories <= 0 && this.CurrState != state.Dying)
             {
                 currentAnimation = deathAnimation;
                 currentAnimation.play();
@@ -500,7 +509,8 @@ namespace JAMMM.Actors
         /// </summary>
         public override void handleAnimationComplete(AnimationType t) 
         {
-
+            if (t == AnimationType.Death)
+                this.die();
         }
 
         /// <summary>
@@ -561,10 +571,17 @@ namespace JAMMM.Actors
                     other.die();
                 }
                 // take damage
-                else
+                else if (other.CurrState == state.Dashing)
                 {
-                    this.calories -= SHARK_DAMAGE;
-                    this.isHit = true;
+                    if (CurrState != state.Dying)
+                    {
+                        this.calories -= SHARK_DAMAGE;
+
+                        if (this.calories <= 0)
+                            ((Shark)other).Calories += this.calories;
+
+                        this.isHit = true;
+                    }
                 }
             }
             else if (other is Fish)

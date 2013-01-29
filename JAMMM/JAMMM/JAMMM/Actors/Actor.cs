@@ -18,6 +18,16 @@ namespace JAMMM
     /// </summary>
     public class Actor
     {
+        public const int SPEAR_SMALL_DAMAGE = 20;
+        public const int SPEAR_MED_DAMAGE = 40;
+        public const int SPEAR_MAX_DAMAGE = 60;
+
+        public const int SHARK_CALORIES = 100;
+        public const int PENGUIN_CALORIES = 60;
+        public const int FISH_CALORIES = 15;
+
+        public const int SHARK_DAMAGE = 100;
+
         /// <summary>
         /// Actors use this enum to determine which animation 
         /// is which handleAnimationComplete.
@@ -37,11 +47,13 @@ namespace JAMMM
         public enum state
         {
             Moving,
+            Turning,
             Dash,
             Dashing,
             DashCooldown,
             DashReady,
-            Dying
+            Dying,
+            Pursuing
         }
 
         /// <summary>
@@ -59,7 +71,7 @@ namespace JAMMM
         protected Animation turnAnimation;
         #endregion
 
-        public static bool printPhysics = true;
+        public static bool printPhysics = false;
         static protected Random rnd = new Random();
         private bool removeMe;
         public bool RemoveMe
@@ -175,6 +187,7 @@ namespace JAMMM
             get { return currTime; }
             set { currTime = value; }
         }
+        
         /// <summary>
         /// rotation in radians
         /// </summary>
@@ -282,7 +295,7 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 1000;
+            this.MaxAccDash = 400;
             this.MaxVel = 200;
             this.MaxVelDash = 400;
             this.dashTime = 1;

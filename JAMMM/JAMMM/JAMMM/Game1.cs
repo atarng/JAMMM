@@ -72,8 +72,16 @@ namespace JAMMM
         public const string FISH_SWIM = "Fish_Swim";
         public const string FISH_DEATH = "Fish_Death";
 
+        public const string SHARK_SWIM = "Shark_Swim";
+        public const string SHARK_EAT = "Shark_Eat";
+        public const string SHARK_TURN = "Shark_Turn";
+        public const string SHARK_DEATH = "Shark_Death";
+
         private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 2;
+
+        private const float SHARK_ATTACK_THRESHOLD = 300;
+        private const float SHARK_AGGRESS_THRESHOLD = 600;
 
         private Dictionary<Actor, Actor> collisions;
 
@@ -151,10 +159,10 @@ namespace JAMMM
 
             screenRectangle = new Rectangle(0, 0, width, height);
 
-            player1StartPosition = new Vector2(width * 0.2f, height * 0.5f);
-            player2StartPosition = new Vector2(width * 0.4f, height * 0.5f);
-            player3StartPosition = new Vector2(width * 0.6f, height * 0.5f);
-            player4StartPosition = new Vector2(width * 0.8f, height * 0.5f);
+            player1StartPosition = new Vector2(width * 0.05f, height * 0.05f);
+            player2StartPosition = new Vector2(width * 0.05f, height * 0.85f);
+            player3StartPosition = new Vector2(width * 0.9f, height * 0.05f);
+            player4StartPosition = new Vector2(width * 0.9f, height * 0.85f);
         }
 
         /// <summary>
@@ -172,6 +180,12 @@ namespace JAMMM
             {
                 fishPool.Add(new Fish((screenRectangle.Width / FISH_POOL_SIZE) * i,
                                       (screenRectangle.Height / FISH_POOL_SIZE) * i));
+            }
+
+            // set initial shark position
+            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+            {
+                sharkPool.Add(new Shark(0.0f, 0.0f));
             }
 
             base.Initialize();          
@@ -198,10 +212,10 @@ namespace JAMMM
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
-            SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
-            SpriteManager.addTexture("Shark_Eat", Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
-            SpriteManager.addTexture("Shark_Turn", Content.Load<Texture2D>("Sprites/Shark_Turn_80_48"));
-            SpriteManager.addTexture("Shark_Death", Content.Load<Texture2D>("Sprites/Shark_Death_80_48"));
+            SpriteManager.addTexture(SHARK_SWIM, Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
+            SpriteManager.addTexture(SHARK_EAT, Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
+            SpriteManager.addTexture(SHARK_TURN, Content.Load<Texture2D>("Sprites/Shark_Turn_80_48"));
+            SpriteManager.addTexture(SHARK_DEATH, Content.Load<Texture2D>("Sprites/Shark_Death_80_48"));
 
             SpriteManager.addTexture(FISH_SWIM, Content.Load<Texture2D>("Sprites/Fish_Swim_16_16_Loop"));
             SpriteManager.addTexture(FISH_DEATH, Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));
@@ -261,13 +275,13 @@ namespace JAMMM
                 (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player1StartPosition.Y + playerPenguin.Height + 5.0f);
             player2ReadyTextPosition = new Vector2(player2StartPosition.X +
-                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player2StartPosition.Y + playerPenguin.Height + 5.0f);
             player3ReadyTextPosition = new Vector2(player3StartPosition.X +
-                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player3StartPosition.Y + playerPenguin.Height + 5.0f);
             player4ReadyTextPosition = new Vector2(player4StartPosition.X +
-                (playerPenguin.Width) - font.MeasureString(readyText).X / 2.0f,
+                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player4StartPosition.Y + playerPenguin.Height + 5.0f);
 
             // set the victory text positions
@@ -466,6 +480,9 @@ namespace JAMMM
                         p.respawn();
 
                     // spawn some sharkies
+                    foreach (Shark s in sharkPool)
+                        s.spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                              (float)(rng.NextDouble() * (double)screenRectangle.Height)));
 
                     break;
                 }
@@ -524,7 +541,7 @@ namespace JAMMM
                 }
                 case (GameState.Battle):
                 {
-                    // do regular game logic updating
+                    // do regular game logic updating each player
                     for( int i = 0; i < players.Count; i++ )
                     {
                         players[i].update(gameTime);
@@ -532,38 +549,41 @@ namespace JAMMM
                         trySpear(players[i], i);
                     }
 
-
-                    // TODO: Add your update logic here
-                    if (true)
+                    // for each fishy, check if was alive last frame and is dead this one
+                    // if that is the case, spawn a new fishy
+                    foreach (Fish f in fishPool)
                     {
-                        for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                        {
-                            fishPool[i].update(gameTime);
-                            Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                        f.update(gameTime);
+                        Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
-                            if (!fishPool[i].IsAlive)
-                            {
-                                fishPool[i].spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
-                                                                (float)(rng.NextDouble() * (double)screenRectangle.Height)));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Flock(fishPool, gameTime);
-                        for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                        if (!f.IsAlive)
                         {
-                            fishPool[i].update(gameTime);
-                            Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                            f.spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                                  (float)(rng.NextDouble() * (double)screenRectangle.Height)));
                         }
                     }
 
+                    // do the same logic for the fishy for the sharks
                     foreach (Shark s in sharkPool)
                     {
                         s.update(gameTime);
+
+                        if (s.CurrState != Actor.state.Dying)
+                        {
+                            tryToAggressTowardPlayers(s);
+                            tryToAttackPlayers(s);
+                        }
+
                         Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                        if (!s.IsAlive)
+                        {
+                            s.spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                                  (float)(rng.NextDouble() * (double)screenRectangle.Height)));
+                        }
                     }
 
+                    // update the onscreen spears
                     for (int i = 0; i < spears.Count; i++)
                     {
                         Spear spear = spears[i];
@@ -576,18 +596,11 @@ namespace JAMMM
                         }
                     }
 
+                    // do collision detection and resolution
                     doCollisions();
 
+                    // update particles
                     ParticleManager.Instance.update(gameTime);
-                    
-                    // for each fishy, check if was alive last frame and is dead this one
-                    // if that is the case, spawn a new fishy
-
-                    // do the same logic for the fishy for the sharks
-
-                    // update the onscreen spears
-
-                    // update any additional effects and stuff that needs it
 
                     // check if there is only 1 player left. if so, end the game
                     TryToEndGame();
@@ -605,6 +618,80 @@ namespace JAMMM
             }
 
             base.Update(gameTime);
+        }
+
+        private void tryToAggressTowardPlayers(Shark s)
+        {
+            float minDist = 10000.0f;
+            float currDist = 0.0f;
+            Vector2 nearestPosition = Vector2.Zero;
+            Vector2 distance = Vector2.Zero;
+            Vector2 vecTowardNearest = Vector2.Zero;
+
+            foreach (Penguin p in players)
+            {
+                if (!p.IsAlive)
+                    continue;
+
+                distance.X = p.Position.X - s.Position.X;
+                distance.Y = p.Position.Y - s.Position.Y;
+
+                currDist = distance.Length();
+
+                if (currDist < minDist)
+                {
+                    minDist = currDist;
+                    nearestPosition = p.Position;
+                    vecTowardNearest = distance;
+                }
+            }
+
+            // try to aggress toward the nearest player
+            if (minDist <= SHARK_AGGRESS_THRESHOLD 
+                && minDist > SHARK_ATTACK_THRESHOLD)
+            {
+                s.CurrState = Actor.state.Pursuing;
+                s.acceleration = vecTowardNearest;
+            }
+            else if (minDist > SHARK_AGGRESS_THRESHOLD)
+            {
+                s.CurrState = Actor.state.Moving;
+            }
+        }
+
+        private void tryToAttackPlayers(Shark s)
+        {
+            float minDist = 10000.0f;
+            float currDist = 0.0f;
+            Vector2 nearestPosition = Vector2.Zero;
+            Vector2 distance = Vector2.Zero;
+            Vector2 vecTowardNearest = Vector2.Zero;
+
+            foreach (Penguin p in players)
+            {
+                if (!p.IsAlive)
+                    continue;
+
+                distance.X = p.Position.X - s.Position.X;
+                distance.Y = p.Position.Y - s.Position.Y;
+
+                currDist = distance.Length();
+
+                if (currDist < minDist)
+                {
+                    minDist = currDist;
+                    nearestPosition = p.Position;
+                    vecTowardNearest = distance;
+                }
+            }
+
+            // try to aggress toward the nearest player
+            if (minDist <= SHARK_ATTACK_THRESHOLD 
+                && s.CurrState != Actor.state.Dashing 
+                && s.CurrState != Actor.state.Dash)
+            {
+                s.CurrState = Actor.state.Dash;
+            }
         }
 
         /// <summary>
@@ -652,13 +739,17 @@ namespace JAMMM
             {
                 for (int j = 0; j < sharkPool.Count; j++)
                 {
-                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) && spears[i].IsAlive && sharkPool[j].IsAlive)
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) && 
+                        spears[i].IsAlive && sharkPool[j].IsAlive &&
+                        !collisions.ContainsKey(spears[i]))
                         collisions.Add(spears[i], sharkPool[j]);
                 }
 
                 for (int j = 0; j < players.Count; j++)
                 {
-                    if (spears[i].bounds.isCollision(players[j].Bounds) && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id )
+                    if (spears[i].bounds.isCollision(players[j].Bounds) 
+                        && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id  &&
+                        !collisions.ContainsKey(spears[i]))
                         collisions.Add(spears[i], players[j]);
                 }
             }
@@ -668,8 +759,21 @@ namespace JAMMM
                 for (int j = 0; j < players.Count; ++j)
                 {
                     if (fishPool[i].Bounds.isCollision(players[j].Bounds) 
-                        && (fishPool[i].CurrState != Actor.state.Dying) && (fishPool[i].IsAlive) && players[j].IsAlive)
+                        && (fishPool[i].CurrState != Actor.state.Dying) && 
+                        (fishPool[i].IsAlive) && players[j].IsAlive &&
+                        !collisions.ContainsKey(fishPool[i]))
                         collisions.Add(fishPool[i], players[j]);
+                }
+            }
+
+            for (int i = 0; i < sharkPool.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (sharkPool[i].Bounds.isCollision(players[j].Bounds)
+                        && (sharkPool[i].IsAlive) && players[j].IsAlive &&
+                        !collisions.ContainsKey(sharkPool[i]))
+                        collisions.Add(sharkPool[i], players[j]);
                 }
             }
 
@@ -683,7 +787,16 @@ namespace JAMMM
                 b.collideWith(a);
 
                 if (a is Penguin && b is Penguin)
-                    Physics.collide(collisions[keyList[i]], keyList[i]);
+                {
+                    Physics.separate(a, b);
+                    Physics.collide(a, b);
+                }
+                else if (a is Penguin && b is Shark ||
+                         a is Shark && b is Penguin)
+                {
+                    Physics.separate(a, b);
+                    Physics.collide(a, b);
+                }
             }
         }
 
@@ -838,13 +951,13 @@ namespace JAMMM
 
                     // draw a green ready text for each readied player
                     if (isPlayer1Ready)
-                        spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Gold);
+                        spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
                     if (isPlayer2Ready)
-                        spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Gold);
+                        spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
                     if (isPlayer3Ready)
-                        spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Gold);
+                        spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
                     if (isPlayer4Ready)
-                        spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Gold);
+                        spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
 
                     spriteBatch.End();
 

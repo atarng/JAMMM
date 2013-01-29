@@ -18,7 +18,7 @@ namespace JAMMM
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
         private const float smallForce = 5;
-        private const float accDecay = 0.95F; //1 is no decay
+        private const float accDecay = 0.985F; //1 is no decay
         //private static Vector2 smallForce = new Vector2(50,50);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
@@ -38,6 +38,34 @@ namespace JAMMM
 
             Vector2[] res = { va, vb };
             return res;
+        }
+
+        public static void separate(Actor a, Actor b)
+        {
+            float iDepth = a.Bounds.intersectionDepth(b.Bounds);
+
+            Vector2 aVel = a.velocity;
+            float aLen = aVel.Length();
+
+            Vector2 bVel = b.velocity;
+            float bLen = bVel.Length();
+
+            // actor A is moving faster than actor B
+            if (aLen > bLen)
+            {
+                Vector2 velNorm = aVel;
+                velNorm.Normalize();
+
+                a.Position -= velNorm * iDepth;
+            }
+            // actor B is moving faster than actor A
+            else
+            {
+                Vector2 velNorm = bVel;
+                velNorm.Normalize();
+
+                b.Position -= velNorm * iDepth;
+            }
         }
 
         public static void applyMovement(Actor a, float delta, Boolean applyFric )
@@ -174,7 +202,6 @@ namespace JAMMM
         {
             return v.X * v.X + v.Y * v.Y;
         }
-
     }
 
     public class Circle
@@ -200,6 +227,20 @@ namespace JAMMM
         {
             this.Radius = radius;
             Center = new Vector2(x, y);
+        }
+
+        public float intersectionDepth(Circle other)
+        {
+            float dx = center.X - other.center.X;
+            float dy = center.Y - other.center.Y;
+
+            Vector2 result = new Vector2(dx, dy);
+
+            float distanceBetweenCenters = result.Length();
+
+            float intersectionDepth = this.Radius + other.Radius - distanceBetweenCenters;
+
+            return intersectionDepth;
         }
 
         public Boolean isCollision( Circle a )

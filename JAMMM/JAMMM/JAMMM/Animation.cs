@@ -161,6 +161,11 @@ namespace JAMMM
         {
             this.isPlaying  = false;
             this.frameTime   = 0.0f;
+            reset();
+        }
+
+        public void reset()
+        {
             this.frameIndex = 0;
         }
 
@@ -196,6 +201,7 @@ namespace JAMMM
                         stop();
                         
                         owner.handleAnimationComplete(this.animationType);
+                        return;
                     }
                 }
 

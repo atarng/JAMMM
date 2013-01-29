@@ -10,55 +10,153 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        public Shark(float x, float y) : base(x, y, 40, 24, 100, 100)
-        { }
+        private int calories;
+        public int Calories
+        {
+            get { return calories; }
+            set { calories = value; }
+        }
 
-        public override void processInput(){}
+        private float blinkTime;
+        private float numBlinks;
+        private bool isHit;
+        private bool isBlink;
+        public const int NUMBER_BLINKS_ON_HIT = 3;
+        public const float BLINK_DURATION = 0.1f;
+
+        public Shark(float x, float y) 
+            : base(x, y, 40, 24, 44, 1500)
+        {
+            this.MaxAccDash = 800;
+            this.calories = 100;
+        }
 
         public override void loadContent()
         {
-            // need to create the animations
             moveAnimation = new Animation((Actor)this, AnimationType.Move,
-                SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL), 4, true);
+                SpriteManager.getTexture(Game1.SHARK_SWIM), 2, true, 0.2f);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
-                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1, true);
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Shark_Eat"), 4, true, 0.3f);
-            base.loadContent();
+                SpriteManager.getTexture(Game1.SHARK_DEATH), 3, false, 0.3f);
+            dashAnimation = new Animation((Actor)this, AnimationType.Dash, 
+                SpriteManager.getTexture(Game1.SHARK_EAT), 4, false, 0.3f);
+            turnAnimation = new Animation((Actor)this, AnimationType.Turn, 
+                SpriteManager.getTexture(Game1.SHARK_TURN), 3, false, 0.2f);
+        }
+
+        private void tryToBlink(GameTime gameTime)
+        {
+            if (this.isHit)
+            {
+                this.blinkTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (this.blinkTime > BLINK_DURATION)
+                {
+                    this.blinkTime -= BLINK_DURATION;
+
+                    // switch to blinking off
+                    if (isBlink)
+                    {
+                        this.isBlink = false;
+                    }
+                    // switch to blinking on 
+                    else
+                    {
+                        this.isBlink = true;
+                        this.numBlinks++;
+
+                        // end the blink animation if we surpassed the maximum
+                        // number of blinks
+                        if (this.numBlinks > NUMBER_BLINKS_ON_HIT)
+                        {
+                            this.isHit = false;
+                            this.isBlink = false;
+                            this.blinkTime = 0.0f;
+                            this.numBlinks = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void tryToDie()
+        {
+            if (this.calories <= 0 && this.CurrState != state.Dying)
+            {
+                currentAnimation = deathAnimation;
+                currentAnimation.play();
+                this.CurrState = state.Dying;
+            }
         }
 
         public override void spawnAt(Vector2 position)
         {
             base.spawnAt(position);
+            this.calories = 100;
             this.currentAnimation = moveAnimation;
             this.currentAnimation.play();
+            this.CurrState = state.Moving;
+            this.isHit = false;
+            this.isBlink = false;
+            this.numBlinks = 0;
         }
 
         public override void update(GameTime gameTime)
         {
             double time = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * MaxAcc;
-            acceleration.Y = 0;// (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * MaxAcc;
+            tryToBlink(gameTime);
+            tryToDie();
 
-            dashAnimation.update(gameTime);
+            if (this.CurrState == state.Moving || this.CurrState == state.Turning)
+            {
+                acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 0.5) * MaxAcc;
+                acceleration.Y = 0;
+            }
+            else if (CurrState == state.Dash)
+            {
+                acceleration.Normalize();
+                acceleration = acceleration * MaxAccDash;
+                CurrTime = DashTime;
+                this.CurrState = state.Dashing;
+
+                currentAnimation = dashAnimation;
+                currentAnimation.play();
+            }
+            else if (CurrState == state.Dashing)
+            {
+                CurrTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (CurrTime <= 0)
+                {
+                    this.CurrState = state.Moving;
+                    currentAnimation = moveAnimation;
+                    currentAnimation.play();
+                }
+            }
+
+            currentAnimation.update(gameTime);
         }
 
         public override void handleAnimationComplete(Actor.AnimationType t)
         {
-            if (t == Actor.AnimationType.Death)
+            if (t == Actor.AnimationType.Dash ||
+                t == Actor.AnimationType.Turn)
             {
-                base.die();
+                this.CurrState = state.Moving;
+                currentAnimation = moveAnimation;
+                currentAnimation.play();
             }
         }
 
-        /// <summary>
-        /// How the penguin collides with other actors.
-        /// </summary>
         public override void collideWith(Actor other)
         {
             if (other is Spear)
             {
-                IsAlive = false;
+                if (other.CurrentSize == Size.Small)
+                    this.calories -= SPEAR_SMALL_DAMAGE;
+                else if (other.CurrentSize == Size.Medium)
+                    this.calories -= SPEAR_MED_DAMAGE;
+                else
+                    this.calories -= SPEAR_MAX_DAMAGE;
 
                 AudioManager.getSound("Actor_Hit").Play();
                 Random rnd = new Random();
@@ -67,30 +165,43 @@ namespace JAMMM.Actors
                     new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f, 
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble()*3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
 
-            }
-            else if (other is Penguin)
-            {
-                tryToEat();
-            }
-            else if (other is Shark)
-            {
+
+                this.isHit = true;
+                this.blinkTime = 0.0f;
+                this.numBlinks = 0;
             }
             else if (other is Fish)
             {
-
+                if (other.CurrState == state.Moving)
+                {
+                    AudioManager.getSound("Fish_Eat").Play();
+                    this.calories += FISH_CALORIES;
+                    other.startDying();
+                }
             }
-        }
-
-        private void tryToEat() 
-        {
-        
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
             batch.Begin();
 
-            dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
+            Color healthColor;
+
+            if (this.Calories < 50 || this.isBlink)
+                healthColor = Color.Red;
+            else
+                healthColor = Color.White;
+
+            if (Math.Abs(Rotation) > Math.PI / 2)
+            {
+                currentAnimation.draw(batch, this.Position,
+                    healthColor, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+            }
+            else
+            {
+                currentAnimation.draw(batch, this.Position,
+                    healthColor, SpriteEffects.None, this.Rotation, 1.0f);
+            }
 
             if (printPhysics)
             {
