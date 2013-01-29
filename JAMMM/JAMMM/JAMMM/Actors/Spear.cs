@@ -17,6 +17,7 @@ namespace JAMMM.Actors
         //    MaxVel = 500;
         //}
 
+
         private int id;
         public int Id
         {
@@ -40,18 +41,27 @@ namespace JAMMM.Actors
 
         public override void update(GameTime delta)
         {
-             base.update(delta);
-             double time = delta.ElapsedGameTime.TotalMilliseconds;
+            if (this.IsAlive)
+            {
+                base.update(delta);
+                double time = delta.ElapsedGameTime.TotalMilliseconds;
+            }
+             if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
+                 ParticleManager.Instance.createParticle(ParticleType.Bubble, new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+
         }
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
-            batch.Begin();
+            if (IsAlive)
+            {
+                batch.Begin();
 
-            dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
-            if (printPhysics)
-                printPhys(batch);
-            batch.End();
+                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+                if (printPhysics)
+                    printPhys(batch);
+                batch.End();
+            }
         }
 
         public void printPhys(SpriteBatch batch)
@@ -64,11 +74,11 @@ namespace JAMMM.Actors
 
             //batch.DrawString(Game1.font, "Position " + Position, loc, c);
             //batch.DrawString(Game1.font, "Center " + Bounds.Center, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "[>]", Bounds.center, c);
-            batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
-            batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "[>]", Bounds.center, c);
+            //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
+            //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
 
-            batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
         }
 
         /// <summary>

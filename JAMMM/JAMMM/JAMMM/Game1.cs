@@ -63,6 +63,10 @@ namespace JAMMM
         public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
         public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
 
+        //public const string PENGUIN_DEATH_SMALL = "Penguin_Death_Small";
+        //public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
+        //public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
+
         public const string FISH_SWIM = "Fish_Swim";
         public const string FISH_DEATH = "Fish_Death";
 
@@ -97,10 +101,19 @@ namespace JAMMM
                         player3CalorieTextPosition,
                         player4CalorieTextPosition;
 
+        private Vector2 player1CalorieValuePosition,
+                        player2CalorieValuePosition,
+                        player3CalorieValuePosition,
+                        player4CalorieValuePosition;
+
         private Vector2 player1VictoryTextPosition,
                         player2VictoryTextPosition,
                         player3VictoryTextPosition,
                         player4VictoryTextPosition;
+
+        static readonly Random rng = new Random(DateTime.Now.Millisecond);
+
+        SoundEffectInstance battleTheme;
 
         //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
@@ -110,18 +123,14 @@ namespace JAMMM
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            fishPool = new List<Fish>();
+            fishPool  = new List<Fish>();
             sharkPool = new List<Shark>();
-            spears = new List<Spear>();
-            Random rng = new Random();
-
-            for (int i = 0; i < FISH_POOL_SIZE; ++i)
-                fishPool.Add(new Fish((float)(200 + rng.NextDouble() * 100), (float)(200 + rng.NextDouble() * 100)));
+            spears    = new List<Spear>();
 
             //for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             //    sharkPool.Add(new Shark());
-            sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
-            sharkPool.Add(new Shark(300, 300));
+            //sharkPool.Add(new Shark(500, 512)); //TODO init sharks correctly
+            //sharkPool.Add(new Shark(300, 300));
 
             //testActAnim = new AnimatedActorTest(100, 100, 10, 10, 10);
             //testAct = new Actor(100, 200, 10, 10, 10);
@@ -140,8 +149,8 @@ namespace JAMMM
             isPlayer3Ready = false;
             isPlayer4Ready = false;
 
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
+            graphics.PreferredBackBufferWidth = 1600;
+            graphics.PreferredBackBufferHeight = 900;
 
             int width = graphics.PreferredBackBufferWidth;
             int height = graphics.PreferredBackBufferHeight;
@@ -164,6 +173,13 @@ namespace JAMMM
         {
             changeState(GameState.FindingPlayers);
 
+            // set initial fish positions
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            {
+                fishPool.Add(new Fish((screenRectangle.Width / FISH_POOL_SIZE) * i,
+                                      (screenRectangle.Height / FISH_POOL_SIZE) * i));
+            }
+
             base.Initialize();          
         }
 
@@ -179,9 +195,12 @@ namespace JAMMM
             playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
             background = Content.Load<Texture2D>("Sprites/Background");
 
-
-            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_3"));
+            AudioManager.addSound("Spear_Throw", Content.Load<SoundEffect>("Sounds/sound_5"));
+            AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
+            AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
+            AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
+            battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
             SpriteManager.addTexture("Shark_Swim", Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
@@ -190,7 +209,7 @@ namespace JAMMM
             SpriteManager.addTexture("Shark_Death", Content.Load<Texture2D>("Sprites/Shark_Death_80_48"));
 
             SpriteManager.addTexture(FISH_SWIM, Content.Load<Texture2D>("Sprites/Fish_Swim_16_16_Loop"));
-            SpriteManager.addTexture(FISH_DEATH, Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));    
+            SpriteManager.addTexture(FISH_DEATH, Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));
             SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
 
             SpriteManager.addTexture(PENGUIN_MOVE_SMALL, Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16"));
@@ -212,6 +231,7 @@ namespace JAMMM
 
             SpriteManager.addTexture("PFX_Beam", Content.Load<Texture2D>("Sprites/PFX_Beam"));
             SpriteManager.addTexture("PFX_FireSplosion", Content.Load<Texture2D>("Sprites/PFX_FireSplosion"));
+            SpriteManager.addTexture("PFX_Burst", Content.Load<Texture2D>("Sprites/PFX_Burst"));
 
             SpriteManager.addTexture("Spear", Content.Load<Texture2D>("Sprites/spear_move_128_48"));
 
@@ -299,6 +319,20 @@ namespace JAMMM
                                               graphics.PreferredBackBufferHeight * 0.03f);
             player4CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+
+            // set the player calorie value positions
+            player1CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player2CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player3CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.03f);
+            player4CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f +
+                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
                                               graphics.PreferredBackBufferHeight * 0.03f);
 
             // set the finding player penguin rectangle
@@ -394,6 +428,7 @@ namespace JAMMM
                 a.Fire = false;
                 //Spear projectile = new Spear(a.Position.X, a.Position.Y, a.CurrentSize);
                 Spear projectile = new Spear(a.Position.X, a.Position.Y,a.CurrentSize, id);
+                projectile.respawn();
                 projectile.loadContent();
                 projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 50000F;
                 projectile.velocity.X = a.Velocity.X;
@@ -421,6 +456,8 @@ namespace JAMMM
                 case (GameState.Battle):
                 {
                     // play the battle theme
+                    if (battleTheme.State != SoundState.Playing)
+                        battleTheme.Play();
 
                     // load content and spawn each player
                     foreach (Penguin p in players)
@@ -508,6 +545,12 @@ namespace JAMMM
                         {
                             fishPool[i].update(gameTime);
                             Physics.applyMovement(fishPool[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                            if (!fishPool[i].IsAlive)
+                            {
+                                fishPool[i].spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                                                (float)(rng.NextDouble() * (double)screenRectangle.Height)));
+                            }
                         }
                     }
                     else
@@ -577,6 +620,7 @@ namespace JAMMM
         {
             //////COLLISIONS///////
             collisions.Clear();
+
             /*
             for (int i = 0; i < SHARK_POOL_SIZE; i++)
             {
@@ -593,17 +637,33 @@ namespace JAMMM
             }
             */
 
+            // player collisions
+            for (int i = 0; i < players.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (i != j && players[i].IsAlive && players[j].IsAlive &&
+                        players[i].Bounds.isCollision(players[j].Bounds))
+                    {
+                        if (collisions.Count == 0)
+                            collisions.Add(players[i], players[j]);
+                        else if (collisions[players[j]] != players[i])
+                            collisions.Add(players[i], players[j]);
+                    }
+                }
+            }
+
             for (int i = 0; i < spears.Count; i++)
             {
                 for (int j = 0; j < sharkPool.Count; j++)
                 {
-                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds))
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) && spears[i].IsAlive && sharkPool[j].IsAlive)
                         collisions.Add(spears[i], sharkPool[j]);
                 }
 
                 for (int j = 0; j < players.Count; j++)
                 {
-                    if ( spears[i].bounds.isCollision(players[j].Bounds) && j != spears[i].Id )
+                    if (spears[i].bounds.isCollision(players[j].Bounds) && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id )
                         collisions.Add(spears[i], players[j]);
                 }
             }
@@ -613,7 +673,7 @@ namespace JAMMM
                 for (int j = 0; j < players.Count; ++j)
                 {
                     if (fishPool[i].Bounds.isCollision(players[j].Bounds) 
-                        && fishPool[i].IsAlive && players[j].IsAlive)
+                        && (fishPool[i].CurrState != Actor.state.Dying) && (fishPool[i].IsAlive) && players[j].IsAlive)
                         collisions.Add(fishPool[i], players[j]);
                 }
             }
@@ -741,7 +801,7 @@ namespace JAMMM
             int numAlive = 0;
 
             foreach (Penguin player in players)
-                if (player.IsAlive)
+                if (player.CurrState != Actor.state.Dying)
                     numAlive++;
 
             //if (numAlive == 1)
@@ -807,24 +867,28 @@ namespace JAMMM
                         spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer2Connected)
                     {
                         spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer3Connected)
                     {
                         spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer4Connected)
                     {
                         spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.WhiteSmoke);
                     }
 
                     spriteBatch.End();
@@ -845,29 +909,31 @@ namespace JAMMM
                     foreach (Spear spear in spears)
                         spear.draw(gameTime, spriteBatch);
 
+                    ParticleManager.Instance.draw(gameTime, spriteBatch);
+
                     break;
                 }
                 case (GameState.Victory):
                 {
                     // draw victory screen splash
-                    GraphicsDevice.Clear(Color.Cyan);
+                    GraphicsDevice.Clear(Color.Blue);
 
                     spriteBatch.Begin();
 
                     // draw victory text (containing the player)
-                    if (players.Count > 0 && players[0].IsAlive)
+                    if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 1 && players[1].IsAlive)
+                    else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 2 && players[2].IsAlive)
+                    else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
                     }
-                    else if (players.Count > 3 && players[3].IsAlive)
+                    else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
                     }
@@ -886,7 +952,7 @@ namespace JAMMM
             //foreach (Shark s in sharkPool)
             //    s.draw(gameTime, spriteBatch);
             
-            ParticleManager.Instance.draw(gameTime, spriteBatch);
+            
 
             //for (int i = 0; i < projectilePool.Count; ++i)
             //    projectilePool[i].draw(gameTime, spriteBatch);

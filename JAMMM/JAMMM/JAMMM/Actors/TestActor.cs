@@ -10,7 +10,7 @@ namespace JAMMM.Actors
 {
     class TestActor : Actor
     {
-        public TestActor(float x, float y, float offX, float offY, float radius)
+        public TestActor(float x, float y, float offX, float offY, float radius) : base(x, y, offX, offY, radius, 1.0f)
         {
             this.MaxAcc = 250;
             this.MaxAccDash = 500;

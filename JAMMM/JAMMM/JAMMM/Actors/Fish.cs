@@ -10,19 +10,11 @@ namespace JAMMM
 {
     public class Fish : Actor
     {
-        public Fish() 
-        {
-            this.MaxAcc = 200;
-            this.MaxAccDash = 500;
-            this.MaxVel = 300;
-                                 
-            this.Position = new Vector2(0,0);
-            this.Offset = new Vector2(8, 8);
-            this.Bounds = new Circle(0 + this.Offset.X, 0 + this.Offset.Y, 8);
-        }
-
         //(float x, float y, float offX, float offY, float radius, mass)
-        public Fish(float x, float y) : base(x, y, 32, 32, 10, 10){}
+        public Fish(float x, float y) : base(x, y, 32, 32, 10, 10) 
+        {
+            
+        }
 
         public override void loadContent()
         {
@@ -37,6 +29,7 @@ namespace JAMMM
             base.spawnAt(position);
             this.currentAnimation = moveAnimation;
             this.currentAnimation.play();
+            this.CurrState = state.Moving;
         }
 
         public override void respawn()
@@ -44,6 +37,7 @@ namespace JAMMM
             base.respawn();
             this.currentAnimation = moveAnimation;
             this.currentAnimation.play();
+            this.CurrState = state.Moving;
         }
         
         public override void update(GameTime gameTime)
