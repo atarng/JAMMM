@@ -129,7 +129,8 @@ namespace JAMMM
 
         //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
-
+        public static int WINDOW_WIDTH = 1600;
+        public static int WINDOW_HEIGHT = 900;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -155,8 +156,8 @@ namespace JAMMM
             isPlayer3Ready = false;
             isPlayer4Ready = false;
 
-            graphics.PreferredBackBufferWidth = 1600;
-            graphics.PreferredBackBufferHeight = 900;
+            graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
+            graphics.PreferredBackBufferHeight = WINDOW_HEIGHT;
 
             int width = graphics.PreferredBackBufferWidth;
             int height = graphics.PreferredBackBufferHeight;
@@ -178,12 +179,13 @@ namespace JAMMM
         protected override void Initialize()
         {
             changeState(GameState.FindingPlayers);
+            Random rnd = new Random();
 
             // set initial fish positions
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
             {
-                fishPool.Add(new Fish((screenRectangle.Width / FISH_POOL_SIZE) * i,
-                                      (screenRectangle.Height / FISH_POOL_SIZE) * i));
+                fishPool.Add(new Fish((screenRectangle.Width * (float)rnd.NextDouble()),
+                                      (screenRectangle.Height * (float)rnd.NextDouble())));
             }
 
             // set initial shark position
@@ -807,7 +809,7 @@ namespace JAMMM
                         && (fishPool[i].CurrState != Actor.state.Dying) && 
                         (fishPool[i].IsAlive) && players[j].IsAlive &&
                         !collisions.ContainsKey(fishPool[i]))
-                        collisions.Add(fishPool[i], players[j]);
+                            collisions.Add(fishPool[i], players[j]);
                 }
             }
 
@@ -961,8 +963,8 @@ namespace JAMMM
                 if (player.CurrState != Actor.state.Dying)
                     numAlive++;
 
-            //if (numAlive == 1)
-            //    changeState(GameState.Victory);
+            if (numAlive == 1)
+                changeState(GameState.Victory);
         }
 
         /// <summary>

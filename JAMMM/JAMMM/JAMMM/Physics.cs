@@ -100,7 +100,7 @@ namespace JAMMM
             //if not dashing and sqrt then cap the magnitude
             if (a.CurrState != Actor.state.Dashing  && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
             {
-                a.Velocity = a.MaxVel * Vector2.Normalize(a.Velocity);
+                a.Velocity = vel = uk * a.Velocity;
             }
             else if( a.CurrState == Actor.state.Dashing && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
             {

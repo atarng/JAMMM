@@ -24,7 +24,7 @@ namespace JAMMM
 
         public const int SHARK_CALORIES = 100;
         public const int PENGUIN_CALORIES = 60;
-        public const int FISH_CALORIES = 15;
+        public const int FISH_CALORIES = 10;
 
         public const int SHARK_DAMAGE = 100;
 
@@ -112,7 +112,9 @@ namespace JAMMM
         public Vector2 Position
         {
             get { return position; }
-            set { position = value; }
+            set {   position = value;
+                    this.Bounds = new Circle(this.position.X + Offset.X, this.position.Y + Offset.Y, this.Bounds.Radius);
+            }
         }
 
         /// <summary>
@@ -167,6 +169,7 @@ namespace JAMMM
             set { dashTime = value; }
         }
 
+
         private float dashCooldownTime;
         public float DashCooldownTime
         {
@@ -179,6 +182,14 @@ namespace JAMMM
         {
             get { return dashCost; }
             set { dashCost = value; }
+        }
+
+
+        private int spearCost;
+        public int SpearCost
+        {
+            get { return spearCost; }
+            set { spearCost = value; }
         }
 
         private float currTime;
@@ -246,7 +257,7 @@ namespace JAMMM
 
         public virtual void spawnAt(Vector2 position)
         {
-            this.position = position;
+            this.Position = position;
             this.isAlive = true;
         }
 
@@ -258,9 +269,33 @@ namespace JAMMM
 
         public virtual void processInput(){}
 
+        public void boundaryCheck()
+        {
+            
+            if (this.Position.X > Game1.WINDOW_WIDTH)
+            {
+                this.Position = new Vector2(Game1.WINDOW_WIDTH, this.Position.Y);
+            }
+            if (this.Position.X < 0)
+            {
+                this.Position = new Vector2(0, this.Position.Y);
+            }
+            if (this.Position.Y > Game1.WINDOW_HEIGHT)
+            {
+                this.Position = new Vector2(this.Position.X, Game1.WINDOW_HEIGHT);
+            }
+            if (this.Position.Y < 0)
+            {
+                this.Position = new Vector2(this.Position.X, 0);
+            }
+        }
+
         public virtual void update(GameTime delta)
         {
             processInput();
+
+
+
         }
 
         public virtual void draw(GameTime delta, SpriteBatch batch)
@@ -281,8 +316,8 @@ namespace JAMMM
 
 
                 batch.DrawString(Game1.font, "Position " + Position, Bounds.Center, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
-                //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
-                //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+                batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+                batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
                 batch.End();
             }
@@ -295,19 +330,21 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 400;
+            this.MaxAccDash = 200;
             this.MaxVel = 200;
-            this.MaxVelDash = 400;
-            this.dashTime = 1;
+            this.MaxVelDash = 300;
+            this.dashTime = 0.25f;
             this.dashCost = 1;
+            this.spearCost = 1;
 
             this.Mass = mass;
             this.dashCooldownTime = 3; //this doesnt do anything
             CurrState = state.DashReady;
 
+            this.Bounds = new Circle(x + offX, y + offY, radius);
             this.Position = new Vector2(x,y);
             this.Offset = new Vector2(offX, offY);
-            this.Bounds = new Circle(x + offX, y + offY, radius);
+
             this.startingPosition = new Vector2(x, y);
             this.isAlive = false;
         }
