@@ -1029,34 +1029,34 @@ namespace JAMMM
                     if (isPlayer1Connected)
                     {
                         spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[0].Calories <= 0 ? "DEAD" : players[0].Calories.ToString(),
-                            player1CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[0].Calories <= 0 ? "IS DEAD" : "Still Alive",
+                            player1CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer2Connected)
                     {
                         spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[1].Calories <= 0 ? "DEAD" : players[1].Calories.ToString(), 
-                            player2CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[1].Calories <= 0 ? "IS DEAD" : "Still Alive", 
+                            player2CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer3Connected)
                     {
                         spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[2].Calories <= 0 ? "DEAD" : players[2].Calories.ToString(), 
-                            player3CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[2].Calories <= 0 ? "IS DEAD" : "Still Alive", 
+                            player3CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer4Connected)
                     {
                         spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[3].Calories <= 0 ? "DEAD" : players[3].Calories.ToString(), 
-                            player4CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[3].Calories <= 0 ? "IS DEAD" : "Still Alive", 
+                            player4CalorieTextPosition, Color.WhiteSmoke);
                     }
 
                     spriteBatch.End();
