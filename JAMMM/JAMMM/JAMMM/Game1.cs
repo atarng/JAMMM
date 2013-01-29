@@ -189,7 +189,7 @@ namespace JAMMM
             // set initial shark position
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             {
-            //    sharkPool.Add(new Shark(0.0f, 0.0f));
+                sharkPool.Add(new Shark(0.0f, 0.0f));
             }
 
             base.Initialize();          
@@ -518,7 +518,8 @@ namespace JAMMM
 
                     // spawn some fishies
                     foreach (Fish p in fishPool)
-                        p.respawn();
+                        p.spawnAt(new Vector2((float)(rng.NextDouble() * (double)screenRectangle.Width),
+                                              (float)(rng.NextDouble() * (double)screenRectangle.Height)));
 
                     // spawn some sharkies
                     foreach (Shark s in sharkPool)
