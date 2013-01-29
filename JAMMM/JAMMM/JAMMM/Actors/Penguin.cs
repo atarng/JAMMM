@@ -75,25 +75,28 @@ namespace JAMMM.Actors
         private bool  isHit;
         private bool  isBlink;
 
+        private string colorCode;
+
         /// <summary>
         /// Penguins take in a player num and a position
         /// and that's how they start on the map.
         /// </summary>
         /// <param name="playerNum"></param>
         /// <param name="pos"></param>
-        public Penguin(PlayerIndex playerIndex, Vector2 pos) 
+        public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             // going to need better values for the base
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
+            this.colorCode        = colorCode;
             this.controller       = playerIndex;
             this.startingPosition = pos;
             this.calories         = 100;
             this.CurrentSize      = Size.Small;
 
-            this.blinkTime       = 0.0f;
-            this.numBlinks       = 0;
-            this.isHit           = false;
-            this.isBlink         = false;
+            this.blinkTime        = 0.0f;
+            this.numBlinks        = 0;
+            this.isHit            = false;
+            this.isBlink          = false;
         }
 
         public override void processInput()
@@ -188,11 +191,11 @@ namespace JAMMM.Actors
         {
             // need to create the animations
             moveAnimation = new Animation((Actor)this, AnimationType.Move, 
-                SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL), 4, true);
+                SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4, true);
             dashAnimation = new Animation((Actor)this, AnimationType.Dash,
-                SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL), 1, false);
+                SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1, false);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
-                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1, false);
+                SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1, false, 1.5f);
         }
 
         public override void update(GameTime delta)
@@ -296,9 +299,9 @@ namespace JAMMM.Actors
 
                 // switch animations
                 currentAnimation.stop();
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE), 8);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE), 1);
+                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
+                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
+                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE + colorCode), 1);
                 currentAnimation.play();
 
                 this.Bounds.Radius = LARGE_SIZE;
@@ -315,9 +318,9 @@ namespace JAMMM.Actors
 
                 // switch animations
                 currentAnimation.stop();
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM), 4);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM), 1);
+                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
+                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
+                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM + colorCode), 1);
                 currentAnimation.play();
 
                 this.Bounds.Radius = MED_SIZE;
@@ -333,9 +336,9 @@ namespace JAMMM.Actors
 
                 // switch animations
                 currentAnimation.stop();
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL), 4);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL), 1);
+                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
+                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
+                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1);
                 currentAnimation.play();
 
                 this.Bounds.Radius = SMALL_SIZE;
@@ -578,7 +581,7 @@ namespace JAMMM.Actors
                         this.calories -= SHARK_DAMAGE;
 
                         if (this.calories <= 0)
-                            ((Shark)other).Calories += this.calories;
+                            ((Shark)other).Calories += 100;
 
                         this.isHit = true;
                     }

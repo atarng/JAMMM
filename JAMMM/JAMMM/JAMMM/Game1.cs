@@ -83,6 +83,8 @@ namespace JAMMM
         private const float SHARK_ATTACK_THRESHOLD = 300;
         private const float SHARK_AGGRESS_THRESHOLD = 600;
 
+        private float globalZoom;
+
         private Dictionary<Actor, Actor> collisions;
 
         private List<Fish> fishPool;
@@ -141,6 +143,8 @@ namespace JAMMM
 
             collisions = new Dictionary<Actor, Actor>();
 
+            globalZoom = 2.0f;
+
             isPlayer1Connected = false;
             isPlayer2Connected = false;
             isPlayer3Connected = false;
@@ -185,7 +189,7 @@ namespace JAMMM
             // set initial shark position
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             {
-                sharkPool.Add(new Shark(0.0f, 0.0f));
+            //    sharkPool.Add(new Shark(0.0f, 0.0f));
             }
 
             base.Initialize();          
@@ -209,6 +213,7 @@ namespace JAMMM
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
+            AudioManager.addSound("Ready_Sound", Content.Load<SoundEffect>("Sounds/ready"));
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
@@ -221,6 +226,7 @@ namespace JAMMM
             SpriteManager.addTexture(FISH_DEATH, Content.Load<Texture2D>("Sprites/Fish_Death_16_16"));
             SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
 
+            #region COLORCODEDPENGUINS
             SpriteManager.addTexture(PENGUIN_MOVE_SMALL, Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16"));
             SpriteManager.addTexture(PENGUIN_MOVE_MEDIUM, Content.Load<Texture2D>("Sprites/Penguin_med_swim_24_24"));
             SpriteManager.addTexture(PENGUIN_MOVE_LARGE, Content.Load<Texture2D>("Sprites/Penguin_fat_swim_32_32"));
@@ -232,6 +238,43 @@ namespace JAMMM
             SpriteManager.addTexture(PENGUIN_DEATH_SMALL, Content.Load<Texture2D>("Sprites/Penguin_small_dead_64_64"));
             SpriteManager.addTexture(PENGUIN_DEATH_MEDIUM, Content.Load<Texture2D>("Sprites/Penguin_med_dead_96_96"));
             SpriteManager.addTexture(PENGUIN_DEATH_LARGE, Content.Load<Texture2D>("Sprites/Penguin_fat_dead_128_128"));
+
+            SpriteManager.addTexture(PENGUIN_MOVE_SMALL + "_r", Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16" + "_r"));
+            SpriteManager.addTexture(PENGUIN_MOVE_MEDIUM + "_r", Content.Load<Texture2D>("Sprites/Penguin_med_swim_24_24" + "_r"));
+            SpriteManager.addTexture(PENGUIN_MOVE_LARGE + "_r", Content.Load<Texture2D>("Sprites/Penguin_fat_swim_32_32" + "_r"));
+
+            SpriteManager.addTexture(PENGUIN_DASH_SMALL + "_r", Content.Load<Texture2D>("Sprites/Penguin_small_dash_64_64" + "_r"));
+            SpriteManager.addTexture(PENGUIN_DASH_MEDIUM + "_r", Content.Load<Texture2D>("Sprites/Penguin_med_dash_96_96" + "_r"));
+            SpriteManager.addTexture(PENGUIN_DASH_LARGE + "_r", Content.Load<Texture2D>("Sprites/Penguin_fat_dash_128_128" + "_r"));
+
+            SpriteManager.addTexture(PENGUIN_DEATH_SMALL + "_r", Content.Load<Texture2D>("Sprites/Penguin_small_dead_64_64" + "_r"));
+            SpriteManager.addTexture(PENGUIN_DEATH_MEDIUM + "_r", Content.Load<Texture2D>("Sprites/Penguin_med_dead_96_96" + "_r"));
+            SpriteManager.addTexture(PENGUIN_DEATH_LARGE + "_r", Content.Load<Texture2D>("Sprites/Penguin_fat_dead_128_128" + "_r"));
+
+            SpriteManager.addTexture(PENGUIN_MOVE_SMALL + "_p", Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16" + "_p"));
+            SpriteManager.addTexture(PENGUIN_MOVE_MEDIUM + "_p", Content.Load<Texture2D>("Sprites/Penguin_med_swim_24_24" + "_p"));
+            SpriteManager.addTexture(PENGUIN_MOVE_LARGE + "_p", Content.Load<Texture2D>("Sprites/Penguin_fat_swim_32_32" + "_p"));
+
+            SpriteManager.addTexture(PENGUIN_DASH_SMALL + "_p", Content.Load<Texture2D>("Sprites/Penguin_small_dash_64_64" + "_p"));
+            SpriteManager.addTexture(PENGUIN_DASH_MEDIUM + "_p", Content.Load<Texture2D>("Sprites/Penguin_med_dash_96_96" + "_p"));
+            SpriteManager.addTexture(PENGUIN_DASH_LARGE + "_p", Content.Load<Texture2D>("Sprites/Penguin_fat_dash_128_128" + "_p"));
+
+            SpriteManager.addTexture(PENGUIN_DEATH_SMALL + "_p", Content.Load<Texture2D>("Sprites/Penguin_small_dead_64_64" + "_p"));
+            SpriteManager.addTexture(PENGUIN_DEATH_MEDIUM + "_p", Content.Load<Texture2D>("Sprites/Penguin_med_dead_96_96" + "_p"));
+            SpriteManager.addTexture(PENGUIN_DEATH_LARGE + "_p", Content.Load<Texture2D>("Sprites/Penguin_fat_dead_128_128" + "_p"));
+
+            SpriteManager.addTexture(PENGUIN_MOVE_SMALL + "_g", Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16" + "_g"));
+            SpriteManager.addTexture(PENGUIN_MOVE_MEDIUM + "_g", Content.Load<Texture2D>("Sprites/Penguin_med_swim_24_24" + "_g"));
+            SpriteManager.addTexture(PENGUIN_MOVE_LARGE + "_g", Content.Load<Texture2D>("Sprites/Penguin_fat_swim_32_32" + "_g"));
+
+            SpriteManager.addTexture(PENGUIN_DASH_SMALL + "_g", Content.Load<Texture2D>("Sprites/Penguin_small_dash_64_64" + "_g"));
+            SpriteManager.addTexture(PENGUIN_DASH_MEDIUM + "_g", Content.Load<Texture2D>("Sprites/Penguin_med_dash_96_96" + "_g"));
+            SpriteManager.addTexture(PENGUIN_DASH_LARGE + "_g", Content.Load<Texture2D>("Sprites/Penguin_fat_dash_128_128" + "_g"));
+
+            SpriteManager.addTexture(PENGUIN_DEATH_SMALL + "_g", Content.Load<Texture2D>("Sprites/Penguin_small_dead_64_64" + "_g"));
+            SpriteManager.addTexture(PENGUIN_DEATH_MEDIUM + "_g", Content.Load<Texture2D>("Sprites/Penguin_med_dead_96_96" + "_g"));
+            SpriteManager.addTexture(PENGUIN_DEATH_LARGE + "_g", Content.Load<Texture2D>("Sprites/Penguin_fat_dead_128_128" + "_g"));
+            #endregion
 
             SpriteManager.addTexture("Particle_Bubble_1", Content.Load<Texture2D>("Sprites/PFX_Bubble_16_16"));
             SpriteManager.addTexture("Particle_Bubble_2", Content.Load<Texture2D>("Sprites/PFX_Bubble_24_24"));
@@ -252,8 +295,6 @@ namespace JAMMM
                 f.loadContent();
             foreach (Spear s in spears)
                 s.loadContent();
-
-            //testActAnim.loadContent();
 
             // load content dependent initialization
             loadContentDependentInitialization();
@@ -602,6 +643,10 @@ namespace JAMMM
                     // update particles
                     ParticleManager.Instance.update(gameTime);
 
+                    // check sfx
+                    if (battleTheme.State == SoundState.Stopped)
+                        battleTheme.Play();
+
                     // check if there is only 1 player left. if so, end the game
                     TryToEndGame();
 
@@ -817,7 +862,7 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.One).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.One, player1StartPosition));
+                    players.Add(new Penguin(PlayerIndex.One, player1StartPosition, ""));
                     isPlayer1Connected = true;
                 }
             }
@@ -825,7 +870,7 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Two).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Two, player2StartPosition));
+                    players.Add(new Penguin(PlayerIndex.Two, player2StartPosition, "_r"));
                     isPlayer2Connected = true;
                 }
             }
@@ -833,7 +878,7 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Three).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Three, player3StartPosition));
+                    players.Add(new Penguin(PlayerIndex.Three, player3StartPosition, "_p"));
                     isPlayer3Connected = true;
                 }
             }
@@ -841,7 +886,7 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Four).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Four, player4StartPosition));
+                    players.Add(new Penguin(PlayerIndex.Four, player4StartPosition, "_g"));
                     isPlayer4Connected = true;
                 }
             }
@@ -857,6 +902,7 @@ namespace JAMMM
                 if (GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A))
                 {
                     isPlayer1Ready = true;
+                    AudioManager.getSound("Ready_Sound").Play();
                 }
             }
             if (isPlayer2Connected && !isPlayer2Ready)
@@ -864,6 +910,7 @@ namespace JAMMM
                 if (GamePad.GetState(PlayerIndex.Two).IsButtonDown(Buttons.A))
                 {
                     isPlayer2Ready = true;
+                    AudioManager.getSound("Ready_Sound").Play();
                 }
             }
             if (isPlayer3Connected && !isPlayer3Ready)
@@ -871,6 +918,7 @@ namespace JAMMM
                 if (GamePad.GetState(PlayerIndex.Three).IsButtonDown(Buttons.A))
                 {
                     isPlayer3Ready = true;
+                    AudioManager.getSound("Ready_Sound").Play();
                 }
             }
             if (isPlayer4Connected && !isPlayer4Ready)
@@ -878,6 +926,7 @@ namespace JAMMM
                 if (GamePad.GetState(PlayerIndex.Four).IsButtonDown(Buttons.A))
                 {
                     isPlayer4Ready = true;
+                    AudioManager.getSound("Ready_Sound").Play();
                 }
             }
         }
@@ -977,28 +1026,32 @@ namespace JAMMM
                         spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[0].Calories <= 0 ? "DEAD" : players[0].Calories.ToString(),
+                            player1CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer2Connected)
                     {
                         spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[1].Calories <= 0 ? "DEAD" : players[1].Calories.ToString(), 
+                            player2CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer3Connected)
                     {
                         spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[2].Calories <= 0 ? "DEAD" : players[2].Calories.ToString(), 
+                            player3CalorieValuePosition, Color.WhiteSmoke);
                     }
                     if (isPlayer4Connected)
                     {
                         spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
                         // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, players[3].Calories <= 0 ? "DEAD" : players[3].Calories.ToString(), 
+                            player4CalorieValuePosition, Color.WhiteSmoke);
                     }
 
                     spriteBatch.End();
