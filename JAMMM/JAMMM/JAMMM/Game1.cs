@@ -804,8 +804,8 @@ namespace JAMMM
                 if (player.CurrState != Actor.state.Dying)
                     numAlive++;
 
-            if (numAlive == 1)
-                changeState(GameState.Victory);
+            //if (numAlive == 1)
+            //    changeState(GameState.Victory);
         }
 
         /// <summary>

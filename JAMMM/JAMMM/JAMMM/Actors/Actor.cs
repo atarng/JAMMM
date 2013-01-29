@@ -282,13 +282,14 @@ namespace JAMMM
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
             this.MaxAcc = 250;
-            this.MaxAccDash = 25000;
+            this.MaxAccDash = 1000;
             this.MaxVel = 200;
-            this.MaxVelDash = 1200;
-            this.Mass = mass;
+            this.MaxVelDash = 400;
             this.dashTime = 1;
-            this.dashCooldownTime = 3;
             this.dashCost = 1;
+
+            this.Mass = mass;
+            this.dashCooldownTime = 3; //this doesnt do anything
             CurrState = state.DashReady;
 
             this.Position = new Vector2(x,y);
