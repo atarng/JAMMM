@@ -118,6 +118,14 @@ namespace JAMMM.Actors
                 accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
+                //if the acceleration is > max acc (means we were dashing)
+                if (!(CurrState == state.Dashing &&
+                    (Vector2.Normalize(accController) == Vector2.Normalize(Acceleration) || Vector2.Zero == accController)))
+                {
+                    Acceleration = accController;
+                }
+
+                /*
                 //if controller acc is greater than old acc, set it to controller acc
                 if (Physics.magnitudeSquared(accController) >= Physics.magnitudeSquared(Acceleration))
                     Acceleration = accController;
@@ -126,6 +134,7 @@ namespace JAMMM.Actors
                     if( accController != Vector2.Zero )
                         Acceleration = Vector2.Normalize(accController) * (float)Math.Sqrt(Physics.magnitudeSquared(Acceleration));
                 }
+                */
 
                 if ( this.calories > DashCost && gamePadState.IsButtonDown(Buttons.A) && !prevStateA)
                 {
@@ -137,7 +146,7 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Actor_Dash").Play();
                 }
 
-                if (gamePadState.IsButtonUp(Buttons.A))
+                if (gamePadState.IsButtonUp(Buttons.A) && CurrState == state.DashReady)
                 {
                     prevStateA = false;
                 }

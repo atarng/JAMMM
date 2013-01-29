@@ -18,7 +18,7 @@ namespace JAMMM
         //private const float uk = 0.5F; // coefficient of friction increase for more friction
         private const Double eps = 1; //epsilon
         private const float smallForce = 5;
-        private const float accDecay = 0.95F; //1 is no decay
+        private const float accDecay = 0.985F; //1 is no decay
         //private static Vector2 smallForce = new Vector2(50,50);
 
         //http://en.wikipedia.org/wiki/Inelastic_collision
