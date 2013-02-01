@@ -58,7 +58,6 @@ namespace JAMMM.Actors
 
         public override void draw(GameTime delta, SpriteBatch batch)
         {
-            batch.Begin();
             Color c = Color.Black;
             Vector2 loc = Position;
             Vector2 fontHeight;
@@ -75,8 +74,6 @@ namespace JAMMM.Actors
             //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
             //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
             //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
-            
-            batch.End();
         }
     }
 }

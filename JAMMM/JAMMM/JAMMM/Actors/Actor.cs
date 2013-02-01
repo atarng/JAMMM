@@ -290,6 +290,23 @@ namespace JAMMM
             }
         }
 
+        public virtual Rectangle getRectangleBounds()
+        {
+            if (currentAnimation != null)
+            {
+                Rectangle result = currentAnimation.getCurrentFrame();
+
+                result.Width = result.Right - result.Left;
+                result.Height = result.Bottom - result.Top;
+                result.X = (int)position.X;
+                result.Y = (int)position.Y;
+
+                return result;
+            }
+
+            return Rectangle.Empty;
+        }
+
         public virtual void update(GameTime delta)
         {
             processInput();

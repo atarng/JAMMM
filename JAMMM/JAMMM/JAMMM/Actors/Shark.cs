@@ -183,8 +183,6 @@ namespace JAMMM.Actors
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
-            batch.Begin();
-
             Color healthColor;
 
             if (this.Calories < 50 || this.isBlink)
@@ -255,7 +253,6 @@ namespace JAMMM.Actors
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
             }
-            batch.End();
         }
     }
 }

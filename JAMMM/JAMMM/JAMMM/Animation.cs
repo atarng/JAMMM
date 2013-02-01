@@ -174,6 +174,11 @@ namespace JAMMM
             this.isPlaying = false;
         }
 
+        public Rectangle getCurrentFrame()
+        {
+            return currentFrame;
+        }
+
         private void updateFrameRectangle()
         {
             this.currentFrame.X = this.frameIndex * this.frameWidth;

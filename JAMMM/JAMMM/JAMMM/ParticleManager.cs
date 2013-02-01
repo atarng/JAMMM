@@ -62,7 +62,6 @@ namespace JAMMM
             }
         }
 
-
         public void update(GameTime gameTime)
         {
             foreach (ParticleBubble a in bubblePool)
@@ -74,7 +73,6 @@ namespace JAMMM
                     b.update(gameTime);
 
         }
-
 
         public void draw(GameTime gameTime, SpriteBatch spriteBatch)
         {

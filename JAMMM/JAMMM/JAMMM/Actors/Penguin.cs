@@ -223,7 +223,6 @@ namespace JAMMM.Actors
             tryToGrow();
             tryToDie();
             tryToBlink(delta);
-            boundaryCheck();
 
             if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble, 
@@ -234,10 +233,10 @@ namespace JAMMM.Actors
             processInput();
             if (CurrState == state.Dash)
             {
-                if (Acceleration.Equals(Vector2.Zero))
-                    Acceleration = Physics.AngleToVector(Rotation);
-                else
-                    Acceleration.Normalize();
+                //if (Acceleration.Equals(Vector2.Zero))
+                //    Acceleration = Physics.AngleToVector(Rotation);
+                //else
+                //    Acceleration.Normalize();
 
                 //velocity = acceleration * MaxVelDash;
                 acceleration += acceleration * MaxAccDash;
@@ -257,12 +256,9 @@ namespace JAMMM.Actors
                 if (CurrTime <= 0)
                 {
                     CurrState = state.DashReady;
+                    currentAnimation = moveAnimation;
+                    currentAnimation.play();
                 }
-            }
-            else if (CurrState == state.DashReady)
-            {
-                currentAnimation = moveAnimation;
-                currentAnimation.play();
             }
 
             /*
@@ -485,7 +481,6 @@ namespace JAMMM.Actors
         {
             if (this.IsAlive)
             {
-                batch.Begin();
                 Color c;
 
                 if (this.isBlink)
@@ -509,7 +504,6 @@ namespace JAMMM.Actors
 
                 if (printPhysics)
                     printPhys(batch);
-                batch.End();
             }
         }
 
@@ -704,6 +698,7 @@ namespace JAMMM.Actors
                     this.calories += FISH_CALORIES;
                     other.startDying();
 
+                    /*
                     ParticleManager.Instance.createParticle(ParticleType.HitSpark,
                         new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
                         new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
@@ -716,7 +711,7 @@ namespace JAMMM.Actors
                     new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
                     new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-
+                    */
                 }
             }
         }

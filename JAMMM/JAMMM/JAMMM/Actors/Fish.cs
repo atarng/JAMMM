@@ -92,8 +92,6 @@ namespace JAMMM
         {
             if (this.IsAlive)
             {
-                batch.Begin();
-
                 if (Math.Abs(Rotation) > Math.PI / 2)
                 {
                     currentAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
@@ -102,8 +100,6 @@ namespace JAMMM
                 {
                     currentAnimation.draw(batch, this.Position, Color.White, SpriteEffects.None, this.Rotation, 1.0f);
                 }
-
-                batch.End();
             }
         }
     }

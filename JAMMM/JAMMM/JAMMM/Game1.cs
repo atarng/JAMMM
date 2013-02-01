@@ -24,6 +24,8 @@ namespace JAMMM
             Victory
         }
 
+        Camera2D camera;
+
         private GameState currentGameState;
 
         GraphicsDeviceManager graphics;
@@ -83,8 +85,6 @@ namespace JAMMM
         private const float SHARK_ATTACK_THRESHOLD = 300;
         private const float SHARK_AGGRESS_THRESHOLD = 600;
 
-        private float globalZoom;
-
         private Dictionary<Actor, Actor> collisions;
 
         private List<Fish> fishPool;
@@ -131,6 +131,7 @@ namespace JAMMM
         public static SpriteFont font;
         public static int WINDOW_WIDTH = 1600;
         public static int WINDOW_HEIGHT = 900;
+        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -144,7 +145,7 @@ namespace JAMMM
 
             collisions = new Dictionary<Actor, Actor>();
 
-            globalZoom = 2.0f;
+            camera = new Camera2D();
 
             isPlayer1Connected = false;
             isPlayer2Connected = false;
@@ -163,6 +164,8 @@ namespace JAMMM
             int height = graphics.PreferredBackBufferHeight;
 
             screenRectangle = new Rectangle(0, 0, width, height);
+
+            camera.move(new Vector2(width / 2.0f, height / 2.0f));
 
             player1StartPosition = new Vector2(width * 0.05f, height * 0.05f);
             player2StartPosition = new Vector2(width * 0.05f, height * 0.85f);
@@ -191,7 +194,7 @@ namespace JAMMM
             // set initial shark position
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             {
-                sharkPool.Add(new Shark(0.0f, 0.0f));
+                //sharkPool.Add(new Shark(0.0f, 0.0f));
             }
 
             base.Initialize();          
@@ -970,12 +973,33 @@ namespace JAMMM
                 changeState(GameState.Victory);
         }
 
+        private void adjustCamera()
+        {
+            // if any player is off screen,
+            // zoom out until that player is still on screen up until the zoom
+            // is a certain limit
+            while (!allPlayersInBounds()
+                && camera.Zoom > Camera2D.MIN_ZOOM)
+                camera.Zoom -= 0.005f;
+        }
+
+        private bool allPlayersInBounds()
+        {
+            foreach (Penguin p in players)
+                if (!camera.isInBounds(p, GraphicsDevice))
+                    return false;
+
+            return true;
+        }
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            //adjustCamera();
+
             switch (this.currentGameState)
             {
                 case (GameState.FindingPlayers):
@@ -1022,44 +1046,14 @@ namespace JAMMM
                     // draw background
                     GraphicsDevice.Clear(Color.Blue);
 
+                    /*
+                    spriteBatch.Begin(SpriteSortMode.BackToFront,
+                        BlendState.AlphaBlend, null, null, null, null,
+                        camera.getTransformation(GraphicsDevice));
+                     * */
                     spriteBatch.Begin();
-                    spriteBatch.Draw(background, screenRectangle, Color.White);
 
-                    // draw calories and player text for each player
-                    if (isPlayer1Connected)
-                    {
-                        spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
-                        //spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
-                        // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[0].Calories <= 0 ? "IS DEAD" : "Still Alive",
-                            player1CalorieTextPosition, Color.WhiteSmoke);
-                    }
-                    if (isPlayer2Connected)
-                    {
-                        spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
-                        //spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
-                        // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[1].Calories <= 0 ? "IS DEAD" : "Still Alive", 
-                            player2CalorieTextPosition, Color.WhiteSmoke);
-                    }
-                    if (isPlayer3Connected)
-                    {
-                        spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
-                        // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[2].Calories <= 0 ? "IS DEAD" : "Still Alive", 
-                            player3CalorieTextPosition, Color.WhiteSmoke);
-                    }
-                    if (isPlayer4Connected)
-                    {
-                        spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
-                        //spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
-                        // draw the calories themselves as a string right after that position
-                        spriteBatch.DrawString(font, players[3].Calories <= 0 ? "IS DEAD" : "Still Alive", 
-                            player4CalorieTextPosition, Color.WhiteSmoke);
-                    }
-
-                    spriteBatch.End();
+                    spriteBatch.Draw(background, camera.getViewRectangle(GraphicsDevice), Color.White);
 
                     // draw each player
                     foreach (Penguin player in players)
@@ -1078,6 +1072,47 @@ namespace JAMMM
                         spear.draw(gameTime, spriteBatch);
 
                     ParticleManager.Instance.draw(gameTime, spriteBatch);
+
+                    spriteBatch.End();
+
+
+                    spriteBatch.Begin();
+
+                    // draw calories and player text for each player
+                    if (isPlayer1Connected)
+                    {
+                        spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
+                        // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[0].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
+                            player1CalorieTextPosition, Color.WhiteSmoke);
+                    }
+                    if (isPlayer2Connected)
+                    {
+                        spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
+                        // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[1].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
+                            player2CalorieTextPosition, Color.WhiteSmoke);
+                    }
+                    if (isPlayer3Connected)
+                    {
+                        spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
+                        spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
+                        // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[2].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
+                            player3CalorieTextPosition, Color.WhiteSmoke);
+                    }
+                    if (isPlayer4Connected)
+                    {
+                        spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
+                        //spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
+                        // draw the calories themselves as a string right after that position
+                        spriteBatch.DrawString(font, players[3].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
+                            player4CalorieTextPosition, Color.WhiteSmoke);
+                    }
+
+                    spriteBatch.End();
 
                     break;
                 }
@@ -1111,19 +1146,6 @@ namespace JAMMM
                     break;
                 }
             }
-
-            //for (int i = 0; i < FISH_POOL_SIZE; ++i)
-            //    fishPool[i].draw(gameTime, spriteBatch);
-
-            //testAct.draw(gameTime, spriteBatch);
-            //testActAnim.draw(gameTime, spriteBatch);
-            //foreach (Shark s in sharkPool)
-            //    s.draw(gameTime, spriteBatch);
-            
-            
-
-            //for (int i = 0; i < projectilePool.Count; ++i)
-            //    projectilePool[i].draw(gameTime, spriteBatch);
 
             base.Draw(gameTime);
         }
