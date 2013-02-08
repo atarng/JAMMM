@@ -290,16 +290,16 @@ namespace JAMMM
             }
         }
 
-        public virtual Rectangle getRectangleBounds()
+        public virtual Rectangle getRectangleBounds(int buffer)
         {
             if (currentAnimation != null)
             {
                 Rectangle result = currentAnimation.getCurrentFrame();
 
-                result.Width = result.Right - result.Left;
-                result.Height = result.Bottom - result.Top;
-                result.X = (int)position.X;
-                result.Y = (int)position.Y;
+                result.Width  = result.Right - result.Left + 2 * buffer;
+                result.Height = result.Bottom - result.Top + 2 * buffer;
+                result.X      = (int)position.X - buffer;
+                result.Y      = (int)position.Y - buffer;
 
                 return result;
             }

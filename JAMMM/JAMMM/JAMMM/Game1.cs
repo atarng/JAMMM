@@ -35,6 +35,7 @@ namespace JAMMM
         private Texture2D title;
         private Rectangle playerPenguinRectangle;
         private Rectangle screenRectangle;
+        private Rectangle gameplayBoundaries;
 
         private Vector2 player1StartPosition,
                         player2StartPosition,
@@ -131,6 +132,8 @@ namespace JAMMM
         public static SpriteFont font;
         public static int WINDOW_WIDTH = 1600;
         public static int WINDOW_HEIGHT = 900;
+
+        private bool zoomingOut = false;
         
         public Game1()
         {
@@ -145,7 +148,7 @@ namespace JAMMM
 
             collisions = new Dictionary<Actor, Actor>();
 
-            camera = new Camera2D();
+            camera = new Camera2D(this);
 
             isPlayer1Connected = false;
             isPlayer2Connected = false;
@@ -169,8 +172,8 @@ namespace JAMMM
 
             player1StartPosition = new Vector2(width * 0.05f, height * 0.05f);
             player2StartPosition = new Vector2(width * 0.05f, height * 0.85f);
-            player3StartPosition = new Vector2(width * 0.9f, height * 0.05f);
-            player4StartPosition = new Vector2(width * 0.9f, height * 0.85f);
+            player3StartPosition = new Vector2(width * 0.9f,  height * 0.05f);
+            player4StartPosition = new Vector2(width * 0.9f,  height * 0.85f);
         }
 
         /// <summary>
@@ -589,6 +592,9 @@ namespace JAMMM
                 }
                 case (GameState.Battle):
                 {
+                    camera.updateBounds();
+                    adjustCamera();
+
                     // do regular game logic updating each player
                     for( int i = 0; i < players.Count; i++ )
                     {
@@ -973,20 +979,77 @@ namespace JAMMM
                 changeState(GameState.Victory);
         }
 
+        /// <summary>
+        /// Moves the camera about. If any players are
+        /// out of view, it will zoom out until they are in view.
+        /// Otherwise, it will try to zoom in as much as it can
+        /// without clipping a player. 
+        /// </summary>
         private void adjustCamera()
         {
-            // if any player is off screen,
-            // zoom out until that player is still on screen up until the zoom
-            // is a certain limit
-            while (!allPlayersInBounds()
-                && camera.Zoom > Camera2D.MIN_ZOOM)
-                camera.Zoom -= 0.005f;
+            Actor a = getFurthestPlayerOutOfBounds();
+
+            if (a == null)
+                a = getFurthestPlayerFromCenter();
+
+            camera.zoomToActor(a);
         }
 
+        /// <summary>
+        /// Gets the furthest penguin form the center of the screen.
+        /// </summary>
+        private Actor getFurthestPlayerFromCenter()
+        {
+            float maxDist = 0.0f;
+            float currDist = 0.0f;
+            Actor fActor = null;
+
+            foreach (Penguin p in players)
+            {
+                currDist = camera.getDistanceFromViewCenter(p);
+
+                if (currDist > maxDist)
+                {
+                    maxDist = currDist;
+                    fActor = p;
+                }
+            }
+
+            return fActor;
+        }
+
+        /// <summary>
+        /// Gets the furthest player outside of the view
+        /// boundaries.
+        /// </summary>
+        private Actor getFurthestPlayerOutOfBounds()
+        {
+            float maxDist = 0.0f;
+            float currDist = 0.0f;
+            Actor fActor = null;
+
+            foreach (Penguin p in players)
+            {
+                currDist = camera.getDistanceOutsideBorders(p);
+
+                if (currDist > maxDist)
+                {
+                    maxDist = currDist;
+                    fActor = p;
+                }
+            }
+
+            return fActor;
+        }
+
+        /// <summary>
+        /// Checks whether all the players are within the bounds
+        /// of the camera view.
+        /// </summary>
         private bool allPlayersInBounds()
         {
             foreach (Penguin p in players)
-                if (!camera.isInBounds(p, GraphicsDevice))
+                if (!camera.isInBounds(p))
                     return false;
 
             return true;
@@ -1046,14 +1109,14 @@ namespace JAMMM
                     // draw background
                     GraphicsDevice.Clear(Color.Blue);
 
-                    /*
+                    
                     spriteBatch.Begin(SpriteSortMode.BackToFront,
                         BlendState.AlphaBlend, null, null, null, null,
-                        camera.getTransformation(GraphicsDevice));
-                     * */
-                    spriteBatch.Begin();
+                        camera.getTransformation());
+                    
+                    //spriteBatch.Begin();
 
-                    spriteBatch.Draw(background, camera.getViewRectangle(GraphicsDevice), Color.White);
+                    spriteBatch.Draw(background, camera.View, Color.White);
 
                     // draw each player
                     foreach (Penguin player in players)

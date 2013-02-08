@@ -91,18 +91,26 @@ namespace JAMMM.Actors
         public override void spawnAt(Vector2 position)
         {
             base.spawnAt(position);
-            this.calories = 100;
+            this.calories = 400;
             this.currentAnimation = moveAnimation;
             this.currentAnimation.play();
             this.CurrState = state.Moving;
             this.isHit = false;
             this.isBlink = false;
             this.numBlinks = 0;
+            this.Mass = 1;
         }
 
         public override void update(GameTime gameTime)
         {
             double time = gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if(IsAlive)
+                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
+                    ParticleManager.Instance.createParticle(ParticleType.Bubble,
+                        new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),
+                        new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+
 
             tryToBlink(gameTime);
             tryToDie();
@@ -133,6 +141,7 @@ namespace JAMMM.Actors
                 }
             }
 
+            boundaryCheck();
             currentAnimation.update(gameTime);
         }
 
@@ -160,10 +169,27 @@ namespace JAMMM.Actors
 
                 AudioManager.getSound("Actor_Hit").Play();
                 Random rnd = new Random();
+
                 ParticleManager.Instance.createParticle(ParticleType.HitSpark, 
                     new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)), 
                     new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f, 
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble()*3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
 
 
                 this.isHit = true;

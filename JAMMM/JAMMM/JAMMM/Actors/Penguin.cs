@@ -22,14 +22,14 @@ namespace JAMMM.Actors
         public const int MED_SIZE = 45;
         public const int LARGE_SIZE = 60;
 
-        public const int SPEAR_SMALL_COST = 5;
-        public const int SPEAR_MED_COST = 7;
-        public const int SPEAR_LARGE_COST = 10;
+        public const int SPEAR_SMALL_COST = 7;
+        public const int SPEAR_MED_COST = 10;
+        public const int SPEAR_LARGE_COST = 13;
 
 
-        public const int DASH_SMALL_COST = 3;
-        public const int DASH_MED_COST = 4;
-        public const int DASH_LARGE_COST = 5;
+        public const int DASH_SMALL_COST = 4;
+        public const int DASH_MED_COST = 5;
+        public const int DASH_LARGE_COST = 7;
 
         public const int SMALL_MASS = 100;
         public const int MEDIUM_MASS = 500;
