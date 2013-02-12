@@ -30,13 +30,15 @@ namespace JAMMM
         private GameState currentGameState;
 
         GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
-        private Texture2D playerPenguin;
-        private Texture2D background;
-        private Texture2D title;
-        private Rectangle playerPenguinRectangle;
-        private Rectangle screenRectangle;
-        public Rectangle gameplayBoundaries;
+
+        private SpriteBatch  spriteBatch;
+        private Texture2D    playerPenguin;
+        private Texture2D    background;
+        private Texture2D    title;
+        private Rectangle    playerPenguinRectangle;
+        private Rectangle    screenRectangle;
+
+        public Rectangle     gameplayBoundaries;
 
         private Vector2 player1StartPosition,
                         player2StartPosition,
@@ -84,7 +86,7 @@ namespace JAMMM
         private const float EPSILON = 0.01f;
 
         private const int FISH_POOL_SIZE = 40;
-        private const int SHARK_POOL_SIZE = 2;
+        private const int SHARK_POOL_SIZE = 0;
 
         private const float SHARK_ATTACK_THRESHOLD = 300;
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;

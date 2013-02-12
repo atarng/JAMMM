@@ -89,70 +89,24 @@ namespace JAMMM
             }
             */
 
-            //Vector2 initVelNormalize = vel; //initial velocity
-            //if (!initVelNormalize.Equals(Vector2.Zero))
-            //    initVelNormalize.Normalize();
-            //if (a.CurrState == Actor.state.Dashing && !acc.Equals(Vector2.Zero))
-            //    acc = a.MaxAccDash * Vector2.Normalize(acc);
-
             a.Velocity = acc * delta + vel;
 
-            //if not dashing and sqrt then cap the magnitude
-            if (a.CurrState != Actor.state.Dashing  && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
-            {
-                a.Velocity = vel = uk * a.Velocity;
-            }
-            else if( a.CurrState == Actor.state.Dashing && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
-            {
+            // cap the max speed for each state
+            if (a.CurrState != Actor.state.Dashing  
+                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
+                a.Velocity = vel = a.MaxVel * Vector2.Normalize(a.Velocity);
+            else if( a.CurrState == Actor.state.Dashing 
+                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
                 a.Velocity = a.MaxVelDash * Vector2.Normalize(a.Velocity);
-            }
 
             //relative friction
             if (applyFric)
                 a.Velocity = vel = uk * a.Velocity;
 
-            //initial velocity is vel, final velocity is a.velocity
-            //Vector2 finalVelNormalize = a.Velocity;
-            //if (!finalVelNormalize.Equals(Vector2.Zero))
-            //    finalVelNormalize.Normalize();
-
-            /*
-            Vector2 temp = a.Velocity + accFricNormalize * uk;
-            temp.Normalize();
-            if (applyFric && magnitudeSquared(temp) > magnitudeSquared(a.Velocity) )//temp.Equals(finalVelNormalize) )// && !acc.Equals(Vector2.Zero))
-                a.Velocity += accFricNormalize * uk;
-            
-            */
             //a.Position = pos = vel * delta + pos;
             Vector2 dV = vel * delta;
 
             a.move(dV.X, dV.Y);
-
-            //uncomment for boundry checks
-            /*
-            if (pos.X > 800)
-            {
-                pos.X = 800;
-                vel.X *= -1; 
-            }
-            else if (pos.X < 0)
-            {
-                pos.X = 0;
-                vel.X *= -1; 
-            }
-            if (pos.Y > 800)
-            {
-                pos.Y = 800;
-                vel.Y *= -1; 
-            }
-            else if (pos.Y < 0)
-            {
-                pos.Y = 0;
-                vel.Y *= -1; 
-            }
-            a.Position = pos;
-            a.Velocity = vel;
-              */  
 
             //Rotations
             //if ( !finalVelNormalize.Equals(Vector2.Zero))
@@ -160,16 +114,6 @@ namespace JAMMM
             {
                 a.Rotation = VectorToAngle(a.Acceleration);
             }
-            /*
-            if (!acc.Equals(Vector2.Zero) && !finalVelNormalize.Equals(Vector2.Zero))
-            {
-                //float angle = (float)Math.Atan2(finalVelNormalize.Y - initVelNormalize.Y, finalVelNormalize.X - initVelNormalize.X);
-                //float angle = (float) Math.Acos(Vector2.Dot(finalVelNormalize, initVelNormalize));
-                //a.Rotation += angle;
-                //if ( Math.Abs(a.Rotation - VectorToAngle(finalVelNormalize)) < Math.PI / 4)
-                a.Rotation = VectorToAngle(finalVelNormalize);
-            }
-            */
 
             //update the bounds
             float s = (float)Math.Sin(a.Rotation);

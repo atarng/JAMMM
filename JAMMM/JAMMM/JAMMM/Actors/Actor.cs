@@ -24,7 +24,7 @@ namespace JAMMM
 
         public const int SHARK_CALORIES = 100;
         public const int PENGUIN_CALORIES = 60;
-        public const int FISH_CALORIES = 10;
+        public const int FISH_CALORIES = 50;
 
         public const int SHARK_DAMAGE = 50;
 
@@ -53,7 +53,8 @@ namespace JAMMM
             DashCooldown,
             DashReady,
             Dying,
-            Pursuing
+            Pursuing,
+            MeleeAttack
         }
 
         /// <summary>
@@ -275,6 +276,86 @@ namespace JAMMM
         public Vector2 getStartingPosition()
         {
             return this.startingPosition;
+        }
+
+        public void resetPhysics()
+        {
+            this.acceleration = Vector2.Zero;
+            this.velocity = Vector2.Zero;
+        }
+
+        protected virtual void changeState(state newState) 
+        {
+            switch (newState)
+            {
+                case state.Dash:
+                {
+                    onDash();
+                    break;
+                }
+                case state.DashCooldown:
+                {
+                    onDashCooldown();
+                    break;
+                }
+                case state.Dashing:
+                {
+                    onDashing();
+                    break;
+                }
+                case state.DashReady:
+                {
+                    onDashReady();
+                    break;
+                }
+                case state.Dying:
+                {
+                    onDying();
+                    break;
+                }
+                case state.Moving:
+                {
+                    onMoving();
+                    break;
+                }
+                case state.Pursuing:
+                {
+                    onPursuing();
+                    break;
+                }
+                case state.Turning:
+                {
+                    onTurning();
+                    break;
+                }
+                case state.MeleeAttack:
+                {
+                    onMeleeAttack();
+                    break;
+                }
+            }
+
+            this.currState = newState;
+        }
+
+        protected virtual void onDash()         { }
+        protected virtual void onDashCooldown() { }
+        protected virtual void onDashing()      { }
+        protected virtual void onDashReady()    { }
+        protected virtual void onDying()        { }
+        protected virtual void onMoving()       { }
+        protected virtual void onPursuing()     { }
+        protected virtual void onTurning()      { }
+        protected virtual void onMeleeAttack()  { }
+
+        protected void changeAnimation(Animation newAnimation)
+        {
+            if (currentAnimation != null)
+                currentAnimation.stop();
+
+            currentAnimation = newAnimation;
+            
+            currentAnimation.play();
         }
 
         public virtual void spawnAt(Vector2 position)

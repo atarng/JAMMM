@@ -197,7 +197,7 @@ namespace JAMMM
 
                 ++this.frameIndex;
 
-                if (this.frameIndex == this.frameCount)
+                if (this.frameIndex >= this.frameCount)
                 {
                     if (this.isLooping)
                         this.frameIndex = 0;
@@ -209,9 +209,9 @@ namespace JAMMM
                         return;
                     }
                 }
-
-                updateFrameRectangle();
             }
+
+            updateFrameRectangle();
         }
 
         public void updateParticle(GameTime gameTime)
