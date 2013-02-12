@@ -65,8 +65,6 @@ namespace JAMMM
 
             currentAnimation.update(gameTime);
 
-            boundaryCheck();
-
             if ((this.velocity.Length() / MaxVel) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble,
                     new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),

@@ -123,7 +123,10 @@ namespace JAMMM
                 a.Velocity += accFricNormalize * uk;
             
             */
-            a.Position = pos = vel * delta + pos;
+            //a.Position = pos = vel * delta + pos;
+            Vector2 dV = vel * delta;
+
+            a.move(dV.X, dV.Y);
 
             //uncomment for boundry checks
             /*

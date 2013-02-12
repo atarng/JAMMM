@@ -22,14 +22,14 @@ namespace JAMMM.Actors
         public const int MED_SIZE = 45;
         public const int LARGE_SIZE = 60;
 
-        public const int SPEAR_SMALL_COST = 7;
+        public const int SPEAR_SMALL_COST = 5;
         public const int SPEAR_MED_COST = 10;
-        public const int SPEAR_LARGE_COST = 13;
+        public const int SPEAR_LARGE_COST = 15;
 
 
-        public const int DASH_SMALL_COST = 4;
-        public const int DASH_MED_COST = 5;
-        public const int DASH_LARGE_COST = 7;
+        public const int DASH_SMALL_COST = 0;
+        public const int DASH_MED_COST = 1;
+        public const int DASH_LARGE_COST = 2;
 
         public const int SMALL_MASS = 100;
         public const int MEDIUM_MASS = 500;
@@ -87,6 +87,8 @@ namespace JAMMM.Actors
 
         private string colorCode;
 
+        public Color color;
+
         /// <summary>
         /// Penguins take in a player num and a position
         /// and that's how they start on the map.
@@ -97,6 +99,15 @@ namespace JAMMM.Actors
             // going to need better values for the base
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
+            if (colorCode == "")
+                color = Color.White;
+            else if (colorCode == "_r")
+                color = Color.Red;
+            else if (colorCode == "_p")
+                color = Color.Purple;
+            else
+                color = Color.Green;
+
             this.colorCode        = colorCode;
             this.controller       = playerIndex;
             this.startingPosition = pos;
@@ -120,10 +131,6 @@ namespace JAMMM.Actors
             GamePadState gamePadState = GamePad.GetState(controller);
             if (gamePadState.IsConnected)
             {
-                // then it is connected, and we can do stuff here
-                //acceleration.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
-                //acceleration.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
-                
                 Vector2 accController = Acceleration;
                 accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
@@ -134,17 +141,6 @@ namespace JAMMM.Actors
                 {
                     Acceleration = accController;
                 }
-
-                /*
-                //if controller acc is greater than old acc, set it to controller acc
-                if (Physics.magnitudeSquared(accController) >= Physics.magnitudeSquared(Acceleration))
-                    Acceleration = accController;
-                else
-                {
-                    if( accController != Vector2.Zero )
-                        Acceleration = Vector2.Normalize(accController) * (float)Math.Sqrt(Physics.magnitudeSquared(Acceleration));
-                }
-                */
 
                 if ( this.calories > DashCost && gamePadState.IsButtonDown(Buttons.A) && !prevStateA)
                 {
@@ -171,14 +167,6 @@ namespace JAMMM.Actors
                         this.Calories -= this.SpearCost;
                     }
                 }
-                /*
-                                // stop dashing
-               else if (CurrState == state.Dashing && gamePadState.IsButtonUp(Buttons.A))
-               {
-                   CurrTime = DashCooldownTime;
-                   CurrState = state.DashCooldown;
-               } 
-               */
             }
 
             KeyboardState kbState = Keyboard.GetState();
@@ -578,8 +566,12 @@ namespace JAMMM.Actors
             this.isBlink = false;
             this.numBlinks = 0;
             this.Calories = START_CALORIES;
-            this.CurrState = state.Moving;
+            this.CurrState = state.DashReady;
             this.currentAnimation = moveAnimation;
+            this.acceleration.X = 0.0f;
+            this.acceleration.Y = 0.0f;
+            this.velocity.X = 0.0f;
+            this.velocity.Y = 0.0f;
             currentAnimation.play();
         }
 

@@ -91,7 +91,7 @@ namespace JAMMM.Actors
         public override void spawnAt(Vector2 position)
         {
             base.spawnAt(position);
-            this.calories = 400;
+            this.calories = 100;
             this.currentAnimation = moveAnimation;
             this.currentAnimation.play();
             this.CurrState = state.Moving;
@@ -209,6 +209,9 @@ namespace JAMMM.Actors
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
+            if (!IsAlive)
+                return;
+
             Color healthColor;
 
             if (this.Calories < 50 || this.isBlink)

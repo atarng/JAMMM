@@ -26,7 +26,7 @@ namespace JAMMM
         public const int PENGUIN_CALORIES = 60;
         public const int FISH_CALORIES = 10;
 
-        public const int SHARK_DAMAGE = 100;
+        public const int SHARK_DAMAGE = 50;
 
         /// <summary>
         /// Actors use this enum to determine which animation 
@@ -116,6 +116,8 @@ namespace JAMMM
                     this.Bounds = new Circle(this.position.X + Offset.X, this.position.Y + Offset.Y, this.Bounds.Radius);
             }
         }
+
+        public Vector2 changeInPosition;
 
         /// <summary>
         /// collision body offset
@@ -248,12 +250,32 @@ namespace JAMMM
 
         protected Vector2 startingPosition;
 
+        public virtual void move(float x, float y)
+        {
+            this.changeInPosition.X = x;
+            this.changeInPosition.Y = y;
+
+            this.position.X += x;
+            this.position.Y += y;
+        }
+
         public virtual void die()
         {
             this.isAlive = false;
         }
 
         public virtual void startDying() {}
+
+        public void setNewStartingPosition(Vector2 pos)
+        {
+            this.startingPosition = pos;
+            this.position = this.startingPosition;
+        }
+
+        public Vector2 getStartingPosition()
+        {
+            return this.startingPosition;
+        }
 
         public virtual void spawnAt(Vector2 position)
         {
@@ -290,16 +312,41 @@ namespace JAMMM
             }
         }
 
-        public virtual Rectangle getRectangleBounds(int buffer)
+        public virtual Rectangle getBufferedRectangleBounds(int buffer)
         {
             if (currentAnimation != null)
             {
                 Rectangle result = currentAnimation.getCurrentFrame();
 
-                result.Width  = result.Right - result.Left + 2 * buffer;
-                result.Height = result.Bottom - result.Top + 2 * buffer;
+                result.Width  = result.Right - result.Left + buffer;
+                result.Height = result.Bottom - result.Top + buffer;
                 result.X      = (int)position.X - buffer;
                 result.Y      = (int)position.Y - buffer;
+
+                return result;
+            }
+
+            return Rectangle.Empty;
+        }
+
+        /// <summary>
+        /// Gets rectangle bounds scaled to input amount
+        /// along each axis.
+        /// </summary>
+        public virtual Rectangle getScaledRectangleBounds(float horScale, float verScale)
+        {
+            if (currentAnimation != null)
+            {
+                Rectangle result = currentAnimation.getCurrentFrame();
+
+                result.Width = result.Right - result.Left + 2;
+                result.Height = result.Bottom - result.Top + 2;
+
+                result.X = (int)position.X;
+                result.Y = (int)position.Y;
+
+                result.Inflate((int)(result.Width * horScale),
+                               (int)(result.Height * verScale));
 
                 return result;
             }
@@ -310,9 +357,6 @@ namespace JAMMM
         public virtual void update(GameTime delta)
         {
             processInput();
-
-
-
         }
 
         public virtual void draw(GameTime delta, SpriteBatch batch)
