@@ -42,30 +42,11 @@ namespace JAMMM
 
         public static void separate(Actor a, Actor b)
         {
-            float iDepth = a.Bounds.intersectionDepth(b.Bounds);
-
-            Vector2 aVel = a.velocity;
-            float aLen = aVel.Length();
-
-            Vector2 bVel = b.velocity;
-            float bLen = bVel.Length();
-
-            // actor A is moving faster than actor B
-            if (aLen > bLen)
-            {
-                Vector2 velNorm = aVel;
-                velNorm.Normalize();
-
-                a.Position -= velNorm * iDepth;
-            }
-            // actor B is moving faster than actor A
+            if (a.changeInPosition.Length() >
+                b.changeInPosition.Length())
+                a.Position -= a.changeInPosition;
             else
-            {
-                Vector2 velNorm = bVel;
-                velNorm.Normalize();
-
-                b.Position -= velNorm * iDepth;
-            }
+                b.Position -= b.changeInPosition;
         }
 
         public static void applyMovement(Actor a, float delta, Boolean applyFric )
@@ -122,6 +103,18 @@ namespace JAMMM
             a.bounds.center.X = /*c * (a.Offset.X) - s * (a.Offset.Y) +*/ a.Position.X;
             a.bounds.center.Y = /* s * (a.Offset.X) + c * (a.Offset.Y) +*/ a.Position.Y;
 
+            if (a is Shark)
+            {
+                Shark sh = (Shark)a;
+
+                sh.mouthPoint = sh.Bounds.center;
+                sh.mouthPoint.X += 100;
+
+                RotatePoint(sh.Bounds.center.X, sh.Bounds.center.Y, sh.Rotation, ref sh.mouthPoint);
+
+                sh.mouthCircle.center = sh.mouthPoint;
+            }
+
             a.acceleration = accDecay * a.acceleration;
 
             //zero if too small
@@ -138,6 +131,24 @@ namespace JAMMM
         public static float VectorToAngle(Vector2 vector)
         {
             return (float)Math.Atan2(vector.Y, vector.X);
+        }
+
+        public static void RotatePoint(float cx, float cy, float angle, ref Vector2 p)
+        {
+            float s = (float)Math.Sin(angle);
+            float c = (float)Math.Cos(angle);
+
+            // translate point back to origin:
+            p.X -= cx;
+            p.Y -= cy;
+
+            // rotate point
+            float xnew = p.X * c - p.Y * s;
+            float ynew = p.X * s + p.Y * c;
+
+            // translate point back:
+            p.X = (xnew + cx);
+            p.Y = (ynew + cy);
         }
 
         public static Vector2 AngleToVector(float angle)
@@ -181,7 +192,10 @@ namespace JAMMM
             float dx = center.X - other.center.X;
             float dy = center.Y - other.center.Y;
 
-            Vector2 result = new Vector2(dx, dy);
+            Vector2 result = Vector2.Zero;
+
+            result.X = dx;
+            result.Y = dy;
 
             float distanceBetweenCenters = result.Length();
 
@@ -194,11 +208,25 @@ namespace JAMMM
         {
             float dx = center.X - a.center.X;
             float dy = center.Y - a.center.Y;
+
+            float lengthSquared = dx * dx + dy * dy;
+
             float radii = radius + a.radius;
-            if (dx * dx + dy * dy < radii * radii)
+
+            float radiiSquared = radii * radii;
+
+            if (lengthSquared <= radiiSquared)
                 return true;
+
             return false;
         }
 
+        public bool containsPoint(Vector2 p)
+        {
+            if ((p - center).Length() > radius)
+                return false;
+
+            return true;
+        }
     }
 }

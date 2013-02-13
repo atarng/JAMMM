@@ -66,6 +66,11 @@ namespace JAMMM
             return true;
         }
 
+        public void die()
+        {
+            this.life = 0;
+        }
+
         public bool isAlive()
         {
             if (life == 0)

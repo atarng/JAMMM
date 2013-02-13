@@ -24,11 +24,17 @@ namespace JAMMM.Actors
         public const int NUMBER_BLINKS_ON_HIT = 3;
         public const float BLINK_DURATION = 0.1f;
 
+        public Vector2 mouthPoint;
+        public Circle mouthCircle;
+
         public Shark(float x, float y) 
-            : base(x, y, 40, 24, 44, 1500)
+            : base(x, y, 160, 96, 60, 1500)
         {
             this.MaxAccDash = 800;
             this.calories = 100;
+
+            mouthCircle = new Circle(this.Bounds.center.X + 100, this.Bounds.center.Y, 35);
+            mouthPoint = Vector2.Zero;
         }
 
         public override void loadContent()
@@ -141,7 +147,6 @@ namespace JAMMM.Actors
                 }
             }
 
-            boundaryCheck();
             currentAnimation.update(gameTime);
         }
 

@@ -282,6 +282,7 @@ namespace JAMMM
         {
             this.acceleration = Vector2.Zero;
             this.velocity = Vector2.Zero;
+            this.rotation = 0.0f;
         }
 
         protected virtual void changeState(state newState) 

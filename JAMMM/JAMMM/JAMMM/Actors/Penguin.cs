@@ -18,9 +18,9 @@ namespace JAMMM.Actors
         public const int NUMBER_BLINKS_ON_HIT          = 5;
         public const float BLINK_DURATION              = 0.1f;
 
-        public const int SMALL_SIZE = 35;
-        public const int MED_SIZE = 45;
-        public const int LARGE_SIZE = 60;
+        public const int SMALL_SIZE = 22;
+        public const int MED_SIZE = 33;
+        public const int LARGE_SIZE = 54;
 
         public const int SPEAR_SMALL_COST = 5;
         public const int SPEAR_MED_COST = 10;
@@ -173,6 +173,16 @@ namespace JAMMM.Actors
                 SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1, false);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
                 SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1, false, 1.5f);
+        }
+
+        public void pauseAnimation()
+        {
+            currentAnimation.pause();
+        }
+
+        public void resumeAnimation()
+        {
+            currentAnimation.play();
         }
 
         public override void update(GameTime delta)
@@ -397,6 +407,24 @@ namespace JAMMM.Actors
             }
         }
 
+        public override void die()
+        {
+            base.die();
+        }
+
+        public void resetProperties()
+        {
+            resetBlink();
+
+            this.Calories = START_CALORIES;
+
+            tryToGrow();
+
+            resetPhysics();
+
+            changeState(state.DashReady);
+        }
+
         public override void draw(GameTime delta, SpriteBatch batch)
         {
             if (this.IsAlive)
@@ -414,9 +442,6 @@ namespace JAMMM.Actors
                 else
                     currentAnimation.draw(batch, this.Position,
                         c, SpriteEffects.None, this.Rotation, 1.0f);
-
-                c = Color.White;
-                batch.DrawString(Game1.font, "Calories: " + this.Calories, new Vector2(this.Position.X - 75, this.Position.Y + 60), c, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
 
                 if (printPhysics)
                     printPhys(batch);
@@ -496,13 +521,7 @@ namespace JAMMM.Actors
         {
             base.respawn();
 
-            resetBlink();
-
-            this.Calories     = START_CALORIES;
-
-            resetPhysics();
-
-            changeState(state.DashReady);
+            resetProperties();
         }
 
         public override void handleAnimationComplete(AnimationType t) 
@@ -564,7 +583,10 @@ namespace JAMMM.Actors
                 // take damage
                 else if (other.CurrState == state.Dashing)
                 {
-                    if (CurrState != state.Dying)
+                    // we must not be dying and we must be colliding with
+                    // the mouth of the shark
+                    if (CurrState != state.Dying &&
+                        this.Bounds.isCollision(((Shark)other).mouthCircle))
                     {
                         ParticleManager.Instance.createParticle(ParticleType.HitSpark,
                             new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),

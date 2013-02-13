@@ -86,7 +86,7 @@ namespace JAMMM
         private const float EPSILON = 0.01f;
 
         private const int FISH_POOL_SIZE = 40;
-        private const int SHARK_POOL_SIZE = 0;
+        private const int SHARK_POOL_SIZE = 2;
 
         private const float SHARK_ATTACK_THRESHOLD = 300;
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
@@ -506,7 +506,7 @@ namespace JAMMM
             }
         }
 
-        protected void trySpear(Penguin a, int id) //TODO change the penguin
+        protected void trySpear(Penguin a, int id)
         {
             if (a.Fire)
             {
@@ -523,28 +523,15 @@ namespace JAMMM
             }
         }
 
-        private Vector2 getRandomPositionInGameplayBounds()
+        private Vector2 getRandomPositionWithinBounds(Rectangle bounds)
         {
             Vector2 newPos = Vector2.Zero;
 
-            newPos.X = (float)gameplayBoundaries.Left 
-                + (float)(rng.NextDouble() * (double)(gameplayBoundaries.Width));
+            newPos.X = (float)bounds.Left
+                + (float)(rng.NextDouble() * (double)(bounds.Width));
 
-            newPos.Y = (float)gameplayBoundaries.Top
-                + (float)(rng.NextDouble() * (double)(gameplayBoundaries.Height));
-
-            return newPos;
-        }
-
-        private Vector2 getRandomPositionOnScreen()
-        {
-            Vector2 newPos = Vector2.Zero;
-
-            newPos.X = (float)screenRectangle.Left
-                + (float)(rng.NextDouble() * (double)(screenRectangle.Width));
-
-            newPos.Y = (float)screenRectangle.Top
-                + (float)(rng.NextDouble() * (double)(screenRectangle.Height));
+            newPos.Y = (float)bounds.Top
+                + (float)(rng.NextDouble() * (double)(bounds.Height));
 
             return newPos;
         }
@@ -568,12 +555,45 @@ namespace JAMMM
                         if (isPlayer4Connected) isPlayer4Ready = false;
 
                         foreach (Penguin p in players)
-                            p.setNewStartingPosition(getRandomPositionOnScreen());
+                        {
+                            p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
+                            p.resetProperties();                        
+                        }
+
+                        Rectangle titleBounds = title.Bounds;
+
+                        titleBounds.X = (int)titlePosition.X;
+                        titleBounds.Y = (int)titlePosition.Y;
 
                         foreach (Penguin p in players)
-                            while (p.getBufferedRectangleBounds(0).Intersects(title.Bounds) &&
-                                   !screenRectangle.Contains(p.getBufferedRectangleBounds(0)))
-                                p.setNewStartingPosition(getRandomPositionOnScreen());
+                            while (p.getBufferedRectangleBounds(0).Intersects(titleBounds) ||
+                                   isNearAnotherPlayer(p))
+                                p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
+
+                        if (isPlayer1Connected)
+                        {
+                            player1ReadyTextPosition = players[0].Position;
+                            player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
+                            player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
+                        }
+                        if (isPlayer2Connected)
+                        {
+                            player2ReadyTextPosition = players[1].Position;
+                            player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
+                            player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
+                        }
+                        if (isPlayer3Connected)
+                        {
+                            player3ReadyTextPosition = players[2].Position;
+                            player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
+                            player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
+                        }
+                        if (isPlayer4Connected)
+                        {
+                            player4ReadyTextPosition = players[3].Position;
+                            player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
+                            player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
+                        }
                     }
 
                     break;
@@ -598,25 +618,23 @@ namespace JAMMM
                     if (battleTheme.State != SoundState.Playing)
                         battleTheme.Play();
 
+                    ParticleManager.Instance.killAllHitParticles();
+
                     camera.resetZoom();
 
                     foreach (Spear s in spears)
                         s.die();
 
-                    // load content and spawn each player
                     foreach (Penguin p in players)
-                    {
-                        p.loadContent();
                         p.respawn();
-                    }
 
                     // spawn some fishies
                     foreach (Fish p in fishPool)
-                        p.spawnAt(getRandomPositionInGameplayBounds());
+                        p.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
 
                     // spawn some sharkies
                     foreach (Shark s in sharkPool)
-                        s.spawnAt(getRandomPositionInGameplayBounds());
+                        s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
 
                     break;
                 }
@@ -771,7 +789,7 @@ namespace JAMMM
                         Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
                         if (!f.IsAlive)
-                            f.spawnAt(getRandomPositionInGameplayBounds());
+                            f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
 
                         keepInBounds(f);
                     }
@@ -797,11 +815,11 @@ namespace JAMMM
                             if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
                             {
                                 sharkRespawnTimes[i] = 0.0f;
-                                
-                                s.spawnAt(getRandomPositionInGameplayBounds());
+
+                                s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
 
                                 while (isNearAPlayer(s))
-                                    s.spawnAt(getRandomPositionInGameplayBounds());
+                                    s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                             }
                         }
 
@@ -860,6 +878,30 @@ namespace JAMMM
 
             foreach (Penguin p in players)
             {
+                currDist = Vector2.Distance(p.Position, aPos);
+
+                if (currDist < minDist)
+                    minDist = currDist;
+            }
+
+            if (minDist <= SHARK_SPAWN_CLOSENESS_THRESHOLD)
+                return true;
+
+            return false;
+        }
+
+        private bool isNearAnotherPlayer(Actor a)
+        {
+            Vector2 aPos = a.Position;
+
+            float minDist = 5000.0f;
+
+            float currDist = 0.0f;
+
+            foreach (Penguin p in players)
+            {
+                if (p == (Penguin)a) continue;
+
                 currDist = Vector2.Distance(p.Position, aPos);
 
                 if (currDist < minDist)
@@ -1069,7 +1111,19 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.One).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.One, player1StartPosition, ""));
+                    Penguin newPlayer = 
+                        new Penguin(PlayerIndex.One, player1StartPosition, "");
+
+                    newPlayer.loadContent();
+                    newPlayer.respawn();
+                    newPlayer.pauseAnimation();
+
+                    players.Add(newPlayer);
+
+                    player1ReadyTextPosition = players[0].Position;
+                    player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
+
                     isPlayer1Connected = true;
                 }
             }
@@ -1077,7 +1131,19 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Two).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Two, player2StartPosition, "_r"));
+                    Penguin newPlayer = 
+                        new Penguin(PlayerIndex.Two, player2StartPosition, "_r");
+
+                    newPlayer.loadContent();
+                    newPlayer.respawn();
+                    newPlayer.pauseAnimation();
+
+                    players.Add(newPlayer);
+
+                    player2ReadyTextPosition = players[1].Position;
+                    player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
+
                     isPlayer2Connected = true;
                 }
                 
@@ -1086,7 +1152,19 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Three).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Three, player3StartPosition, "_p"));
+                    Penguin newPlayer = 
+                        new Penguin(PlayerIndex.Three, player3StartPosition, "_p");
+
+                    newPlayer.loadContent();
+                    newPlayer.respawn();
+                    newPlayer.pauseAnimation();
+
+                    players.Add(newPlayer);
+
+                    player3ReadyTextPosition = players[2].Position;
+                    player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
+
                     isPlayer3Connected = true;
                 }
             }
@@ -1094,7 +1172,19 @@ namespace JAMMM
             {
                 if (GamePad.GetState(PlayerIndex.Four).IsConnected)
                 {
-                    players.Add(new Penguin(PlayerIndex.Four, player4StartPosition, "_g"));
+                    Penguin newPlayer = 
+                        new Penguin(PlayerIndex.Four, player4StartPosition, "_g");
+
+                    newPlayer.loadContent();
+                    newPlayer.respawn();
+                    newPlayer.pauseAnimation();
+
+                    players.Add(newPlayer);
+
+                    player4ReadyTextPosition = players[3].Position;
+                    player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
+
                     isPlayer4Connected = true;
                 }
             }
@@ -1378,30 +1468,15 @@ namespace JAMMM
             {
                 case (GameState.FindingPlayers):
                 {
-                    // draw the finding players screen
                     GraphicsDevice.Clear(Color.DarkSeaGreen);
                     spriteBatch.Begin();
 
-                    // draw the title
                     spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
                     spriteBatch.Draw(title, titlePosition, Color.White);
-                    //spriteBatch.DrawString(font, titleText, titlePosition, Color.WhiteSmoke);
 
-                    // draw a penguin for each connected controller
-                    if (isPlayer1Connected)
-                        spriteBatch.Draw(playerPenguin, players[0].getStartingPosition(), playerPenguinRectangle, 
-                            players[0].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer2Connected)
-                        spriteBatch.Draw(playerPenguin, players[1].getStartingPosition(), playerPenguinRectangle,
-                            players[1].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer3Connected)
-                        spriteBatch.Draw(playerPenguin, players[2].getStartingPosition(), playerPenguinRectangle,
-                            players[2].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer4Connected)
-                        spriteBatch.Draw(playerPenguin, players[3].getStartingPosition(), playerPenguinRectangle,
-                            players[3].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+                    foreach (Penguin p in players)
+                        p.draw(gameTime, spriteBatch);
 
-                    // draw a green ready text for each readied player
                     if (isPlayer1Ready)
                         spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
                     if (isPlayer2Ready)
@@ -1417,7 +1492,6 @@ namespace JAMMM
                 }
                 case (GameState.TransitionIntoBattle):
                 {
-                    // draw background
                     GraphicsDevice.Clear(Color.DarkSeaGreen);
 
                     spriteBatch.Begin();
@@ -1425,21 +1499,9 @@ namespace JAMMM
                     spriteBatch.Draw(background, expandingView, backgroundFadeColor);
 
                     spriteBatch.Draw(title, titlePosition, titleFadeColor);
-                    //spriteBatch.DrawString(font, titleText, titlePosition, Color.WhiteSmoke);
 
-                    // draw a penguin for each connected controller
-                    if (isPlayer1Connected)
-                        spriteBatch.Draw(playerPenguin, players[0].getStartingPosition(), playerPenguinRectangle,
-                            players[0].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer2Connected)
-                        spriteBatch.Draw(playerPenguin, players[1].getStartingPosition(), playerPenguinRectangle,
-                            players[1].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer3Connected)
-                        spriteBatch.Draw(playerPenguin, players[2].getStartingPosition(), playerPenguinRectangle,
-                            players[2].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-                    if (isPlayer4Connected)
-                        spriteBatch.Draw(playerPenguin, players[3].getStartingPosition(), playerPenguinRectangle,
-                            players[3].color, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+                    foreach (Penguin p in players)
+                        p.draw(gameTime, spriteBatch);
 
                     spriteBatch.End();
 
@@ -1447,30 +1509,28 @@ namespace JAMMM
                 }
                 case (GameState.Battle):
                 {
-                    // draw background
                     GraphicsDevice.Clear(Color.Blue);
                     
                     spriteBatch.Begin(SpriteSortMode.BackToFront,
                         BlendState.AlphaBlend, null, null, null, null,
                         camera.getTransformation());
-                    
-                    //spriteBatch.Begin();
 
                     spriteBatch.Draw(background, camera.maxView, Color.White);
 
-                    // draw each player
-                    foreach (Penguin player in players)
-                        player.draw(gameTime, spriteBatch);
+                    foreach (Penguin p in players)
+                    {
+                        p.draw(gameTime, spriteBatch);
+                        spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
+                            new Vector2(p.Position.X - 75, p.Position.Y + 60),
+                            Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+                    }
 
-                    // draw each fish
                     foreach (Fish fish in fishPool)
                         fish.draw(gameTime, spriteBatch);
                     
-                    // draw each shark
                     foreach (Shark shark in sharkPool)
                         shark.draw(gameTime, spriteBatch);
 
-                    // draw each spear
                     foreach (Spear spear in spears)
                         spear.draw(gameTime, spriteBatch);
 
@@ -1478,45 +1538,31 @@ namespace JAMMM
 
                     spriteBatch.End();
 
-
                     spriteBatch.Begin();
 
-                    // draw calories and player text for each player
                     if (isPlayer1Connected)
                     {
                         spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
-                        // draw the calories themselves as a string right after that position
-                        //spriteBatch.DrawString(font, players[0].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
-                        //    player1CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer2Connected)
                     {
                         spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
-                        // draw the calories themselves as a string right after that position
-                        //spriteBatch.DrawString(font, players[1].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
-                        //    player2CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer3Connected)
                     {
                         spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
-                        // draw the calories themselves as a string right after that position
-                        //spriteBatch.DrawString(font, players[2].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
-                        //    player3CalorieTextPosition, Color.WhiteSmoke);
                     }
                     if (isPlayer4Connected)
                     {
                         spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
                         spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
-                        // draw the calories themselves as a string right after that position
-                        //spriteBatch.DrawString(font, players[3].Calories <= 0 ? "IS DEAD" : "Is Still Alive",
-                        //    player4CalorieTextPosition, Color.WhiteSmoke);
                     }
 
                     spriteBatch.End();
@@ -1525,12 +1571,10 @@ namespace JAMMM
                 }
                 case (GameState.Victory):
                 {
-                    // draw victory screen splash
-                    GraphicsDevice.Clear(Color.Blue);
+                    GraphicsDevice.Clear(Color.DarkSeaGreen);
 
                     spriteBatch.Begin();
 
-                    // draw victory text (containing the player)
                     if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
                     {
                         spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);

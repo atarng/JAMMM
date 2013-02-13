@@ -62,6 +62,12 @@ namespace JAMMM
             }
         }
 
+        public void killAllHitParticles()
+        {
+            foreach (ParticleHitSpark b in hitSparkPool)
+                b.die();
+        }
+
         public void update(GameTime gameTime)
         {
             foreach (ParticleBubble a in bubblePool)
