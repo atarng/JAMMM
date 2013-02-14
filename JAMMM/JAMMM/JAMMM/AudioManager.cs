@@ -6,16 +6,12 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace JAMMM
 {
-
-    enum SoundType {
+    enum SoundType 
+    {
         Spear_Throw,
         Actor_Hit,
         Actor_Dash
-        
     }
-
-
-
 
     /// <summary>
     /// AudioManager is a singleton controlling the usage
@@ -23,10 +19,8 @@ namespace JAMMM
     /// away all functionality and just allow desiring actors
     /// or the game to play sounds and music and ask what's playing.
     /// </summary>
-    
     public class AudioManager
     {
-
         SoundEffect soundEffect;
         private static Dictionary<string, SoundEffect> database = new Dictionary<string, SoundEffect>();
 
@@ -38,7 +32,5 @@ namespace JAMMM
         {
             return database[soundId];
         }
-
-
     }
 }

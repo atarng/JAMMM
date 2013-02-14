@@ -10,13 +10,6 @@ namespace JAMMM.Actors
 {
     public class Spear : Actor
     {
-        //public Penguin.Size size;
-
-        //(float x, float y, float offX, float offY, float radius, mass)
-        //public Spear(float x, float y) : base(x, y, 0, 24, 10, 100) {
-        //    MaxVel = 500;
-        //}
-
         private int id;
         public int Id
         {
@@ -24,19 +17,20 @@ namespace JAMMM.Actors
             set{id = value;}
         }
 
-        public Spear(float x, float y, Size s, int id)
-            : base(x, y, 0, 24, 20, 100)
+        public Spear() : base(0, 0, 0, 24, 20, 100)
         {
-            MaxVelDash = 777;
-            this.CurrentSize = s;
-            this.id = id;
-            CurrState = state.Dashing;
+            MaxVel = 777;
+        }
+
+        protected override void onMoving()
+        {
+            changeAnimation(moveAnimation);
         }
 
         public override void loadContent()
         {
-            dashAnimation = new Animation((Actor)this, AnimationType.Dash, SpriteManager.getTexture("Spear"), 4, true, 0.4f);
-            base.loadContent();
+            moveAnimation = new Animation((Actor)this, AnimationType.Dash, 
+                SpriteManager.getTexture("Spear"), 4, true, 0.1f);
         }
 
         public override void update(GameTime delta)
@@ -44,10 +38,16 @@ namespace JAMMM.Actors
             if (this.IsAlive)
             {
                 base.update(delta);
-                double time = delta.ElapsedGameTime.TotalMilliseconds;
-                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
-                    ParticleManager.Instance.createParticle(ParticleType.Bubble, new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
+                double time = delta.ElapsedGameTime.TotalMilliseconds;
+
+                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
+                    ParticleManager.Instance.createParticle(ParticleType.Bubble, 
+                        new Vector2(this.Position.X + rnd.Next(-15, 15), 
+                            this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 
+                            3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+
+                currentAnimation.update(delta);
             }
         }
 
@@ -56,13 +56,32 @@ namespace JAMMM.Actors
             if (IsAlive)
             {
                 if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
-                    ParticleManager.Instance.createParticle(ParticleType.Bubble, new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+                    ParticleManager.Instance.createParticle(ParticleType.Bubble, 
+                        new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y 
+                            + rnd.Next(-15, 15)), new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
+                currentAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
 
-                dashAnimation.draw(batch, this.Position, Color.White, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
                 if (printPhysics)
                     printPhys(batch);
             }
+        }
+
+        public override void spawnAt(Vector2 position)
+        {
+            base.spawnAt(position);
+
+            changeState(state.Moving);
+        }
+
+        public void setSpawnParameters(Size s, int id, Penguin p)
+        {
+            this.CurrentSize = s;
+            this.id = id;
+
+            acceleration = Vector2.Normalize(Physics.AngleToVector(p.Rotation)) * 50000F;
+            velocity.X = p.Velocity.X;
+            velocity.Y = p.Velocity.Y;
         }
 
         public void printPhys(SpriteBatch batch)
@@ -82,19 +101,10 @@ namespace JAMMM.Actors
             //batch.DrawString(Game1.font, "Rotation " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
         }
 
-        /// <summary>
-        /// How the penguin collides with other actors.
-        /// </summary>
         public override void collideWith(Actor other)
         {
-            if (other is Penguin)
-            {
+            if (other is Penguin || other is Shark)
                 this.IsAlive = false;
-            }
-            else if (other is Shark)
-            {
-                this.IsAlive = false;
-            }
         }
     }
 }

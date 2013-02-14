@@ -25,7 +25,6 @@ namespace JAMMM
 
         protected Animation animation;
 
-
         /// <summary>
         /// These are all of the animations for each actor. 
         /// Actors need to instantiate these within their

@@ -17,21 +17,16 @@ namespace JAMMM.Actors
             set { calories = value; }
         }
 
-        private float blinkTime;
-        private float numBlinks;
-        private bool isHit;
-        private bool isBlink;
-        public const int NUMBER_BLINKS_ON_HIT = 3;
-        public const float BLINK_DURATION = 0.1f;
+        public const int SHARK_BASE_HEALTH = 100;
 
         public Vector2 mouthPoint;
         public Circle mouthCircle;
 
-        public Shark(float x, float y) 
-            : base(x, y, 160, 96, 60, 1500)
+        public Shark() : base(0, 0, 160, 96, 60, 1500)
         {
-            this.MaxAccDash = 800;
-            this.calories = 100;
+            this.MaxAccDash = 1500;
+            this.MaxVelDash = 1000;
+            this.calories = SHARK_BASE_HEALTH;
 
             mouthCircle = new Circle(this.Bounds.center.X + 100, this.Bounds.center.Y, 35);
             mouthPoint = Vector2.Zero;
@@ -44,67 +39,42 @@ namespace JAMMM.Actors
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
                 SpriteManager.getTexture(Game1.SHARK_DEATH), 3, false, 0.3f);
             dashAnimation = new Animation((Actor)this, AnimationType.Dash, 
-                SpriteManager.getTexture(Game1.SHARK_EAT), 4, false, 0.3f);
+                SpriteManager.getTexture(Game1.SHARK_EAT), 4, false, 0.4f);
             turnAnimation = new Animation((Actor)this, AnimationType.Turn, 
                 SpriteManager.getTexture(Game1.SHARK_TURN), 3, false, 0.2f);
-        }
-
-        private void tryToBlink(GameTime gameTime)
-        {
-            if (this.isHit)
-            {
-                this.blinkTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (this.blinkTime > BLINK_DURATION)
-                {
-                    this.blinkTime -= BLINK_DURATION;
-
-                    // switch to blinking off
-                    if (isBlink)
-                    {
-                        this.isBlink = false;
-                    }
-                    // switch to blinking on 
-                    else
-                    {
-                        this.isBlink = true;
-                        this.numBlinks++;
-
-                        // end the blink animation if we surpassed the maximum
-                        // number of blinks
-                        if (this.numBlinks > NUMBER_BLINKS_ON_HIT)
-                        {
-                            this.isHit = false;
-                            this.isBlink = false;
-                            this.blinkTime = 0.0f;
-                            this.numBlinks = 0;
-                        }
-                    }
-                }
-            }
         }
 
         private void tryToDie()
         {
             if (this.calories <= 0 && this.CurrState != state.Dying)
-            {
-                currentAnimation = deathAnimation;
-                currentAnimation.play();
-                this.CurrState = state.Dying;
-            }
+                changeState(state.Dying);
+        }
+
+        public void attack()
+        {
+            changeState(state.Dash);
+        }
+
+        protected override void onDying()
+        {
+            changeAnimation(deathAnimation);
+        }
+
+        protected override void onMoving()
+        {
+            CurrTime = 0.0f;
+            changeAnimation(moveAnimation);
         }
 
         public override void spawnAt(Vector2 position)
         {
             base.spawnAt(position);
-            this.calories = 100;
-            this.currentAnimation = moveAnimation;
-            this.currentAnimation.play();
-            this.CurrState = state.Moving;
-            this.isHit = false;
-            this.isBlink = false;
-            this.numBlinks = 0;
-            this.Mass = 1;
+
+            this.calories = SHARK_BASE_HEALTH;
+
+            resetBlink();
+
+            changeState(state.Moving);
         }
 
         public override void update(GameTime gameTime)
@@ -117,48 +87,39 @@ namespace JAMMM.Actors
                         new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),
                         new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
-
             tryToBlink(gameTime);
+
             tryToDie();
 
-            if (this.CurrState == state.Moving || this.CurrState == state.Turning)
+            if (this.CurrState == state.Moving)
             {
                 acceleration.X = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 0.5) * MaxAcc;
                 acceleration.Y = 0;
             }
             else if (CurrState == state.Dash)
-            {
-                acceleration.Normalize();
-                acceleration = acceleration * MaxAccDash;
-                CurrTime = DashTime;
-                this.CurrState = state.Dashing;
-
-                currentAnimation = dashAnimation;
-                currentAnimation.play();
-            }
-            else if (CurrState == state.Dashing)
-            {
-                CurrTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (CurrTime <= 0)
-                {
-                    this.CurrState = state.Moving;
-                    currentAnimation = moveAnimation;
-                    currentAnimation.play();
-                }
-            }
+                changeState(state.Dashing);
 
             currentAnimation.update(gameTime);
         }
 
+        protected override void onDash()
+        {
+            changeAnimation(dashAnimation);
+        }
+
+        protected override void onDashing()
+        {
+            acceleration.Normalize();
+
+            acceleration += acceleration * MaxAccDash;
+
+            CurrTime = DashTime;
+        }
+
         public override void handleAnimationComplete(Actor.AnimationType t)
         {
-            if (t == Actor.AnimationType.Dash ||
-                t == Actor.AnimationType.Turn)
-            {
-                this.CurrState = state.Moving;
-                currentAnimation = moveAnimation;
-                currentAnimation.play();
-            }
+            if (t == Actor.AnimationType.Dash)
+                changeState(state.Moving);
         }
 
         public override void collideWith(Actor other)
@@ -172,7 +133,6 @@ namespace JAMMM.Actors
                 else
                     this.calories -= SPEAR_MAX_DAMAGE;
 
-                AudioManager.getSound("Actor_Hit").Play();
                 Random rnd = new Random();
 
                 ParticleManager.Instance.createParticle(ParticleType.HitSpark, 
@@ -196,10 +156,7 @@ namespace JAMMM.Actors
                     new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
 
-
-                this.isHit = true;
-                this.blinkTime = 0.0f;
-                this.numBlinks = 0;
+                getHit();
             }
             else if (other is Fish)
             {
@@ -225,15 +182,11 @@ namespace JAMMM.Actors
                 healthColor = Color.White;
 
             if (Math.Abs(Rotation) > Math.PI / 2)
-            {
                 currentAnimation.draw(batch, this.Position,
                     healthColor, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
-            }
             else
-            {
                 currentAnimation.draw(batch, this.Position,
                     healthColor, SpriteEffects.None, this.Rotation, 1.0f);
-            }
 
             if (printPhysics)
             {

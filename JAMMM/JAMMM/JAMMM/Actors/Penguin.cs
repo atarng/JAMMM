@@ -11,21 +11,18 @@ namespace JAMMM.Actors
     public class Penguin : Actor
     {
         public const int START_CALORIES = 100;
+
         public const int SMALL_SIZE_CALORIES_THRESHOLD = 1;
         public const int MED_SIZE_CALORIES_THRESHOLD   = 150;
         public const int MAX_SIZE_CALORIES_THRESHOLD   = 230;
 
-        public const int NUMBER_BLINKS_ON_HIT          = 5;
-        public const float BLINK_DURATION              = 0.1f;
-
         public const int SMALL_SIZE = 22;
-        public const int MED_SIZE = 33;
+        public const int MED_SIZE   = 33;
         public const int LARGE_SIZE = 54;
 
         public const int SPEAR_SMALL_COST = 5;
-        public const int SPEAR_MED_COST = 10;
+        public const int SPEAR_MED_COST   = 10;
         public const int SPEAR_LARGE_COST = 15;
-
 
         public const int DASH_SMALL_COST = 0;
         public const int DASH_MED_COST = 1;
@@ -66,14 +63,6 @@ namespace JAMMM.Actors
         }
 
         private bool prevStateA = false;
-
-        private float blinkTime;
-
-        private float numBlinks;
-
-        private bool  isHit;
-
-        private bool  isBlink;
 
         private string colorCode;
 
@@ -173,16 +162,6 @@ namespace JAMMM.Actors
                 SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1, false);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
                 SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1, false, 1.5f);
-        }
-
-        public void pauseAnimation()
-        {
-            currentAnimation.pause();
-        }
-
-        public void resumeAnimation()
-        {
-            currentAnimation.play();
         }
 
         public override void update(GameTime delta)
@@ -309,64 +288,62 @@ namespace JAMMM.Actors
 
         private void tryToGrow()
         {
-            // switch to big
-            if (calories >= MAX_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Large)
-            {
-                this.CurrentSize = Size.Large;
+            if (calories >= MAX_SIZE_CALORIES_THRESHOLD   && this.CurrentSize != Size.Large)
+                becomeLarge();
+            else if (calories >= MED_SIZE_CALORIES_THRESHOLD 
+                && calories < MAX_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Medium)
+                becomeMedium();
+            else if (calories >= SMALL_SIZE_CALORIES_THRESHOLD 
+                && calories < MED_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Small)
+                becomeSmall();
+        }
 
-                this.DashCost = DASH_LARGE_COST;
-                this.SpearCost = SPEAR_LARGE_COST;
+        private void becomeSmall()
+        {
+            this.CurrentSize = Size.Small;
 
-                // switch animations
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE + colorCode), 1);
+            this.DashCost = DASH_SMALL_COST;
+            this.SpearCost = SPEAR_SMALL_COST;
 
-                this.Bounds.Radius = LARGE_SIZE;
+            moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
+            dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
+            deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1);
 
-                this.Mass = LARGE_MASS;
+            this.Bounds.Radius = SMALL_SIZE;
 
-                return;
+            this.Mass = SMALL_MASS;
+        }
 
-            }
-            // switch to medium
-            else if (calories >= MED_SIZE_CALORIES_THRESHOLD && calories < MAX_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Medium)
-            {
-                this.CurrentSize = Size.Medium;
+        private void becomeMedium()
+        {
+            this.CurrentSize = Size.Medium;
 
-                this.DashCost = DASH_MED_COST;
-                this.SpearCost = SPEAR_MED_COST;
+            this.DashCost = DASH_MED_COST;
+            this.SpearCost = SPEAR_MED_COST;
 
-                // switch animations
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM + colorCode), 1);
+            moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
+            dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
+            deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM + colorCode), 1);
 
-                this.Bounds.Radius = MED_SIZE;
+            this.Bounds.Radius = MED_SIZE;
 
-                this.Mass = MEDIUM_MASS;
+            this.Mass = MEDIUM_MASS;
+        }
 
-                return;
-            }
-            // switch to small
-            else if (calories >= SMALL_SIZE_CALORIES_THRESHOLD && calories < MED_SIZE_CALORIES_THRESHOLD && this.CurrentSize != Size.Small)
-            {
-                this.CurrentSize = Size.Small;
+        private void becomeLarge()
+        {
+            this.CurrentSize = Size.Large;
 
-                this.DashCost = DASH_SMALL_COST;
-                this.SpearCost = SPEAR_SMALL_COST;
+            this.DashCost = DASH_LARGE_COST;
+            this.SpearCost = SPEAR_LARGE_COST;
 
-                // switch animations
-                moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
-                dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
-                deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1);
+            moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
+            dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
+            deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE + colorCode), 1);
 
-                this.Bounds.Radius = SMALL_SIZE;
+            this.Bounds.Radius = LARGE_SIZE;
 
-                this.Mass = SMALL_MASS;
-
-                return;
-            }
+            this.Mass = LARGE_MASS;
         }
 
         private void tryToDie()
@@ -376,37 +353,6 @@ namespace JAMMM.Actors
                 changeState(state.Dying);
         }
 
-        private void tryToBlink(GameTime gameTime)
-        {
-            if (this.isHit)
-            {
-                this.blinkTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (this.blinkTime >= BLINK_DURATION)
-                {
-                    this.blinkTime -= BLINK_DURATION;
-
-                    // switch to blinking off
-                    if (isBlink)
-                        this.isBlink = false;
-                    // switch to blinking on 
-                    else
-                    {
-                        this.isBlink = true;
-                        this.numBlinks++;
-
-                        // end the blink animation if we surpassed the maximum
-                        // number of blinks
-                        if (this.numBlinks > NUMBER_BLINKS_ON_HIT)
-                        {
-                            this.isHit = false;
-                            resetBlink();
-                        }
-                    }
-                }
-            }
-        }
-
         public override void die()
         {
             base.die();
@@ -414,11 +360,13 @@ namespace JAMMM.Actors
 
         public void resetProperties()
         {
-            resetBlink();
+            this.isHit = false;
 
             this.Calories = START_CALORIES;
 
-            tryToGrow();
+            resetBlink();
+
+            becomeSmall();
 
             resetPhysics();
 
@@ -499,22 +447,6 @@ namespace JAMMM.Actors
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
                 //batch.DrawString(Game1.font, "Rot " + Rotation, loc += fontHeight, c, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0); 
-        }
-
-        private void resetBlink()
-        {
-            this.isBlink = false;
-            this.numBlinks = 0;
-            this.blinkTime = 0.0f;
-        }
-
-        private void getHit()
-        {
-            AudioManager.getSound("Actor_Hit").Play();
-
-            resetBlink();
-
-            this.isHit = true;
         }
 
         public override void respawn()

@@ -28,10 +28,9 @@ namespace JAMMM
 
         public const int SHARK_DAMAGE = 50;
 
-        /// <summary>
-        /// Actors use this enum to determine which animation 
-        /// is which handleAnimationComplete.
-        /// </summary>
+        public const float BLINK_DURATION = 0.1f;
+        public const int NUMBER_BLINKS_ON_HIT = 5;
+
         public enum AnimationType
         {
             Idle,
@@ -53,15 +52,9 @@ namespace JAMMM
             DashCooldown,
             DashReady,
             Dying,
-            Pursuing,
             MeleeAttack
         }
 
-        /// <summary>
-        /// These are all of the animations for each actor. 
-        /// Actors need to instantiate these within their
-        /// load content method.
-        /// </summary>
         #region Animations
         protected Animation currentAnimation;
         protected Animation dashAnimation;
@@ -120,9 +113,6 @@ namespace JAMMM
 
         public Vector2 changeInPosition;
 
-        /// <summary>
-        /// collision body offset
-        /// </summary>
         private Vector2 offset;
         public Vector2 Offset
         {
@@ -172,7 +162,6 @@ namespace JAMMM
             set { dashTime = value; }
         }
 
-
         private float dashCooldownTime;
         public float DashCooldownTime
         {
@@ -186,7 +175,6 @@ namespace JAMMM
             get { return dashCost; }
             set { dashCost = value; }
         }
-
 
         private int spearCost;
         public int SpearCost
@@ -202,9 +190,6 @@ namespace JAMMM
             set { currTime = value; }
         }
         
-        /// <summary>
-        /// rotation in radians
-        /// </summary>
         private float rotation;
         public float Rotation
         {
@@ -212,9 +197,6 @@ namespace JAMMM
             set { rotation = value; }
         }
 
-        /// <summary>
-        /// Whether or not this actor is alive.
-        /// </summary>
         private bool isAlive;
         public bool IsAlive
         {
@@ -222,9 +204,6 @@ namespace JAMMM
             set { isAlive = value; }
         }
 
-        /// <summary>
-        /// Setting the scale for this actor.
-        /// </summary>
         private float scale;
         public float Scale
         {
@@ -239,9 +218,11 @@ namespace JAMMM
             Large = 2
         }
 
-        /// <summary>
-        /// The size of the penguin.
-        /// </summary>
+        protected float blinkTime;
+        protected float numBlinks;
+        protected bool isHit;
+        protected bool isBlink;
+
         private Size currentSize;
         public Size CurrentSize
         {
@@ -285,6 +266,16 @@ namespace JAMMM
             this.rotation = 0.0f;
         }
 
+        public void pauseAnimation()
+        {
+            currentAnimation.pause();
+        }
+
+        public void resumeAnimation()
+        {
+            currentAnimation.play();
+        }
+
         protected virtual void changeState(state newState) 
         {
             switch (newState)
@@ -319,11 +310,6 @@ namespace JAMMM
                     onMoving();
                     break;
                 }
-                case state.Pursuing:
-                {
-                    onPursuing();
-                    break;
-                }
                 case state.Turning:
                 {
                     onTurning();
@@ -345,7 +331,6 @@ namespace JAMMM
         protected virtual void onDashReady()    { }
         protected virtual void onDying()        { }
         protected virtual void onMoving()       { }
-        protected virtual void onPursuing()     { }
         protected virtual void onTurning()      { }
         protected virtual void onMeleeAttack()  { }
 
@@ -354,9 +339,58 @@ namespace JAMMM
             if (currentAnimation != null)
                 currentAnimation.stop();
 
+            newAnimation.stop();
+
             currentAnimation = newAnimation;
             
             currentAnimation.play();
+        }
+
+        protected virtual void resetBlink()
+        {
+            this.isBlink = false;
+            this.numBlinks = 0;
+            this.blinkTime = 0.0f;
+        }
+
+        protected virtual void getHit()
+        {
+            AudioManager.getSound("Actor_Hit").Play();
+
+            resetBlink();
+
+            this.isHit = true;
+        }
+
+        protected virtual void tryToBlink(GameTime gameTime)
+        {
+            if (this.isHit)
+            {
+                this.blinkTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (this.blinkTime >= BLINK_DURATION)
+                {
+                    this.blinkTime -= BLINK_DURATION;
+
+                    // switch to blinking off
+                    if (isBlink)
+                        this.isBlink = false;
+                    // switch to blinking on 
+                    else
+                    {
+                        this.isBlink = true;
+                        this.numBlinks++;
+
+                        // end the blink animation if we surpassed the maximum
+                        // number of blinks
+                        if (this.numBlinks > NUMBER_BLINKS_ON_HIT)
+                        {
+                            this.isHit = false;
+                            resetBlink();
+                        }
+                    }
+                }
+            }
         }
 
         public virtual void spawnAt(Vector2 position)
@@ -411,10 +445,6 @@ namespace JAMMM
             return Rectangle.Empty;
         }
 
-        /// <summary>
-        /// Gets rectangle bounds scaled to input amount
-        /// along each axis.
-        /// </summary>
         public virtual Rectangle getScaledRectangleBounds(float horScale, float verScale)
         {
             if (currentAnimation != null)
@@ -492,10 +522,6 @@ namespace JAMMM
             this.isAlive = false;
         }
 
-        /// <summary>
-        /// Actors override this to determine what happens at
-        /// the end of each animation. 
-        /// </summary>
         public virtual void handleAnimationComplete(AnimationType t) { }
     }
 }

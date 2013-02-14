@@ -90,7 +90,7 @@ namespace JAMMM
         private float frameTime;
         private Actor owner;
 
-        //Constructor for actor
+        // Constructor for actor
         public Animation(Actor owner, 
                          Actor.AnimationType type, 
                          Texture2D spriteSheet, 
@@ -115,6 +115,7 @@ namespace JAMMM
             this.currentFrame.Y = 0;
         }
 
+        // Constructor for particles
         public Animation(
                  Actor.AnimationType type,
                  Texture2D spriteSheet,
@@ -138,18 +139,20 @@ namespace JAMMM
             this.currentFrame.Height = this.frameHeight;
             this.currentFrame.Y = 0;
         }
-        //Constructor for particles
-
 
         public void replaceSpriteSheet(Texture2D newSheet, int newFrameCount)
         {
             this.texture = newSheet;
+
             this.frameCount = newFrameCount;
             this.frameWidth = newSheet.Width / frameCount;
             this.frameHeight = newSheet.Height;
+
             this.currentFrame.Width = this.frameWidth;
             this.currentFrame.Height = this.frameHeight;
             this.currentFrame.Y = 0;
+
+            updateFrameRectangle();
         }
 
         public void play()
@@ -159,7 +162,7 @@ namespace JAMMM
 
         public void stop()
         {
-            this.isPlaying  = false;
+            this.isPlaying   = false;
             this.frameTime   = 0.0f;
             reset();
         }
@@ -209,9 +212,9 @@ namespace JAMMM
                         return;
                     }
                 }
-            }
 
-            updateFrameRectangle();
+                updateFrameRectangle();
+            }
         }
 
         public void updateParticle(GameTime gameTime)

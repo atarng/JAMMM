@@ -25,28 +25,10 @@ namespace JAMMM
             Victory
         }
 
-        Camera2D camera;
 
-        private GameState currentGameState;
 
-        GraphicsDeviceManager graphics;
+        #region GAME_CONSTANTS
 
-        private SpriteBatch  spriteBatch;
-        private Texture2D    playerPenguin;
-        private Texture2D    background;
-        private Texture2D    title;
-        private Rectangle    playerPenguinRectangle;
-        private Rectangle    screenRectangle;
-
-        public Rectangle     gameplayBoundaries;
-
-        private Vector2 player1StartPosition,
-                        player2StartPosition,
-                        player3StartPosition,
-                        player4StartPosition;
-
-        private Vector2 titlePosition;
- 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
         private const string player1Text = "Player 1";
@@ -71,10 +53,6 @@ namespace JAMMM
         public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
         public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
 
-        //public const string PENGUIN_DEATH_SMALL = "Penguin_Death_Small";
-        //public const string PENGUIN_DEATH_MEDIUM = "Penguin_Death_Med";
-        //public const string PENGUIN_DEATH_LARGE = "Penguin_Death_Large";
-
         public const string FISH_SWIM = "Fish_Swim";
         public const string FISH_DEATH = "Fish_Death";
 
@@ -87,10 +65,47 @@ namespace JAMMM
 
         private const int FISH_POOL_SIZE = 40;
         private const int SHARK_POOL_SIZE = 2;
+        private const int SPEAR_POOL_SIZE = 50;
 
         private const float SHARK_ATTACK_THRESHOLD = 300;
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
         private const float SHARK_AGGRESS_THRESHOLD = 600;
+
+        public static int WINDOW_WIDTH = 1600;
+        public static int WINDOW_HEIGHT = 900;
+
+        private const float slowZoom = 0.001f;
+        private const float medZoom = 0.002f;
+
+        private const float SHARK_RESPAWN_TIME = 1.0f;
+
+        private const float BACKGROUND_FADE_DURATION = 1.0f;
+
+        #endregion
+
+        #region GAME_VARIABLES
+
+        Camera2D camera;
+
+        private GameState currentGameState;
+
+        GraphicsDeviceManager graphics;
+
+        private SpriteBatch  spriteBatch;
+        private Texture2D    playerPenguin;
+        private Texture2D    background;
+        private Texture2D    title;
+        private Rectangle    playerPenguinRectangle;
+        private Rectangle    screenRectangle;
+
+        public Rectangle     gameplayBoundaries;
+
+        private Vector2 player1StartPosition,
+                        player2StartPosition,
+                        player3StartPosition,
+                        player4StartPosition;
+
+        private Vector2 titlePosition;
 
         private Dictionary<Actor, Actor> collisions;
 
@@ -135,27 +150,21 @@ namespace JAMMM
 
         SoundEffectInstance battleTheme;
 
-        //private AnimatedActorTest testActAnim;
         public static SpriteFont font;
 
-        public static int WINDOW_WIDTH = 1600;
-        public static int WINDOW_HEIGHT = 900;
-
-        // zooming related
-
-        private const float slowZoom = 0.001f;
-        private const float medZoom = 0.002f;
-
-        private const float SHARK_RESPAWN_TIME = 1.0f;
-
-        private const float BACKGROUND_FADE_DURATION = 1.0f;
         private Color backgroundFadeColor;
         private Color titleFadeColor;
+
         private Rectangle expandingView = Rectangle.Empty;
+
         private float fadeTime;
 
         private bool hasBeenCompletedOnce = false;
-        
+
+#endregion
+
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -198,37 +207,18 @@ namespace JAMMM
             player4StartPosition = new Vector2(width * 0.8f,  height * 0.8f);
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
+
+
         protected override void Initialize()
         {
             changeState(GameState.FindingPlayers);
             Random rnd = new Random();
 
-            // set initial fish positions
-            for (int i = 0; i < FISH_POOL_SIZE; ++i)
-            {
-                fishPool.Add(new Fish(0.0f, 0.0f));
-            }
-
-            // set initial shark position
-            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
-            {
-                sharkPool.Add(new Shark(0.0f, 0.0f));
-                sharkRespawnTimes.Add(0.0f);
-            }
+            createObjectPools();
 
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
@@ -318,8 +308,6 @@ namespace JAMMM
 
             SpriteManager.addTexture("Spear", Content.Load<Texture2D>("Sprites/spear_move_128_48"));
 
-
-            // tell each actor to load their content now that the sprite manager has its database
             foreach (Shark s in sharkPool)
                 s.loadContent();
             foreach (Fish f in fishPool)
@@ -331,10 +319,312 @@ namespace JAMMM
             loadContentDependentInitialization();
         }
 
-        /// <summary>
-        /// This is for initializing variables and components that require
-        /// all of the assets to be loaded first.
-        /// </summary>
+        protected override void UnloadContent() {}
+
+        protected override void Update(GameTime gameTime)
+        {
+            // Allows the game to exit
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
+                this.Exit();
+
+            // the basic game logic outer switch
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                    {
+                        // check controller connectivity for each player
+                        TryToAddPlayers();
+
+                        // check controller state to ready each player
+                        TryToReadyPlayers();
+
+                        // check controller state for player 1 to start the game
+                        TryToStartGame();
+
+                        break;
+                    }
+                case (GameState.TransitionIntoBattle):
+                    {
+                        fadeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                        if (fadeTime >= BACKGROUND_FADE_DURATION)
+                            changeState(GameState.Battle);
+                        // update the fade color
+                        else
+                        {
+                            float fadeRatio = (fadeTime / BACKGROUND_FADE_DURATION);
+
+                            backgroundFadeColor.A = (byte)(50 + (int)(fadeRatio * 205));
+
+                            titleFadeColor.A = (byte)(255 - fadeRatio * 255);
+                            titleFadeColor.R = (byte)(255 - fadeRatio * 255);
+                            titleFadeColor.G = (byte)(255 - fadeRatio * 255);
+                            titleFadeColor.B = (byte)(255 - fadeRatio * 255);
+
+                            expandingView.X = screenRectangle.X +
+                                (int)((camera.maxView.X - screenRectangle.X) * fadeRatio);
+                            expandingView.Y = screenRectangle.Y +
+                                (int)((camera.maxView.Y - screenRectangle.Y) * fadeRatio);
+                            expandingView.Width = screenRectangle.Width +
+                                (int)((camera.maxView.Width - screenRectangle.Width) * fadeRatio);
+                            expandingView.Height = screenRectangle.Height +
+                                (int)((camera.maxView.Height - screenRectangle.Height) * fadeRatio);
+                        }
+
+                        break;
+                    }
+                case (GameState.Battle):
+                    {
+                        // do regular game logic updating each player
+                        for (int i = 0; i < players.Count; i++)
+                        {
+                            players[i].update(gameTime);
+                            Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                            TrySpear(players[i], i);
+                            keepInBounds(players[i]);
+                        }
+
+                        // for each fishy, check if was alive last frame and is dead this one
+                        // if that is the case, spawn a new fishy
+                        foreach (Fish f in fishPool)
+                        {
+                            f.update(gameTime);
+                            Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                            if (!f.IsAlive)
+                                f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                            keepInBounds(f);
+                        }
+
+                        for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+                        {
+                            Shark s = sharkPool.ElementAt(i);
+
+                            s.update(gameTime);
+
+                            if (s.CurrState != Actor.state.Dying)
+                            {
+                                TryToAggressTowardPlayers(s);
+                                TryToAttackPlayers(s);
+                            }
+
+                            Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                            if (!s.IsAlive)
+                            {
+                                sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                                if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
+                                {
+                                    sharkRespawnTimes[i] = 0.0f;
+
+                                    s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                                    while (isNearAPlayer(s))
+                                        s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                                }
+                            }
+
+                            keepInBounds(s);
+                        }
+
+                        // update spears
+                        foreach (Spear s in spears)
+                        {
+                            s.update(gameTime);
+                            Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+
+                            if (s.IsAlive && isOffScreen(s))
+                                s.die();
+                        }
+
+                        // collision detection and resolution
+                        detectCollisions();
+                        resolveCollisions();
+
+                        // update particles
+                        ParticleManager.Instance.update(gameTime);
+
+                        // check sfx
+                        if (battleTheme.State == SoundState.Stopped)
+                            battleTheme.Play();
+
+                        // check if there is only 1 player left. if so, end the game
+                        TryToEndGame();
+
+                        updateCamera(gameTime);
+                        camera.updateBounds();
+
+                        break;
+                    }
+                case (GameState.Victory):
+                    {
+                        // check if player1 wants to restart the match
+                        // TODO: We might want more options here like doing a new
+                        // match altogether, but we have plenty of time to figure that out
+                        TryToRestartGame();
+                        break;
+                    }
+            }
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                    {
+                        GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+                        spriteBatch.Begin();
+                        //
+                        spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
+                        spriteBatch.Draw(title, titlePosition, Color.White);
+
+                        foreach (Penguin p in players)
+                            p.draw(gameTime, spriteBatch);
+
+                        if (isPlayer1Ready)
+                            spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
+                        if (isPlayer2Ready)
+                            spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
+                        if (isPlayer3Ready)
+                            spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
+                        if (isPlayer4Ready)
+                            spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
+                        //
+                        spriteBatch.End();
+
+                        break;
+                    }
+                case (GameState.TransitionIntoBattle):
+                    {
+                        GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+                        spriteBatch.Begin();
+
+                        spriteBatch.Draw(background, expandingView, backgroundFadeColor);
+
+                        spriteBatch.Draw(title, titlePosition, titleFadeColor);
+
+                        foreach (Penguin p in players)
+                            p.draw(gameTime, spriteBatch);
+
+                        spriteBatch.End();
+
+                        break;
+                    }
+                case (GameState.Battle):
+                    {
+                        GraphicsDevice.Clear(Color.Blue);
+
+                        spriteBatch.Begin(SpriteSortMode.BackToFront,
+                            BlendState.AlphaBlend, null, null, null, null,
+                            camera.getTransformation());
+
+                        spriteBatch.Draw(background, camera.maxView, Color.White);
+
+                        foreach (Penguin p in players)
+                        {
+                            p.draw(gameTime, spriteBatch);
+
+                            if (p.CurrState != Actor.state.Dying &&
+                                p.IsAlive)
+                                spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
+                                new Vector2(p.Position.X - 75, p.Position.Y + 60),
+                                Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+                        }
+
+                        foreach (Fish fish in fishPool)
+                            fish.draw(gameTime, spriteBatch);
+
+                        foreach (Shark s in sharkPool)
+                        {
+                            s.draw(gameTime, spriteBatch);
+
+                            if (s.CurrState != Actor.state.Dying &&
+                                s.IsAlive)
+                                spriteBatch.DrawString(Game1.font, "Calories: " + s.Calories,
+                                new Vector2(s.Position.X - 75, s.Position.Y + 100),
+                                Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+                        }
+
+                        foreach (Spear spear in spears)
+                            spear.draw(gameTime, spriteBatch);
+
+                        ParticleManager.Instance.draw(gameTime, spriteBatch);
+
+                        spriteBatch.End();
+
+                        spriteBatch.Begin();
+
+                        if (isPlayer1Connected)
+                        {
+                            spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
+                        }
+                        if (isPlayer2Connected)
+                        {
+                            spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
+                        }
+                        if (isPlayer3Connected)
+                        {
+                            spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
+                        }
+                        if (isPlayer4Connected)
+                        {
+                            spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
+                            spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
+                        }
+
+                        spriteBatch.End();
+
+                        break;
+                    }
+                case (GameState.Victory):
+                    {
+                        GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+                        spriteBatch.Begin();
+
+                        if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
+                        {
+                            spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
+                        }
+                        else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
+                        {
+                            spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
+                        }
+                        else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
+                        {
+                            spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
+                        }
+                        else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
+                        {
+                            spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
+                        }
+
+                        spriteBatch.End();
+
+                        break;
+                    }
+            }
+
+            base.Draw(gameTime);
+        }
+
+
+
         private void loadContentDependentInitialization()
         {
             // set the title position relative to the viewport and font size
@@ -357,9 +647,9 @@ namespace JAMMM
                 player4StartPosition.Y + playerPenguin.Height + 5.0f);
 
             // set the victory text positions
-            player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f - 
+            player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
                                                      font.MeasureString(player1VictoryText).X / 2.0f,
-                                                     graphics.PreferredBackBufferHeight / 2.0f - 
+                                                     graphics.PreferredBackBufferHeight / 2.0f -
                                                      font.MeasureString(player1VictoryText).Y / 2.0f);
             player2VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
                                                      font.MeasureString(player2VictoryText).X / 2.0f,
@@ -375,7 +665,7 @@ namespace JAMMM
                                                      font.MeasureString(player4VictoryText).Y / 2.0f);
 
             // set the player name text positions
-            player1TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f - 
+            player1TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
                                               font.MeasureString(player1Text).X / 2.0f,
                                               graphics.PreferredBackBufferHeight * 0.01f);
             player2TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
@@ -424,104 +714,166 @@ namespace JAMMM
             gameplayBoundaries = camera.maxView;
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
+
+
+        private void createObjectPools()
         {
-            // TODO: Unload any non ContentManager content here
+            for (int i = 0; i < FISH_POOL_SIZE; ++i)
+                fishPool.Add(new Fish());
+
+            for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+            {
+                sharkPool.Add(new Shark());
+                sharkRespawnTimes.Add(0.0f);
+            }
+
+            for (int i = 0; i < SPEAR_POOL_SIZE; ++i)
+                spears.Add(new Spear());
         }
 
-        protected void Flock(List<Fish> _boids, GameTime gametime)
+
+
+        private void updateCamera(GameTime gameTime)
         {
-            float maxSpeed = _boids[0].MaxVel;
-            float maxAccel = _boids[0].MaxAcc;
-            float desiredSeparation = 50.0f;
-            float neighborRadius = 100.0f;
-            float separationFactor = 30.0f;
-            float alignmentFactor  = 4.0f;
-            float cohesionFactor  = 1.0f;
+            TryZoomOut((float)gameTime.ElapsedGameTime.TotalSeconds);
+            TryZoomIn((float)gameTime.ElapsedGameTime.TotalSeconds);
+        }
 
-            float elapsedTime = (float)gametime.ElapsedGameTime.TotalSeconds;            
-            for (int i = 0; i < _boids.Count; i++)
+
+
+        private void changeState(GameState newState)
+        {
+            switch (newState)
             {
-                float count = 0;
-                float count0 = 0;
-                Vector2 cohesion = new Vector2(0, 0);
-                Vector2 separation = new Vector2(0, 0);
-                Vector2 alignment = new Vector2(0, 0);                
-
-                for (int j = 0; j < _boids.Count; j++)
+                case (GameState.FindingPlayers):
                 {
-                    Vector2 vecTo = _boids[j].Position - _boids[i].Position;
-                    if (vecTo.Length() > 0 && vecTo.Length() < neighborRadius)
-                    {
-                        cohesion += _boids[j].Position;
-                        alignment += _boids[j].Velocity;
-                        count++;                        
-                    }
-                    if (vecTo.Length() > 0 && vecTo.Length() < desiredSeparation)
-                    {
-                        Vector2 temp = -vecTo;
-                        temp.Normalize();
-                        temp /= vecTo.Length();
-                        separation += temp;                        
-                        count0++;
-                    }
+                    onEnteringFindingPlayers();
+                    break;
+                }
+                case (GameState.TransitionIntoBattle):
+                {
+                    onEnteringTransitionIntoBattle();
+                    break;
+                }
+                case (GameState.Battle):
+                {
+                    onEnteringBattle();
+                    break;
+                }
+                case (GameState.Victory):
+                {
+                    onEnteringVictory();
+                    break;
+                }
+            }
+
+            this.currentGameState = newState;
+        }
+
+        private void onEnteringFindingPlayers()
+        {
+            if (hasBeenCompletedOnce)
+            {
+                if (isPlayer1Connected) isPlayer1Ready = false;
+                if (isPlayer2Connected) isPlayer2Ready = false;
+                if (isPlayer3Connected) isPlayer3Ready = false;
+                if (isPlayer4Connected) isPlayer4Ready = false;
+
+                foreach (Penguin p in players)
+                {
+                    p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
+                    p.resetProperties();
                 }
 
-                if (count > 0)
-                {
-                    cohesion /= count;
-                    cohesion = cohesion - _boids[i].Position;
-                    alignment /= count;
-                    if (alignment.Length() > maxAccel)
-                    {
-                        alignment.Normalize();
-                        alignment *= maxAccel;
-                    }
-                }
-                if (count0 > 0)
-                {
-                    separation /= count0;
-                }
-                if (cohesion.Length() > 0)
-                {
-                    float temp = cohesion.Length();
-                    cohesion.Normalize();
-                    if ( temp < (desiredSeparation + neighborRadius) / 2.0f)
-                    {
-                        cohesion *= maxSpeed * (temp / neighborRadius);
-                    }
-                    else
-                    {                        
-                        cohesion *= maxSpeed;
-                    }
-                    cohesion -= _boids[i].velocity;
-                }
-                _boids[i].acceleration = cohesion * cohesionFactor + separation * separationFactor + alignment * alignmentFactor;                
+                Rectangle titleBounds = title.Bounds;
 
+                titleBounds.X = (int)titlePosition.X;
+                titleBounds.Y = (int)titlePosition.Y;
 
+                foreach (Penguin p in players)
+                    while (p.getBufferedRectangleBounds(0).Intersects(titleBounds) ||
+                           isNearAnotherPlayer(p))
+                        p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
+
+                if (isPlayer1Connected)
+                {
+                    player1ReadyTextPosition = players[0].Position;
+                    player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
+                }
+                if (isPlayer2Connected)
+                {
+                    player2ReadyTextPosition = players[1].Position;
+                    player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
+                }
+                if (isPlayer3Connected)
+                {
+                    player3ReadyTextPosition = players[2].Position;
+                    player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
+                }
+                if (isPlayer4Connected)
+                {
+                    player4ReadyTextPosition = players[3].Position;
+                    player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
+                    player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
+                }
             }
         }
 
-        protected void trySpear(Penguin a, int id)
+        private void onEnteringTransitionIntoBattle()
         {
-            if (a.Fire)
+            backgroundFadeColor.R = 255;
+            backgroundFadeColor.G = 255;
+            backgroundFadeColor.B = 255;
+            backgroundFadeColor.A = 50;
+
+            titleFadeColor = Color.White;
+
+            fadeTime = 0.0f;
+        }
+
+        private void onEnteringBattle()
+        {
+            // play the battle theme
+            if (battleTheme.State != SoundState.Playing)
+                battleTheme.Play();
+
+            // kill all the particles
+            ParticleManager.Instance.killAllHitParticles();
+
+            // zoom back to the default
+            camera.resetZoom();
+
+            // kill all the spears
+            foreach (Spear s in spears)
+                s.die();
+
+            // respawn the players
+            foreach (Penguin p in players)
+                p.respawn();
+
+            // spawn some fishies
+            foreach (Fish p in fishPool)
+                p.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+            // spawn some sharkies
+            foreach (Shark s in sharkPool)
             {
-                a.Fire = false;
-                //Spear projectile = new Spear(a.Position.X, a.Position.Y, a.CurrentSize);
-                Spear projectile = new Spear(a.Position.X, a.Position.Y,a.CurrentSize, id);
-                projectile.respawn();
-                projectile.loadContent();
-                projectile.acceleration = Vector2.Normalize(Physics.AngleToVector(a.Rotation)) * 50000F;
-                projectile.velocity.X = a.Velocity.X;
-                projectile.velocity.Y = a.Velocity.Y;
-                spears.Add(projectile); //TODO change type to spear
-                //projectilePool.Add(projectile);
+                s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                while (isNearAPlayer(s))
+                    s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
             }
         }
+
+        private void onEnteringVictory()
+        {
+
+        }
+
+
 
         private Vector2 getRandomPositionWithinBounds(Rectangle bounds)
         {
@@ -536,120 +888,7 @@ namespace JAMMM
             return newPos;
         }
 
-        /// <summary>
-        /// This is called any time we change states. This needs
-        /// to do some initialization for that state likely. Just
-        /// some logical initialization- no assets.
-        /// </summary>
-        private void changeState(GameState newState)
-        {
-            switch (newState)
-            {
-                case (GameState.FindingPlayers):
-                {
-                    if (hasBeenCompletedOnce)
-                    {
-                        if (isPlayer1Connected) isPlayer1Ready = false;
-                        if (isPlayer2Connected) isPlayer2Ready = false;
-                        if (isPlayer3Connected) isPlayer3Ready = false;
-                        if (isPlayer4Connected) isPlayer4Ready = false;
-
-                        foreach (Penguin p in players)
-                        {
-                            p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
-                            p.resetProperties();                        
-                        }
-
-                        Rectangle titleBounds = title.Bounds;
-
-                        titleBounds.X = (int)titlePosition.X;
-                        titleBounds.Y = (int)titlePosition.Y;
-
-                        foreach (Penguin p in players)
-                            while (p.getBufferedRectangleBounds(0).Intersects(titleBounds) ||
-                                   isNearAnotherPlayer(p))
-                                p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
-
-                        if (isPlayer1Connected)
-                        {
-                            player1ReadyTextPosition = players[0].Position;
-                            player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
-                            player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
-                        }
-                        if (isPlayer2Connected)
-                        {
-                            player2ReadyTextPosition = players[1].Position;
-                            player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
-                            player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
-                        }
-                        if (isPlayer3Connected)
-                        {
-                            player3ReadyTextPosition = players[2].Position;
-                            player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
-                            player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
-                        }
-                        if (isPlayer4Connected)
-                        {
-                            player4ReadyTextPosition = players[3].Position;
-                            player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
-                            player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
-                        }
-                    }
-
-                    break;
-                }
-                case (GameState.TransitionIntoBattle):
-                {
-                    // initialize the fading variables
-                    backgroundFadeColor.R = 255;
-                    backgroundFadeColor.G = 255;
-                    backgroundFadeColor.B = 255;
-                    backgroundFadeColor.A = 50;
-
-                    titleFadeColor = Color.White;
-
-                    fadeTime = 0.0f;
-                    
-                    break;
-                }
-                case (GameState.Battle):
-                {
-                    // play the battle theme
-                    if (battleTheme.State != SoundState.Playing)
-                        battleTheme.Play();
-
-                    ParticleManager.Instance.killAllHitParticles();
-
-                    camera.resetZoom();
-
-                    foreach (Spear s in spears)
-                        s.die();
-
-                    foreach (Penguin p in players)
-                        p.respawn();
-
-                    // spawn some fishies
-                    foreach (Fish p in fishPool)
-                        p.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                    // spawn some sharkies
-                    foreach (Shark s in sharkPool)
-                        s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                    break;
-                }
-                case (GameState.Victory):
-                {
-                    // play victory theme
-
-                    break;
-                }
-            }
-
-            this.currentGameState = newState;
-        }
-
-        protected Boolean isOffScreen(Actor a)
+        private bool isOffScreen(Actor a)
         {
             Rectangle aBounds = a.getBufferedRectangleBounds(0);
 
@@ -712,162 +951,6 @@ namespace JAMMM
             }
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
-                this.Exit();
-
-            // the basic game logic outer switch
-            switch (this.currentGameState)
-            {
-                case (GameState.FindingPlayers) :
-                {
-                    // check controller connectivity for each player
-                    TryToAddPlayers();
-
-                    // check controller state to ready each player
-                    TryToReadyPlayers();
-
-                    // check controller state for player 1 to start the game
-                    TryToStartGame();
-
-                    break;
-                }
-                case (GameState.TransitionIntoBattle):
-                {
-                    fadeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                    if (fadeTime >= BACKGROUND_FADE_DURATION)
-                        changeState(GameState.Battle);
-                    // update the fade color
-                    else
-                    {
-                        float fadeRatio = (fadeTime / BACKGROUND_FADE_DURATION);
-
-                        backgroundFadeColor.A = (byte)(50 + (int)(fadeRatio * 205));
-
-                        titleFadeColor.A = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.R = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.G = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.B = (byte)(255 - fadeRatio * 255);
-
-                        expandingView.X = screenRectangle.X + 
-                            (int)((camera.maxView.X - screenRectangle.X) * fadeRatio);
-                        expandingView.Y = screenRectangle.Y + 
-                            (int)((camera.maxView.Y - screenRectangle.Y) * fadeRatio);
-                        expandingView.Width = screenRectangle.Width + 
-                            (int)((camera.maxView.Width - screenRectangle.Width) * fadeRatio);
-                        expandingView.Height = screenRectangle.Height + 
-                            (int)((camera.maxView.Height - screenRectangle.Height) * fadeRatio);
-                    }
-
-                    break;
-                }
-                case (GameState.Battle):
-                {
-                    // do regular game logic updating each player
-                    for( int i = 0; i < players.Count; i++ )
-                    {
-                        players[i].update(gameTime);
-                        Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-                        trySpear(players[i], i);
-                        keepInBounds(players[i]);
-                    }
-
-                    // for each fishy, check if was alive last frame and is dead this one
-                    // if that is the case, spawn a new fishy
-                    foreach (Fish f in fishPool)
-                    {
-                        f.update(gameTime);
-                        Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
-                        if (!f.IsAlive)
-                            f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                        keepInBounds(f);
-                    }
-
-                    for (int i = 0; i < SHARK_POOL_SIZE; ++i)
-                    {
-                        Shark s = sharkPool.ElementAt(i);
-
-                        s.update(gameTime);
-
-                        if (s.CurrState != Actor.state.Dying)
-                        {
-                            tryToAggressTowardPlayers(s);
-                            tryToAttackPlayers(s);
-                        }
-
-                        Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
-                        if (!s.IsAlive)
-                        {
-                            sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                            if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
-                            {
-                                sharkRespawnTimes[i] = 0.0f;
-
-                                s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                                while (isNearAPlayer(s))
-                                    s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-                            }
-                        }
-
-                        keepInBounds(s);
-                    }
-
-                    // update the onscreen spears
-                    for (int i = 0; i < spears.Count; i++)
-                    {
-                        Spear spear = spears[i];
-                        spear.update(gameTime);
-                        Physics.applyMovement(spear, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
-
-                        if (isOffScreen(spear))
-                            spear.IsAlive = false;
-                    }
-
-                    // do collision detection and resolution
-                    doCollisions();
-
-                    // update particles
-                    ParticleManager.Instance.update(gameTime);
-
-                    // check sfx
-                    if (battleTheme.State == SoundState.Stopped)
-                        battleTheme.Play();
-
-                    // check if there is only 1 player left. if so, end the game
-                    TryToEndGame();
-
-                    updateCamera(gameTime);
-                    camera.updateBounds();
-
-                    break;
-                }
-                case (GameState.Victory) : 
-                {
-                    // check if player1 wants to restart the match
-                    // TODO: We might want more options here like doing a new
-                    // match altogether, but we have plenty of time to figure that out
-                    TryToRestartGame();
-                    break;
-                }
-            }
-
-            base.Update(gameTime);
-        }
-
         private bool isNearAPlayer(Actor a)
         {
             Vector2 aPos = a.Position;
@@ -914,8 +997,140 @@ namespace JAMMM
             return false;
         }
 
-        private void tryToAggressTowardPlayers(Shark s)
+
+
+        private void detectCollisions()
         {
+            collisions.Clear();
+
+            // player collisions
+            for (int i = 0; i < players.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (i != j && players[i].IsAlive && players[j].IsAlive &&
+                        players[i].Bounds.isCollision(players[j].Bounds))
+                    {
+                        if (collisions.Count == 0)
+                            collisions.Add(players[i], players[j]);
+                        else if (collisions[players[j]] != players[i])
+                            collisions.Add(players[i], players[j]);
+                    }
+                }
+            }
+
+            // spear collisions
+            for (int i = 0; i < spears.Count; i++)
+            {
+                for (int j = 0; j < sharkPool.Count; j++)
+                {
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) &&
+                        spears[i].IsAlive && sharkPool[j].IsAlive &&
+                        !collisions.ContainsKey(spears[i]))
+                        collisions.Add(spears[i], sharkPool[j]);
+                }
+
+                for (int j = 0; j < players.Count; j++)
+                {
+                    if (spears[i].bounds.isCollision(players[j].Bounds)
+                        && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id &&
+                        !collisions.ContainsKey(spears[i]))
+                        collisions.Add(spears[i], players[j]);
+                }
+            }
+
+            // fish collisions
+            for (int i = 0; i < fishPool.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (fishPool[i].Bounds.isCollision(players[j].Bounds)
+                        && (fishPool[i].CurrState != Actor.state.Dying) &&
+                        (fishPool[i].IsAlive) && players[j].IsAlive &&
+                        !collisions.ContainsKey(fishPool[i]))
+                        collisions.Add(fishPool[i], players[j]);
+                }
+
+                for (int j = 0; j < sharkPool.Count; j++)
+                {
+                    if (fishPool[i].Bounds.isCollision(sharkPool[j].Bounds) &&
+                        fishPool[i].IsAlive && sharkPool[j].IsAlive &&
+                        !collisions.ContainsKey(fishPool[i]))
+                        collisions.Add(fishPool[i], sharkPool[j]);
+                }
+            }
+
+            // shark collisions
+            for (int i = 0; i < sharkPool.Count; ++i)
+            {
+                for (int j = 0; j < players.Count; ++j)
+                {
+                    if (sharkPool[i].Bounds.isCollision(players[j].Bounds)
+                        && (sharkPool[i].IsAlive) && players[j].IsAlive &&
+                        !collisions.ContainsKey(sharkPool[i]))
+                        collisions.Add(sharkPool[i], players[j]);
+                }
+
+                for (int j = 0; j < fishPool.Count; ++j)
+                {
+                    if (sharkPool[i].Bounds.isCollision(fishPool[j].Bounds)
+                        && (sharkPool[i].IsAlive) && fishPool[j].IsAlive &&
+                        !collisions.ContainsKey(sharkPool[i]))
+                        collisions.Add(sharkPool[i], fishPool[j]);
+                }
+            }
+        }
+
+        private void resolveCollisions()
+        {
+            List<Actor> keyList = new List<Actor>(collisions.Keys);
+            for (int i = 0; i < keyList.Count; i++)
+            {
+                Actor a = collisions[keyList[i]];
+                Actor b = keyList[i];
+
+                a.collideWith(b);
+                b.collideWith(a);
+
+                if (a is Penguin && b is Penguin)
+                {
+                    Physics.separate(a, b);
+                    Physics.collide(a, b);
+                }
+                else if (a is Penguin && b is Shark ||
+                         a is Shark && b is Penguin)
+                {
+                    Physics.separate(a, b);
+                    Physics.collide(a, b);
+                }
+            }
+        }
+
+
+
+        private void TrySpear(Penguin a, int id)
+        {
+            if (a.Fire)
+            {
+                a.Fire = false;
+
+                foreach (Spear s in spears)
+                {
+                    if (!s.IsAlive)
+                    {
+                        s.setSpawnParameters(a.CurrentSize, id, a);
+                        s.spawnAt(a.Position);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void TryToAggressTowardPlayers(Shark s)
+        {
+            if (s.CurrState != Actor.state.Moving)
+                return;
+
             float minDist = 10000.0f;
             float currDist = 0.0f;
             Vector2 nearestPosition = Vector2.Zero;
@@ -943,18 +1158,14 @@ namespace JAMMM
             // try to aggress toward the nearest player
             if (minDist <= SHARK_AGGRESS_THRESHOLD 
                 && minDist > SHARK_ATTACK_THRESHOLD)
-            {
-                s.CurrState = Actor.state.Pursuing;
                 s.acceleration = vecTowardNearest;
-            }
-            else if (minDist > SHARK_AGGRESS_THRESHOLD)
-            {
-                s.CurrState = Actor.state.Moving;
-            }
         }
 
-        private void tryToAttackPlayers(Shark s)
+        private void TryToAttackPlayers(Shark s)
         {
+            if (s.CurrState != Actor.state.Moving)
+                return;
+
             float minDist = 10000.0f;
             float currDist = 0.0f;
             Vector2 nearestPosition = Vector2.Zero;
@@ -980,131 +1191,15 @@ namespace JAMMM
             }
 
             // try to aggress toward the nearest player
-            if (minDist <= SHARK_ATTACK_THRESHOLD 
-                && s.CurrState != Actor.state.Dashing 
+            if (minDist <= SHARK_ATTACK_THRESHOLD
+                && s.CurrState != Actor.state.Dashing
                 && s.CurrState != Actor.state.Dash)
             {
-                s.CurrState = Actor.state.Dash;
+                s.acceleration = vecTowardNearest;
+                ((Shark)s).attack();
             }
         }
 
-        /// <summary>
-        /// Do all of the collision detection for each pair
-        /// for which we allow collisions.
-        /// </summary>
-        private void doCollisions()
-        {
-            //////COLLISIONS///////
-            collisions.Clear();
-
-            /*
-            for (int i = 0; i < SHARK_POOL_SIZE; i++)
-            {
-                for (int j = 0; j < SHARK_POOL_SIZE; j++)
-                {
-                    if (i != j && sharkPool[i].Bounds.isCollision(sharkPool[j].Bounds))
-                    {
-                        if( collisions.Count == 0 )
-                            collisions.Add(sharkPool[i], sharkPool[j]);
-                        else if( collisions[sharkPool[j]] != sharkPool[i] )
-                            collisions.Add(sharkPool[i], sharkPool[j]);
-                    }
-                }
-            }
-            */
-
-            // player collisions
-            for (int i = 0; i < players.Count; ++i)
-            {
-                for (int j = 0; j < players.Count; ++j)
-                {
-                    if (i != j && players[i].IsAlive && players[j].IsAlive &&
-                        players[i].Bounds.isCollision(players[j].Bounds))
-                    {
-                        if (collisions.Count == 0)
-                            collisions.Add(players[i], players[j]);
-                        else if (collisions[players[j]] != players[i])
-                            collisions.Add(players[i], players[j]);
-                    }
-                }
-            }
-
-            for (int i = 0; i < spears.Count; i++)
-            {
-                for (int j = 0; j < sharkPool.Count; j++)
-                {
-                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) && 
-                        spears[i].IsAlive && sharkPool[j].IsAlive &&
-                        !collisions.ContainsKey(spears[i]))
-                        collisions.Add(spears[i], sharkPool[j]);
-                }
-
-                for (int j = 0; j < players.Count; j++)
-                {
-                    if (spears[i].bounds.isCollision(players[j].Bounds) 
-                        && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id  &&
-                        !collisions.ContainsKey(spears[i]))
-                        collisions.Add(spears[i], players[j]);
-                }
-            }
-
-            for (int i = 0; i < fishPool.Count; ++i)
-            {
-                for (int j = 0; j < players.Count; ++j)
-                {
-                    if (fishPool[i].Bounds.isCollision(players[j].Bounds) 
-                        && (fishPool[i].CurrState != Actor.state.Dying) && 
-                        (fishPool[i].IsAlive) && players[j].IsAlive &&
-                        !collisions.ContainsKey(fishPool[i]))
-                            collisions.Add(fishPool[i], players[j]);
-                }
-            }
-
-            for (int i = 0; i < sharkPool.Count; ++i)
-            {
-                for (int j = 0; j < players.Count; ++j)
-                {
-                    if (sharkPool[i].Bounds.isCollision(players[j].Bounds)
-                        && (sharkPool[i].IsAlive) && players[j].IsAlive &&
-                        !collisions.ContainsKey(sharkPool[i]))
-                        collisions.Add(sharkPool[i], players[j]);
-                }
-            }
-
-            List<Actor> keyList = new List<Actor>(collisions.Keys);
-            for (int i = 0; i < keyList.Count; i++)
-            {
-                Actor a = collisions[keyList[i]];
-                Actor b = keyList[i];
-
-                a.collideWith(b);
-                b.collideWith(a);
-
-                if (a is Penguin && b is Penguin)
-                {
-                    Physics.separate(a, b);
-                    Physics.collide(a, b);
-                }
-                else if (a is Penguin && b is Shark ||
-                         a is Shark && b is Penguin)
-                {
-                    Physics.separate(a, b);
-                    Physics.collide(a, b);
-                }
-            }
-        }
-
-        private void removeActor(Actor a)
-        {
-            if (a is Spear)
-                spears.Remove((Spear)a);
-            if (a is Shark)
-                sharkPool.Remove((Shark)a);
-        }
-
-        /// <summary>
-        /// Tries to add players to the view.
-        /// </summary>
         private void TryToAddPlayers()
         {
             if (!isPlayer1Connected)
@@ -1190,9 +1285,6 @@ namespace JAMMM
             }
         }
 
-        /// <summary>
-        /// Readies up a player if they're pressing A on the corresponding controller.
-        /// </summary>
         private void TryToReadyPlayers()
         {
             if (isPlayer1Connected && !isPlayer1Ready)
@@ -1229,18 +1321,12 @@ namespace JAMMM
             }
         }
 
-        /// <summary>
-        /// Checks if player 1 pressed start.
-        /// </summary>
         private void TryToStartGame()
         {
             if (isPlayer1Ready && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
                 changeState(GameState.TransitionIntoBattle);
         }
 
-        /// <summary>
-        /// Checks if player 1 pressed start.
-        /// </summary>
         private void TryToRestartGame()
         {
             if (GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
@@ -1250,10 +1336,6 @@ namespace JAMMM
             }
         }
 
-        /// <summary>
-        /// Check if only 1 player is alive. If that is the case,
-        /// then change state to victory.
-        /// </summary>
         private void TryToEndGame()
         {
             int numAlive = 0;
@@ -1266,22 +1348,6 @@ namespace JAMMM
                 changeState(GameState.Victory);
         }
 
-        /// <summary>
-        /// Zooms in when the players are within an inner view
-        /// rectangle for a certain duration. Zooms out when
-        /// a player is going to pass through the border.
-        /// </summary>
-        private void updateCamera(GameTime gameTime)
-        {
-            TryZoomOut((float)gameTime.ElapsedGameTime.TotalSeconds);
-            TryZoomIn((float)gameTime.ElapsedGameTime.TotalSeconds);
-        }
-
-        /// <summary>
-        /// Find the player closest to the borders and zoom out by their
-        /// velocity as long as they are moving in the direction of crossing
-        /// that border and are within a certain limit ZOOM_BUFFER.
-        /// </summary>
         private void TryZoomOut(float gameTime)
         {
             Actor furthestPlayer = null;
@@ -1373,10 +1439,6 @@ namespace JAMMM
             }
         }
 
-        /// <summary>
-        /// If all of the players are within specific rectangles
-        /// in the overall view ranges then zoom in slowly. 
-        /// </summary>
         private void TryZoomIn(float gameTime)
         {
             bool allInBoundsMedium = true,
@@ -1410,195 +1472,78 @@ namespace JAMMM
                 }
             }
         }
-
-        /// <summary>
-        /// Gets the furthest penguin form the center of the screen.
-        /// </summary>
-        private Actor getFurthestPlayerFromCenter()
-        {
-            float maxDist = 0.0f;
-            float currDist = 0.0f;
-            Actor fActor = null;
-
-            foreach (Penguin p in players)
-            {
-                currDist = camera.getDistanceFromViewCenter(p);
-
-                if (currDist > maxDist)
-                {
-                    maxDist = currDist;
-                    fActor = p;
-                }
-            }
-
-            return fActor;
-        }
-
-        /// <summary>
-        /// Gets the furthest player outside of the view
-        /// boundaries.
-        /// </summary>
-        private Actor getFurthestPlayerOutOfBounds()
-        {
-            float maxDist = 0.0f;
-            float currDist = 0.0f;
-            Actor fActor = null;
-
-            foreach (Penguin p in players)
-            {
-                currDist = camera.getDistanceOutsideBorders(p);
-
-                if (currDist > maxDist)
-                {
-                    maxDist = currDist;
-                    fActor = p;
-                }
-            }
-
-            return fActor;
-        }
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
-        {
-            switch (this.currentGameState)
-            {
-                case (GameState.FindingPlayers):
-                {
-                    GraphicsDevice.Clear(Color.DarkSeaGreen);
-                    spriteBatch.Begin();
-
-                    spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
-                    spriteBatch.Draw(title, titlePosition, Color.White);
-
-                    foreach (Penguin p in players)
-                        p.draw(gameTime, spriteBatch);
-
-                    if (isPlayer1Ready)
-                        spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
-                    if (isPlayer2Ready)
-                        spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
-                    if (isPlayer3Ready)
-                        spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
-                    if (isPlayer4Ready)
-                        spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
-
-                    spriteBatch.End();
-
-                    break;
-                }
-                case (GameState.TransitionIntoBattle):
-                {
-                    GraphicsDevice.Clear(Color.DarkSeaGreen);
-
-                    spriteBatch.Begin();
-
-                    spriteBatch.Draw(background, expandingView, backgroundFadeColor);
-
-                    spriteBatch.Draw(title, titlePosition, titleFadeColor);
-
-                    foreach (Penguin p in players)
-                        p.draw(gameTime, spriteBatch);
-
-                    spriteBatch.End();
-
-                    break;
-                }
-                case (GameState.Battle):
-                {
-                    GraphicsDevice.Clear(Color.Blue);
-                    
-                    spriteBatch.Begin(SpriteSortMode.BackToFront,
-                        BlendState.AlphaBlend, null, null, null, null,
-                        camera.getTransformation());
-
-                    spriteBatch.Draw(background, camera.maxView, Color.White);
-
-                    foreach (Penguin p in players)
-                    {
-                        p.draw(gameTime, spriteBatch);
-                        spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
-                            new Vector2(p.Position.X - 75, p.Position.Y + 60),
-                            Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-                    }
-
-                    foreach (Fish fish in fishPool)
-                        fish.draw(gameTime, spriteBatch);
-                    
-                    foreach (Shark shark in sharkPool)
-                        shark.draw(gameTime, spriteBatch);
-
-                    foreach (Spear spear in spears)
-                        spear.draw(gameTime, spriteBatch);
-
-                    ParticleManager.Instance.draw(gameTime, spriteBatch);
-
-                    spriteBatch.End();
-
-                    spriteBatch.Begin();
-
-                    if (isPlayer1Connected)
-                    {
-                        spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
-                    }
-                    if (isPlayer2Connected)
-                    {
-                        spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
-                    }
-                    if (isPlayer3Connected)
-                    {
-                        spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
-                    }
-                    if (isPlayer4Connected)
-                    {
-                        spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
-                        spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
-                    }
-
-                    spriteBatch.End();
-
-                    break;
-                }
-                case (GameState.Victory):
-                {
-                    GraphicsDevice.Clear(Color.DarkSeaGreen);
-
-                    spriteBatch.Begin();
-
-                    if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
-                    {
-                        spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
-                    }
-                    else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
-                    {
-                        spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
-                    }
-                    else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
-                    {
-                        spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
-                    }
-                    else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
-                    {
-                        spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
-                    }
-
-                    spriteBatch.End();
-
-                    break;
-                }
-            }
-
-            base.Draw(gameTime);
-        }
     }
+
+    /**
+protected void Flock(List<Fish> _boids, GameTime gametime)
+{
+    float maxSpeed = _boids[0].MaxVel;
+    float maxAccel = _boids[0].MaxAcc;
+    float desiredSeparation = 50.0f;
+    float neighborRadius = 100.0f;
+    float separationFactor = 30.0f;
+    float alignmentFactor  = 4.0f;
+    float cohesionFactor  = 1.0f;
+
+    float elapsedTime = (float)gametime.ElapsedGameTime.TotalSeconds;            
+    for (int i = 0; i < _boids.Count; i++)
+    {
+        float count = 0;
+        float count0 = 0;
+        Vector2 cohesion = new Vector2(0, 0);
+        Vector2 separation = new Vector2(0, 0);
+        Vector2 alignment = new Vector2(0, 0);                
+
+        for (int j = 0; j < _boids.Count; j++)
+        {
+            Vector2 vecTo = _boids[j].Position - _boids[i].Position;
+            if (vecTo.Length() > 0 && vecTo.Length() < neighborRadius)
+            {
+                cohesion += _boids[j].Position;
+                alignment += _boids[j].Velocity;
+                count++;                        
+            }
+            if (vecTo.Length() > 0 && vecTo.Length() < desiredSeparation)
+            {
+                Vector2 temp = -vecTo;
+                temp.Normalize();
+                temp /= vecTo.Length();
+                separation += temp;                        
+                count0++;
+            }
+        }
+
+        if (count > 0)
+        {
+            cohesion /= count;
+            cohesion = cohesion - _boids[i].Position;
+            alignment /= count;
+            if (alignment.Length() > maxAccel)
+            {
+                alignment.Normalize();
+                alignment *= maxAccel;
+            }
+        }
+        if (count0 > 0)
+        {
+            separation /= count0;
+        }
+        if (cohesion.Length() > 0)
+        {
+            float temp = cohesion.Length();
+            cohesion.Normalize();
+            if ( temp < (desiredSeparation + neighborRadius) / 2.0f)
+            {
+                cohesion *= maxSpeed * (temp / neighborRadius);
+            }
+            else
+            {                        
+                cohesion *= maxSpeed;
+            }
+            cohesion -= _boids[i].velocity;
+        }
+        _boids[i].acceleration = cohesion * cohesionFactor + separation * separationFactor + alignment * alignmentFactor;                
+    }
+}
+ * */
 }

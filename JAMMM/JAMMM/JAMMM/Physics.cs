@@ -76,7 +76,7 @@ namespace JAMMM
             if (a.CurrState != Actor.state.Dashing  
                 && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
                 a.Velocity = vel = a.MaxVel * Vector2.Normalize(a.Velocity);
-            else if( a.CurrState == Actor.state.Dashing 
+            else if(a.CurrState == Actor.state.Dashing 
                 && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
                 a.Velocity = a.MaxVelDash * Vector2.Normalize(a.Velocity);
 
