@@ -70,15 +70,20 @@ namespace JAMMM
             }
             */
 
-            a.Velocity = acc * delta + vel;
+            a.Velocity = acc * delta + a.MiscAcceleration * delta + vel;
 
             // cap the max speed for each state
             if (a.CurrState != Actor.state.Dashing  
-                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel)
+                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVel && !a.IsBeingKnockedBack)
                 a.Velocity = vel = a.MaxVel * Vector2.Normalize(a.Velocity);
-            else if(a.CurrState == Actor.state.Dashing 
-                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash )
+            else if(a.CurrState == Actor.state.Dashing
+                && Math.Sqrt(magnitudeSquared(a.Velocity)) > a.MaxVelDash && !a.IsBeingKnockedBack)
                 a.Velocity = a.MaxVelDash * Vector2.Normalize(a.Velocity);
+            
+            // cap total max speed
+            if (Math.Sqrt(magnitudeSquared(a.Velocity)) > Actor.MAX_POSSIBLE_SPEED)
+                a.velocity = Actor.MAX_POSSIBLE_SPEED * Vector2.Normalize(a.Velocity);
+
 
             //relative friction
             if (applyFric)
@@ -115,7 +120,8 @@ namespace JAMMM
                 sh.mouthCircle.center = sh.mouthPoint;
             }
 
-            a.acceleration = accDecay * a.acceleration;
+            a.acceleration     *= accDecay;
+            a.MiscAcceleration *= accDecay;
 
             //zero if too small
             if ( Math.Abs(a.Velocity.X) < eps) 

@@ -45,6 +45,10 @@ namespace JAMMM
         public const string PENGUIN_MOVE_MEDIUM = "Penguin_Move_Med";
         public const string PENGUIN_MOVE_LARGE = "Penguin_Move_Large";
 
+        public const string PENGUIN_MELEE_SMALL = "Penguin_Melee_Small";
+        public const string PENGUIN_MELEE_MEDIUM = "Penguin_Melee_Med";
+        public const string PENGUIN_MELEE_LARGE = "Penguin_Melee_Large";
+
         public const string PENGUIN_DASH_SMALL = "Penguin_Dash_Small";
         public const string PENGUIN_DASH_MEDIUM = "Penguin_Dash_Med";
         public const string PENGUIN_DASH_LARGE = "Penguin_Dash_Large";
@@ -64,7 +68,7 @@ namespace JAMMM
         private const float EPSILON = 0.01f;
 
         private const int FISH_POOL_SIZE = 40;
-        private const int SHARK_POOL_SIZE = 2;
+        private const int SHARK_POOL_SIZE = 0;
         private const int SPEAR_POOL_SIZE = 50;
 
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
@@ -87,10 +91,8 @@ namespace JAMMM
         GraphicsDeviceManager graphics;
 
         private SpriteBatch  spriteBatch;
-        private Texture2D    playerPenguin;
         private Texture2D    background;
         private Texture2D    title;
-        private Rectangle    playerPenguinRectangle;
         private Rectangle    screenRectangle;
 
         public Rectangle     gameplayBoundaries;
@@ -219,7 +221,6 @@ namespace JAMMM
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Peric");
-            playerPenguin = Content.Load<Texture2D>("Sprites/Penguin_Small_Image");
             background = Content.Load<Texture2D>("Sprites/Background");
             title = Content.Load<Texture2D>("Sprites/title");
 
@@ -227,9 +228,11 @@ namespace JAMMM
             AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
+
             AudioManager.addSound("Death_Penguin", Content.Load<SoundEffect>("Sounds/death_penguin"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
             AudioManager.addSound("Ready_Sound", Content.Load<SoundEffect>("Sounds/ready"));
+
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
@@ -243,6 +246,22 @@ namespace JAMMM
             SpriteManager.addTexture("Kelp_Idle", Content.Load<Texture2D>("Sprites/Kelp_Idle"));
 
             #region COLORCODEDPENGUINS
+            SpriteManager.addTexture(PENGUIN_MELEE_SMALL, Content.Load<Texture2D>("Sprites/penguin_small_melee"));
+            SpriteManager.addTexture(PENGUIN_MELEE_MEDIUM, Content.Load<Texture2D>("Sprites/penguin_med_melee"));
+            SpriteManager.addTexture(PENGUIN_MELEE_LARGE, Content.Load<Texture2D>("Sprites/penguin_fat_melee"));
+
+            SpriteManager.addTexture(PENGUIN_MELEE_SMALL + "_r", Content.Load<Texture2D>("Sprites/penguin_small_melee" + "_r"));
+            SpriteManager.addTexture(PENGUIN_MELEE_MEDIUM + "_r", Content.Load<Texture2D>("Sprites/penguin_med_melee" + "_r"));
+            SpriteManager.addTexture(PENGUIN_MELEE_LARGE + "_r", Content.Load<Texture2D>("Sprites/penguin_fat_melee" + "_r"));
+
+            SpriteManager.addTexture(PENGUIN_MELEE_SMALL + "_p", Content.Load<Texture2D>("Sprites/penguin_small_melee" + "_p"));
+            SpriteManager.addTexture(PENGUIN_MELEE_MEDIUM + "_p", Content.Load<Texture2D>("Sprites/penguin_med_melee" + "_p"));
+            SpriteManager.addTexture(PENGUIN_MELEE_LARGE + "_p", Content.Load<Texture2D>("Sprites/penguin_fat_melee" + "_p"));
+
+            SpriteManager.addTexture(PENGUIN_MELEE_SMALL + "_g", Content.Load<Texture2D>("Sprites/penguin_small_melee" + "_g"));
+            SpriteManager.addTexture(PENGUIN_MELEE_MEDIUM + "_g", Content.Load<Texture2D>("Sprites/penguin_med_melee" + "_g"));
+            SpriteManager.addTexture(PENGUIN_MELEE_LARGE + "_g", Content.Load<Texture2D>("Sprites/penguin_fat_melee" + "_g"));
+
             SpriteManager.addTexture(PENGUIN_MOVE_SMALL, Content.Load<Texture2D>("Sprites/Penguin_small_swim_18_16"));
             SpriteManager.addTexture(PENGUIN_MOVE_MEDIUM, Content.Load<Texture2D>("Sprites/Penguin_med_swim_24_24"));
             SpriteManager.addTexture(PENGUIN_MOVE_LARGE, Content.Load<Texture2D>("Sprites/Penguin_fat_swim_32_32"));
@@ -409,16 +428,19 @@ namespace JAMMM
 
                         if (!s.IsAlive)
                         {
-                            sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                            if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
+                            if (numPlayersAlive() > 1)
                             {
-                                sharkRespawnTimes[i] = 0.0f;
+                                sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                                s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                                if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
+                                {
+                                    sharkRespawnTimes[i] = 0.0f;
 
-                                while (isNearAPlayer(s))
                                     s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                                    while (isNearAPlayer(s))
+                                        s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                                }
                             }
                         }
 
@@ -608,6 +630,8 @@ namespace JAMMM
                         {
                             spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
                         }
+                        else
+                            spriteBatch.DrawString(font, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
 
                         spriteBatch.End();
 
@@ -637,6 +661,7 @@ namespace JAMMM
                             graphics.PreferredBackBufferHeight * 0.1f);
 
             // set the text positions 
+            /*
             player1ReadyTextPosition = new Vector2(player1StartPosition.X +
                 (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player1StartPosition.Y + playerPenguin.Height + 5.0f);
@@ -649,6 +674,7 @@ namespace JAMMM
             player4ReadyTextPosition = new Vector2(player4StartPosition.X +
                 (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
                 player4StartPosition.Y + playerPenguin.Height + 5.0f);
+             * */
 
             // set the victory text positions
             player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
@@ -711,7 +737,7 @@ namespace JAMMM
                                               graphics.PreferredBackBufferHeight * 0.03f);
 
             // set the finding player penguin rectangle
-            playerPenguinRectangle = new Rectangle(0, 0, playerPenguin.Width, playerPenguin.Height);
+            //playerPenguinRectangle = new Rectangle(0, 0, playerPenguin.Width, playerPenguin.Height);
 
             camera.initialize();
             camera.updateBounds();
@@ -815,7 +841,7 @@ namespace JAMMM
                 foreach (Penguin p in players)
                 {
                     p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
-                    p.resetProperties();
+                    p.respawn();
                 }
 
                 Rectangle titleBounds = title.Bounds;
@@ -942,8 +968,8 @@ namespace JAMMM
         {
             Rectangle aBounds = a.getBufferedRectangleBounds(0);
 
-            return !gameplayBoundaries.Contains(aBounds) &&
-                   !gameplayBoundaries.Intersects(aBounds);
+            return !camera.View.Contains(aBounds) &&
+                   !camera.View.Intersects(aBounds);
         }
 
         private void keepInBounds(Actor a)
@@ -1045,6 +1071,19 @@ namespace JAMMM
                 return true;
 
             return false;
+        }
+
+
+
+        private int numPlayersAlive()
+        {
+            int numPlayersAlive = 0;
+
+            foreach (Penguin player in players)
+                if (player.CurrState != Actor.state.Dying)
+                    numPlayersAlive++;
+
+            return numPlayersAlive;
         }
 
 
@@ -1297,12 +1336,15 @@ namespace JAMMM
         private void TryToEndGame()
         {
             int numAlive = 0;
-
-            foreach (Penguin player in players)
-                if (player.CurrState != Actor.state.Dying)
+            int numLivePlayers = numPlayersAlive();
+            
+            // huehuehue
+            foreach (Shark s in sharkPool)
+                if (s.CurrState != Actor.state.Dying)
                     numAlive++;
 
-            if (numAlive == 1)
+            if ((numAlive == 0 && numLivePlayers == 1) ||
+               (numLivePlayers == 0))
                 changeState(GameState.Victory);
         }
     }

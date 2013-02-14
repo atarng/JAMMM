@@ -31,6 +31,14 @@ namespace JAMMM
         public const float BLINK_DURATION = 0.1f;
         public const int NUMBER_BLINKS_ON_HIT = 5;
 
+        protected float knockbackTime = 0.0f;
+        public const float KNOCKBACK_DURATION = 0.5f;
+
+        public const float MAX_POSSIBLE_SPEED = 800.0f;
+
+        public const float MELEE_DISPLACEMENT = 50.0f;
+        public const float SPEAR_DISPLACEMENT = 20.0f;
+
         public enum AnimationType
         {
             Idle,
@@ -41,6 +49,7 @@ namespace JAMMM
             Death,
             Bubble,
             HitSpark,
+            Melee
         }
 
         public enum state
@@ -63,6 +72,7 @@ namespace JAMMM
         protected Animation deathAnimation;
         protected Animation throwAnimation;
         protected Animation turnAnimation;
+        protected Animation meleeAnimation;
         #endregion
 
         public static bool printPhysics = false;
@@ -93,6 +103,13 @@ namespace JAMMM
         {
             get { return acceleration; }
             set { acceleration = value; }
+        }
+
+        public Vector2 miscAcceleration;
+        public Vector2 MiscAcceleration
+        {
+            get { return miscAcceleration; }
+            set { miscAcceleration = value; }
         }
 
         public Vector2 velocity;
@@ -176,6 +193,13 @@ namespace JAMMM
             set { dashCost = value; }
         }
 
+        private int meleeCost;
+        public int MeleeCost
+        {
+            get { return meleeCost; }
+            set { meleeCost = value; }
+        }
+
         private int spearCost;
         public int SpearCost
         {
@@ -221,7 +245,17 @@ namespace JAMMM
         protected float blinkTime;
         protected float numBlinks;
         protected bool isHit;
+        public bool IsHit
+        {
+            get { return isHit; }
+        }
         protected bool isBlink;
+
+        protected bool isBeingKnockedBack;
+        public bool IsBeingKnockedBack
+        {
+            get { return isBeingKnockedBack; }
+        }
 
         private Size currentSize;
         public Size CurrentSize
@@ -262,6 +296,7 @@ namespace JAMMM
         public void resetPhysics()
         {
             this.acceleration = Vector2.Zero;
+            this.miscAcceleration = Vector2.Zero;
             this.velocity = Vector2.Zero;
             this.rotation = 0.0f;
         }

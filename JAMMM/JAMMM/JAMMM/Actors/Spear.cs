@@ -17,6 +17,12 @@ namespace JAMMM.Actors
             set{id = value;}
         }
 
+        public Penguin Owner
+        {
+            get { return owner; }
+        }
+        private Penguin owner;
+
         public Spear() : base(0, 0, 0, 24, 20, 100)
         {
             MaxVel = 777;
@@ -74,8 +80,18 @@ namespace JAMMM.Actors
             changeState(state.Moving);
         }
 
+        public override void die()
+        {
+            base.die();
+
+            if (owner != null)
+                owner.spearAlive = false;
+        }
+
         public void setSpawnParameters(Size s, int id, Penguin p)
         {
+            this.owner = p;
+
             this.CurrentSize = s;
             this.id = id;
 
@@ -104,7 +120,7 @@ namespace JAMMM.Actors
         public override void collideWith(Actor other)
         {
             if (other is Penguin || other is Shark)
-                this.IsAlive = false;
+                die();
         }
     }
 }

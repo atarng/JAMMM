@@ -11,8 +11,8 @@ namespace JAMMM.Actors
     public class Shark : Actor
     {
         public const int SHARK_BASE_HEALTH = 100;
-        private const float SHARK_ATTACK_THRESHOLD = 300;
-        private const float SHARK_AGGRESS_THRESHOLD = 600;
+        private const float SHARK_ATTACK_THRESHOLD = 400;
+        private const float SHARK_AGGRESS_THRESHOLD = 800;
 
         public Vector2 mouthPoint;
         public Circle mouthCircle;
@@ -100,6 +100,17 @@ namespace JAMMM.Actors
             }
             else if (CurrState == state.Dash)
                 changeState(state.Dashing);
+
+            if (knockbackTime > 0.0f)
+            {
+                knockbackTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (knockbackTime <= 0.0f)
+                {
+                    knockbackTime = 0.0f;
+                    isBeingKnockedBack = false;
+                }
+            }
 
             currentAnimation.update(gameTime);
         }
@@ -238,6 +249,19 @@ namespace JAMMM.Actors
                     new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
 
+                isBeingKnockedBack = true;
+                knockbackTime = KNOCKBACK_DURATION;
+
+                // get physics rotation to p's rotation, 
+                // normalize that, and magnify by the amount
+                Vector2 pRotation = Physics.AngleToVector(other.Rotation);
+
+                pRotation.Normalize();
+
+                // give us an acceleration in that direction
+                this.miscAcceleration += pRotation * ((Spear)other).Owner.KnockbackAmount;
+                this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
+
                 getHit();
             }
             else if (other is Fish)
@@ -247,6 +271,35 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
+                }
+            }
+            else if (other is Penguin)
+            {
+                Penguin p = (Penguin)other;
+
+                if (p.CurrState == state.MeleeAttack)
+                {
+                    isBeingKnockedBack = true;
+                    knockbackTime = KNOCKBACK_DURATION;
+
+                    getHit();
+
+                    this.calories -= p.MeleeDamage;
+
+                    // get physics rotation to p's rotation, 
+                    // normalize that, and magnify by the amount
+                    Vector2 pRotation = Physics.AngleToVector(p.Rotation);
+
+                    pRotation.Normalize();
+
+                    // give us an acceleration in that direction
+                    this.acceleration = pRotation * p.KnockbackAmount;
+                    this.Position += pRotation * Actor.MELEE_DISPLACEMENT;
+                }
+                else if (other.CurrState == state.Dying)
+                {
+                    this.calories += PENGUIN_CALORIES;
+                    other.die();
                 }
             }
         }

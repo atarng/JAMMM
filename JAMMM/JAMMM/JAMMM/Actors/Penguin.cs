@@ -20,19 +20,47 @@ namespace JAMMM.Actors
         public const int MED_SIZE   = 33;
         public const int LARGE_SIZE = 54;
 
+        private const int MELEE_DAMAGE_SMALL = 5;
+        private const int MELEE_DAMAGE_MEDIUM = 10;
+        private const int MELEE_DAMAGE_LARGE = 15;
+
+        private const float KNOCKBACK_SMALL = 300.0f;
+        private const float KNOCKBACK_MEDIUM = 600.0f;
+        private const float KNOCKBACK_LARGE = 900.0f;
+
         public const int SPEAR_SMALL_COST = 5;
         public const int SPEAR_MED_COST   = 10;
         public const int SPEAR_LARGE_COST = 15;
 
-        public const int DASH_SMALL_COST = 0;
-        public const int DASH_MED_COST = 1;
-        public const int DASH_LARGE_COST = 2;
+        public const int DASH_SMALL_COST = 2;
+        public const int DASH_MED_COST   = 3;
+        public const int DASH_LARGE_COST = 5;
+
+        public const int MELEE_SMALL_COST = 0;
+        public const int MELEE_MED_COST   = 1;
+        public const int MELEE_LARGE_COST = 2;
 
         public const int SMALL_MASS = 100;
         public const int MEDIUM_MASS = 500;
         public const int LARGE_MASS = 1500;
 
-        public const float fireCooldown                = 0.5F;
+        public const float fireCooldown = 0.5F;
+
+        public const float meleeCooldown = 0.5F;
+
+        private float knockbackAmount;
+        public float KnockbackAmount
+        {
+            get { return knockbackAmount; }
+        }
+
+        private int meleeDamage;
+        public int MeleeDamage
+        {
+            get { return meleeDamage; }
+        }
+
+        public bool spearAlive; 
 
         private Boolean fire;
         public Boolean Fire
@@ -66,6 +94,12 @@ namespace JAMMM.Actors
 
         private string colorCode;
 
+        public Vector2 spearPoint;
+        public Circle spearCircle;
+
+        private float meleeTime;
+        private bool canMelee;
+
         public Color color;
 
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
@@ -87,10 +121,16 @@ namespace JAMMM.Actors
             this.CurrentSize      = Size.Small;
 
             this.DashCost         = DASH_SMALL_COST;
-            this.SpearCost        =  SPEAR_SMALL_COST;
+            this.SpearCost        = SPEAR_SMALL_COST;
+            this.MeleeCost        = MELEE_SMALL_COST;
 
             this.isHit = false;
+            this.canMelee = true;
+            meleeTime = 0.0f;
             resetBlink();
+
+            spearPoint = Vector2.Zero;
+            spearCircle = new Circle(this.Bounds.center.X + 50, this.Bounds.center.Y, 15);
         }
 
         public override void processInput()
@@ -110,20 +150,36 @@ namespace JAMMM.Actors
                 //if the acceleration is > max acc (means we were dashing)
                 if (!(CurrState == state.Dashing &&
                     (Vector2.Normalize(accController) == Vector2.Normalize(Acceleration) 
-                    || Vector2.Zero == accController)))
+                    || Vector2.Zero == accController)) && !isHit)
                     Acceleration = accController;
 
                 if ( this.calories > DashCost 
-                  && gamePadState.IsButtonDown(Buttons.A) && !prevStateA)
+                  && gamePadState.IsButtonDown(Buttons.A) && !prevStateA && 
+                    CurrState != state.MeleeAttack)
                     changeState(state.Dash);
 
                 if (gamePadState.IsButtonUp(Buttons.A) 
-                    && CurrState == state.DashReady)
+                    && (CurrState == state.DashReady ||
+                        CurrState == state.Moving))
                     prevStateA = false;
+
+                if (gamePadState.IsButtonDown(Buttons.X) &&
+                    canMelee && CurrState != state.MeleeAttack && !spearAlive)
+                {
+                    if (CurrState == state.Dash ||
+                        CurrState == state.Dashing)
+                    {
+                        CurrTime = 0.0f;
+                        prevStateA = false;
+                    }
+
+                    changeState(state.MeleeAttack);
+                }
                 
                 if (gamePadState.Triggers.Right == 1 && FireTime <= 0)
                 {
-                    if (this.Calories > this.SpearCost)
+                    if (this.Calories > this.SpearCost &&
+                        this.CurrState != state.MeleeAttack)
                     {
                         AudioManager.getSound("Spear_Throw").Play();
                         FireTime = fireCooldown;
@@ -145,6 +201,11 @@ namespace JAMMM.Actors
                 && this.CurrState != state.Dash)
                 changeState(state.Dash);
 
+            if (kbState.IsKeyDown(Keys.F)
+                && canMelee && this.CurrState != state.Dashing
+                && this.CurrState != state.Dash)
+                changeState(state.MeleeAttack);
+
             if (kbState.IsKeyDown(Keys.W))
                 acceleration.Y = -1 * MaxAcc;
             if (kbState.IsKeyDown(Keys.A))
@@ -164,6 +225,8 @@ namespace JAMMM.Actors
                 SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1, false);
             deathAnimation = new Animation((Actor)this, AnimationType.Death,
                 SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1, false, 1.5f);
+            meleeAnimation = new Animation((Actor)this, AnimationType.Melee,
+                SpriteManager.getTexture(Game1.PENGUIN_MELEE_SMALL + colorCode), 4, false);  
         }
 
         public override void update(GameTime delta)
@@ -195,8 +258,30 @@ namespace JAMMM.Actors
                     changeState(state.DashReady);
             }
 
+            if (meleeTime > 0)
+            {
+                meleeTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+
+                if (meleeTime <= 0)
+                {
+                    meleeTime = 0.0f;
+                    canMelee = true;
+                }
+            }
+
             if (fireTime > 0)
                 fireTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+
+            if (knockbackTime > 0.0f)
+            {
+                knockbackTime -= (float)delta.ElapsedGameTime.TotalSeconds;
+
+                if (knockbackTime <= 0.0f)
+                {
+                    knockbackTime = 0.0f;
+                    isBeingKnockedBack = false;
+                }
+            }
         }
 
         protected override void onDash()         
@@ -225,6 +310,12 @@ namespace JAMMM.Actors
         protected override void onDashReady()    
         {
             CurrTime = 0.0f;
+
+            changeState(state.Moving);
+        }
+
+        protected override void onMoving()
+        {
             changeAnimation(moveAnimation);
         }
 
@@ -285,7 +376,15 @@ namespace JAMMM.Actors
         
         protected override void onMeleeAttack()  
         {
- 
+            this.calories -= MeleeCost;
+
+            canMelee = false;
+
+            meleeTime = meleeCooldown;
+
+            changeAnimation(meleeAnimation);
+
+            AudioManager.getSound("Spear_Throw").Play();
         }
 
         private void tryToGrow()
@@ -306,10 +405,14 @@ namespace JAMMM.Actors
 
             this.DashCost = DASH_SMALL_COST;
             this.SpearCost = SPEAR_SMALL_COST;
+            this.MeleeCost = MELEE_SMALL_COST;
+            this.meleeDamage = MELEE_DAMAGE_SMALL;
+            this.knockbackAmount = KNOCKBACK_SMALL;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
             deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_SMALL + colorCode), 1);
+            meleeAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MELEE_SMALL + colorCode), 4);
 
             this.Bounds.Radius = SMALL_SIZE;
 
@@ -322,10 +425,14 @@ namespace JAMMM.Actors
 
             this.DashCost = DASH_MED_COST;
             this.SpearCost = SPEAR_MED_COST;
+            this.MeleeCost = MELEE_MED_COST;
+            this.meleeDamage = MELEE_DAMAGE_MEDIUM;
+            this.knockbackAmount = KNOCKBACK_MEDIUM;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
             deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_MEDIUM + colorCode), 1);
+            meleeAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MELEE_MEDIUM + colorCode), 4);
 
             this.Bounds.Radius = MED_SIZE;
 
@@ -338,10 +445,14 @@ namespace JAMMM.Actors
 
             this.DashCost = DASH_LARGE_COST;
             this.SpearCost = SPEAR_LARGE_COST;
+            this.MeleeCost = MELEE_LARGE_COST;
+            this.meleeDamage = MELEE_DAMAGE_LARGE;
+            this.knockbackAmount = KNOCKBACK_LARGE;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
             deathAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DEATH_LARGE + colorCode), 1);
+            meleeAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MELEE_LARGE + colorCode), 4);
 
             this.Bounds.Radius = LARGE_SIZE;
 
@@ -377,6 +488,7 @@ namespace JAMMM.Actors
                     {
                         s.setSpawnParameters(this.CurrentSize, id, this);
                         s.spawnAt(this.Position);
+                        spearAlive = true;
                         break;
                     }
                 }
@@ -485,6 +597,8 @@ namespace JAMMM.Actors
         {
             if (t == AnimationType.Death)
                 die();
+            else if (t == AnimationType.Melee)
+                changeState(state.Moving);
         }
 
         public override void collideWith(Actor other)
@@ -528,6 +642,19 @@ namespace JAMMM.Actors
                     (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
 
                 getHit();
+
+                isBeingKnockedBack = true;
+                knockbackTime = KNOCKBACK_DURATION;
+
+                // get physics rotation to p's rotation, 
+                // normalize that, and magnify by the amount
+                Vector2 pRotation = Physics.AngleToVector(other.Rotation);
+
+                pRotation.Normalize();
+
+                // give us an acceleration in that direction
+                this.miscAcceleration += pRotation * ((Spear)other).Owner.KnockbackAmount;
+                this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
             }
             else if (other is Shark)
             {
@@ -583,6 +710,31 @@ namespace JAMMM.Actors
                     this.calories += FISH_CALORIES;
                     other.startDying();
                 }
+            }
+            else if (other is Penguin)
+            {
+                Penguin p = (Penguin)other;
+
+                if (p.CurrState == state.MeleeAttack)
+                {
+                    isBeingKnockedBack = true;
+                    knockbackTime = KNOCKBACK_DURATION;
+
+                    getHit();
+
+                    this.calories -= p.MeleeDamage;
+                        
+                    // get physics rotation to p's rotation, 
+                    // normalize that, and magnify by the amount
+                    Vector2 pRotation = Physics.AngleToVector(p.Rotation);
+                        
+                    pRotation.Normalize();
+
+                    // give us an acceleration in that direction
+                    this.miscAcceleration += pRotation * p.KnockbackAmount;
+                    this.Position += pRotation * Actor.MELEE_DISPLACEMENT;
+                }
+
             }
         }
     }

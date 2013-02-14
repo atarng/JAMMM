@@ -170,6 +170,7 @@ namespace JAMMM
         public void reset()
         {
             this.frameIndex = 0;
+            updateFrameRectangle();
         }
 
         public void pause()
