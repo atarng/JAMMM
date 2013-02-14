@@ -140,7 +140,9 @@ namespace JAMMM.Actors
                 fire = true;
             }
 
-            if (kbState.IsKeyDown(Keys.LeftShift))
+            if (kbState.IsKeyDown(Keys.LeftShift) 
+                && this.CurrState != state.Dashing 
+                && this.CurrState != state.Dash)
                 changeState(state.Dash);
 
             if (kbState.IsKeyDown(Keys.W))
