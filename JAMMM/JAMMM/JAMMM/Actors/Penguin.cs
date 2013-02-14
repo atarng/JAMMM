@@ -358,6 +358,29 @@ namespace JAMMM.Actors
             base.die();
         }
 
+        /// <summary>
+        /// Checks if the player can throw a spear
+        /// and respawns an existing dead spear
+        /// with new physical settings as a result.
+        /// </summary>
+        public void TrySpear(int id, List<Spear> spearPool)
+        {
+            if (this.Fire)
+            {
+                this.Fire = false;
+
+                foreach (Spear s in spearPool)
+                {
+                    if (!s.IsAlive)
+                    {
+                        s.setSpawnParameters(this.CurrentSize, id, this);
+                        s.spawnAt(this.Position);
+                        break;
+                    }
+                }
+            }
+        }
+
         public void resetProperties()
         {
             this.isHit = false;

@@ -10,6 +10,13 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
+        public const int SHARK_BASE_HEALTH = 100;
+        private const float SHARK_ATTACK_THRESHOLD = 300;
+        private const float SHARK_AGGRESS_THRESHOLD = 600;
+
+        public Vector2 mouthPoint;
+        public Circle mouthCircle;
+
         private int calories;
         public int Calories
         {
@@ -17,15 +24,10 @@ namespace JAMMM.Actors
             set { calories = value; }
         }
 
-        public const int SHARK_BASE_HEALTH = 100;
-
-        public Vector2 mouthPoint;
-        public Circle mouthCircle;
-
         public Shark() : base(0, 0, 160, 96, 60, 1500)
         {
             this.MaxAccDash = 1500;
-            this.MaxVelDash = 1000;
+            this.MaxVelDash = 500;
             this.calories = SHARK_BASE_HEALTH;
 
             mouthCircle = new Circle(this.Bounds.center.X + 100, this.Bounds.center.Y, 35);
@@ -114,6 +116,86 @@ namespace JAMMM.Actors
             acceleration += acceleration * MaxAccDash;
 
             CurrTime = DashTime;
+        }
+
+        /// <summary>
+        /// Try to move toward one of the players passed in.
+        /// </summary>
+        public void TryToAggressTowardPlayers(Shark s, List<Penguin> players)
+        {
+            if (s.CurrState != Actor.state.Moving)
+                return;
+
+            float minDist = 10000.0f;
+            float currDist = 0.0f;
+            Vector2 nearestPosition = Vector2.Zero;
+            Vector2 distance = Vector2.Zero;
+            Vector2 vecTowardNearest = Vector2.Zero;
+
+            foreach (Penguin p in players)
+            {
+                if (!p.IsAlive)
+                    continue;
+
+                distance.X = p.Position.X - s.Position.X;
+                distance.Y = p.Position.Y - s.Position.Y;
+
+                currDist = distance.Length();
+
+                if (currDist < minDist)
+                {
+                    minDist = currDist;
+                    nearestPosition = p.Position;
+                    vecTowardNearest = distance;
+                }
+            }
+
+            // try to aggress toward the nearest player
+            if (minDist <= SHARK_AGGRESS_THRESHOLD
+                && minDist > SHARK_ATTACK_THRESHOLD)
+                s.acceleration = vecTowardNearest;
+        }
+
+        /// <summary>
+        /// Try to attack one of the players in the list passed in.
+        /// </summary>
+        public void TryToAttackPlayers(Shark s, List<Penguin> players)
+        {
+            if (s.CurrState != Actor.state.Moving)
+                return;
+
+            float minDist = 10000.0f;
+            float currDist = 0.0f;
+            Vector2 nearestPosition = Vector2.Zero;
+            Vector2 distance = Vector2.Zero;
+            Vector2 vecTowardNearest = Vector2.Zero;
+
+            foreach (Penguin p in players)
+            {
+                if (!p.IsAlive)
+                    continue;
+
+                distance.X = p.Position.X - s.Position.X;
+                distance.Y = p.Position.Y - s.Position.Y;
+
+                currDist = distance.Length();
+
+                if (currDist < minDist)
+                {
+                    minDist = currDist;
+                    nearestPosition = p.Position;
+                    vecTowardNearest = distance;
+                }
+            }
+
+            // try to aggress toward the nearest player
+            if (minDist <= SHARK_ATTACK_THRESHOLD
+                && s.CurrState != Actor.state.Dashing
+                && s.CurrState != Actor.state.Dash)
+            {
+                s.acceleration = vecTowardNearest;
+                ((Shark)s).attack();
+            }
         }
 
         public override void handleAnimationComplete(Actor.AnimationType t)
