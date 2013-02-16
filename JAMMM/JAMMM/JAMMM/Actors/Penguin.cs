@@ -563,7 +563,7 @@ namespace JAMMM.Actors
                 //batch.DrawString(Game1.font, "Cal " + Calories, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Velocity " + Velocity, loc += fontHeight, c);
                 //batch.DrawString(Game1.font, "Accleration " + Acceleration, loc += fontHeight, c);
-                String s = "";
+                string s = "";
                 switch (CurrState)
                 {
                     case state.Dash:

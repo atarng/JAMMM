@@ -133,7 +133,7 @@ namespace JAMMM
                 }
             }
 
-            adjustAccelerationToAvoidNearest
+            avoidNearestPredators((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             if ((this.velocity.Length() / MaxVel) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble,
@@ -141,6 +141,32 @@ namespace JAMMM
                     new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.1f, -0.20f, 1, 0.5f, 10f);
 
             currentAnimation.update(gameTime);
+        }
+
+        /// <summary>
+        /// Simulates our movement for the current frame.
+        /// If it will move us into attack range of a predator
+        /// then rotate our acceleration for this frame until
+        /// we will no longer endanger ourselves.
+        /// </summary>
+        private void avoidNearestPredators(float gameTime)
+        {
+            Vector2 currPos = this.Position;
+            Vector2 destVel = this.velocity;
+            Vector2 destPos = this.Position;
+
+            destVel = gameTime * this.acceleration;
+            destPos = destVel * gameTime + currPos;
+
+            if (nearestShark != null)
+            {
+
+            }
+
+            if (nearestPlayer != null)
+            {
+
+            }
         }
 
         /// <summary>
