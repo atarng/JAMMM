@@ -158,6 +158,8 @@ namespace JAMMM
 
         private bool hasBeenCompletedOnce = false;
 
+        private Timer timer1;
+
 #endregion
 
 
@@ -390,6 +392,10 @@ namespace JAMMM
                 }
                 case (GameState.Battle):
                 {
+
+
+                    timer1.Update(gameTime);
+
                     // do regular game logic updating each player
                     for (int i = 0; i < players.Count; i++)
                     {
@@ -581,6 +587,8 @@ namespace JAMMM
                         spriteBatch.End();
 
                         spriteBatch.Begin();
+
+                        timer1.Draw(spriteBatch, font, graphics);
 
                         if (isPlayer1Connected)
                         {
@@ -926,6 +934,10 @@ namespace JAMMM
         /// </summary>
         private void onEnteringBattle()
         {
+
+            //initialize the timer
+            timer1 = new Timer();
+
             // play the battle theme
             if (battleTheme.State != SoundState.Playing)
                 battleTheme.Play();
