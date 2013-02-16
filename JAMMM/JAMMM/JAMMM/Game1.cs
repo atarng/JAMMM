@@ -67,7 +67,7 @@ namespace JAMMM
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 40;
+        private const int FISH_POOL_SIZE = 80;
         private const int SHARK_POOL_SIZE = 0;
         private const int SPEAR_POOL_SIZE = 50;
 
@@ -104,7 +104,7 @@ namespace JAMMM
 
         private Vector2 titlePosition;
 
-        private Dictionary<Actor, Actor> collisions;
+        private Dictionary<Actor, List<Actor>> collisions;
 
         private List<Fish>    fishPool;
         private List<Shark>   sharkPool;
@@ -174,7 +174,7 @@ namespace JAMMM
 
             players = new List<Penguin>();
 
-            collisions = new Dictionary<Actor, Actor>();
+            collisions = new Dictionary<Actor, List<Actor>>();
 
             camera = new Camera2D(this);
 
@@ -403,6 +403,9 @@ namespace JAMMM
                     // if that is the case, spawn a new fishy
                     foreach (Fish f in fishPool)
                     {
+                        f.TryToSchool(fishPool);
+                        f.TryToEvade(players, sharkPool);
+
                         f.update(gameTime);
                         Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
@@ -761,16 +764,23 @@ namespace JAMMM
         private void createObjectPools()
         {
             for (int i = 0; i < FISH_POOL_SIZE; ++i)
+            {
                 fishPool.Add(new Fish());
+                collisions.Add(fishPool[i], new List<Actor>());
+            }
 
             for (int i = 0; i < SHARK_POOL_SIZE; ++i)
             {
                 sharkPool.Add(new Shark());
                 sharkRespawnTimes.Add(0.0f);
+                collisions.Add(sharkPool[i], new List<Actor>());
             }
 
             for (int i = 0; i < SPEAR_POOL_SIZE; ++i)
+            {
                 spears.Add(new Spear());
+                collisions.Add(spears[i], new List<Actor>());
+            }
         }
 
 
@@ -889,6 +899,13 @@ namespace JAMMM
         /// </summary>
         private void onEnteringTransitionIntoBattle()
         {
+            // add collision pairs for each player that exists
+            foreach (Penguin p in players)
+            {
+                if (!collisions.ContainsKey(p))
+                    collisions.Add(p, new List<Actor>());
+            }
+
             backgroundFadeColor.R = 255;
             backgroundFadeColor.G = 255;
             backgroundFadeColor.B = 255;
@@ -988,8 +1005,9 @@ namespace JAMMM
                     if (a.velocity.X < 0.0f)
                         a.velocity.X = 0.0f;
 
-                    if (a.acceleration.X < 0.0f)
-                        a.acceleration.X = 0.0f;
+                    //if (a.acceleration.X < 0.0f)
+                    //    a.acceleration.X = 0.0f;
+                    a.acceleration.X = -(a.acceleration.X);
                 }
 
                 if (aBounds.Right > gameplayBoundaries.Right)
@@ -999,8 +1017,9 @@ namespace JAMMM
                     if (a.velocity.X > 0.0f)
                         a.velocity.X = 0.0f;
 
-                    if (a.acceleration.X > 0.0f)
-                        a.acceleration.X = 0.0f;
+                    //if (a.acceleration.X > 0.0f)
+                    //    a.acceleration.X = 0.0f;
+                    a.acceleration.X = -(a.acceleration.X);
                 }
 
                 if (aBounds.Top < gameplayBoundaries.Top)
@@ -1010,8 +1029,9 @@ namespace JAMMM
                     if (a.velocity.Y < 0.0f)
                         a.velocity.Y = 0.0f;
 
-                    if (a.acceleration.Y < 0.0f)
-                        a.acceleration.Y = 0.0f;
+                    //if (a.acceleration.Y < 0.0f)
+                    //    a.acceleration.Y = 0.0f;
+                    a.acceleration.Y = -(a.acceleration.Y);
                 }
 
                 if (aBounds.Bottom > gameplayBoundaries.Bottom)
@@ -1021,8 +1041,9 @@ namespace JAMMM
                     if (a.velocity.Y > 0.0f)
                         a.velocity.Y = 0.0f;
 
-                    if (a.acceleration.Y > 0.0f)
-                        a.acceleration.Y = 0.0f;
+                    //if (a.acceleration.Y > 0.0f)
+                    //    a.acceleration.Y = 0.0f;
+                    a.acceleration.Y = -(a.acceleration.Y);
                 }
             }
         }
@@ -1090,107 +1111,183 @@ namespace JAMMM
 
         private void detectCollisions()
         {
-            collisions.Clear();
+            // clear potential collisions
+            foreach (List<Actor> pairs in collisions.Values)
+                pairs.Clear();
+
+            #region PLAYERS
 
             // player collisions
             for (int i = 0; i < players.Count; ++i)
             {
+                // players with players
                 for (int j = 0; j < players.Count; ++j)
                 {
-                    if (i != j && players[i].IsAlive && players[j].IsAlive &&
-                        players[i].Bounds.isCollision(players[j].Bounds))
+                    if (i == j || !players[i].IsAlive || !players[j].IsAlive)
+                        continue;
+
+                    if (players[i].Bounds.isCollision(players[j].Bounds) || 
+                        (players[i].Bounds.isCollision(players[j].spearCircle) 
+                        && players[j].CurrState == Actor.state.MeleeAttack))
                     {
-                        if (collisions.Count == 0)
-                            collisions.Add(players[i], players[j]);
-                        else if (collisions[players[j]] != players[i])
-                            collisions.Add(players[i], players[j]);
+                        if (!collisions[players[i]].Contains(players[j]) && 
+                            !collisions[players[j]].Contains(players[i]))
+                            collisions[players[i]].Add(players[j]);
                     }
                 }
             }
 
+            #endregion
+
+            #region SPEARS
+
             // spear collisions
             for (int i = 0; i < spears.Count; i++)
             {
+                if (!spears[i].IsAlive) continue;
+
+                // spears with sharks
                 for (int j = 0; j < sharkPool.Count; j++)
                 {
-                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds) &&
-                        spears[i].IsAlive && sharkPool[j].IsAlive &&
-                        !collisions.ContainsKey(spears[i]))
-                        collisions.Add(spears[i], sharkPool[j]);
+                    if (!sharkPool[j].IsAlive) continue;
+
+                    if (spears[i].Bounds.isCollision(sharkPool[j].Bounds))
+                    {
+                        if (!collisions[spears[i]].Contains(sharkPool[j]) &&
+                            !collisions[sharkPool[j]].Contains(spears[i]))
+                            collisions[spears[i]].Add(sharkPool[j]);
+                    }
                 }
 
+                // spears with players
                 for (int j = 0; j < players.Count; j++)
                 {
-                    if (spears[i].bounds.isCollision(players[j].Bounds)
-                        && spears[i].IsAlive && players[j].IsAlive && j != spears[i].Id &&
-                        !collisions.ContainsKey(spears[i]))
-                        collisions.Add(spears[i], players[j]);
+                    if (j == spears[i].Id || !players[j].IsAlive) continue;
+
+                    if (spears[i].bounds.isCollision(players[j].Bounds))
+                    {
+                        if (!collisions[spears[i]].Contains(players[j]) &&
+                            !collisions[players[j]].Contains(spears[i]))
+                            collisions[spears[i]].Add(players[j]);
+                    }
                 }
             }
+
+            #endregion
+
+            #region FISH
 
             // fish collisions
             for (int i = 0; i < fishPool.Count; ++i)
             {
+                if (!fishPool[i].IsAlive)
+                    continue;
+                
+                // fish with players
                 for (int j = 0; j < players.Count; ++j)
                 {
-                    if (fishPool[i].Bounds.isCollision(players[j].Bounds)
-                        && (fishPool[i].CurrState != Actor.state.Dying) &&
-                        (fishPool[i].IsAlive) && players[j].IsAlive &&
-                        !collisions.ContainsKey(fishPool[i]))
-                        collisions.Add(fishPool[i], players[j]);
+                    if (!players[j].IsAlive || players[j].CurrState == Actor.state.Dying)
+                        continue;
+
+                    if (fishPool[i].Bounds.isCollision(players[j].Bounds))
+                    {
+                        if (!collisions[fishPool[i]].Contains(players[j]) &&
+                            !collisions[players[j]].Contains(fishPool[i]))
+                            collisions[fishPool[i]].Add(players[j]);
+                    }
                 }
 
+                // fish with sharks
                 for (int j = 0; j < sharkPool.Count; j++)
                 {
-                    if (fishPool[i].Bounds.isCollision(sharkPool[j].Bounds) &&
-                        fishPool[i].IsAlive && sharkPool[j].IsAlive &&
-                        !collisions.ContainsKey(fishPool[i]))
-                        collisions.Add(fishPool[i], sharkPool[j]);
+                    if (!sharkPool[j].IsAlive) continue;
+
+                    if (fishPool[i].Bounds.isCollision(sharkPool[j].Bounds))
+                    {
+                        if (!collisions[fishPool[i]].Contains(sharkPool[j]) &&
+                            !collisions[sharkPool[j]].Contains(fishPool[i]))
+                            collisions[fishPool[i]].Add(sharkPool[j]);
+                    }
+                }
+
+                // fish with fish
+                for (int j = 0; j < fishPool.Count; ++j)
+                {
+                    if (i == j || !fishPool[j].IsAlive)
+                        continue;
+
+                    if (fishPool[i].Bounds.isCollision(fishPool[j].Bounds))
+                    {
+                        if (!collisions[fishPool[i]].Contains(fishPool[j]) && 
+                            !collisions[fishPool[j]].Contains(fishPool[i]))
+                            collisions[fishPool[i]].Add(fishPool[j]);
+                    }
                 }
             }
+
+            #endregion
+
+            #region SHARKS
 
             // shark collisions
             for (int i = 0; i < sharkPool.Count; ++i)
             {
+                if (!sharkPool[i].IsAlive) continue;
+
+                // sharks with players
                 for (int j = 0; j < players.Count; ++j)
                 {
-                    if (sharkPool[i].Bounds.isCollision(players[j].Bounds)
-                        && (sharkPool[i].IsAlive) && players[j].IsAlive &&
-                        !collisions.ContainsKey(sharkPool[i]))
-                        collisions.Add(sharkPool[i], players[j]);
+                    if (!players[j].IsAlive)
+                        continue;
+
+                    if (sharkPool[i].Bounds.isCollision(players[j].Bounds) || 
+                        (sharkPool[i].Bounds.isCollision(players[j].spearCircle) 
+                        && players[j].CurrState == Actor.state.MeleeAttack))
+                    {
+                        if (!collisions[sharkPool[i]].Contains(players[j]))
+                            collisions[sharkPool[i]].Add(players[j]);
+                    }
                 }
 
+                // sharks with fishies
                 for (int j = 0; j < fishPool.Count; ++j)
                 {
-                    if (sharkPool[i].Bounds.isCollision(fishPool[j].Bounds)
-                        && (sharkPool[i].IsAlive) && fishPool[j].IsAlive &&
-                        !collisions.ContainsKey(sharkPool[i]))
-                        collisions.Add(sharkPool[i], fishPool[j]);
+                    if (!fishPool[j].IsAlive) continue;
+
+                    if (sharkPool[i].Bounds.isCollision(fishPool[j].Bounds))
+                    {
+                        if (!collisions[sharkPool[i]].Contains(fishPool[j]) &&
+                            !collisions[fishPool[j]].Contains(sharkPool[i]))
+                            collisions[sharkPool[i]].Add(fishPool[j]);
+                    }
                 }
             }
+
+            #endregion
         }
 
         private void resolveCollisions()
         {
-            List<Actor> keyList = new List<Actor>(collisions.Keys);
-            for (int i = 0; i < keyList.Count; i++)
+            foreach (Actor collider in collisions.Keys)
             {
-                Actor a = collisions[keyList[i]];
-                Actor b = keyList[i];
-
-                a.collideWith(b);
-                b.collideWith(a);
-
-                if (a is Penguin && b is Penguin)
+                foreach (Actor collidee in collisions[collider])
                 {
-                    Physics.separate(a, b);
-                    Physics.collide(a, b);
-                }
-                else if (a is Penguin && b is Shark ||
-                         a is Shark && b is Penguin)
-                {
-                    Physics.separate(a, b);
-                    Physics.collide(a, b);
+                    collider.collideWith(collidee);
+                    collidee.collideWith(collider);
+
+                    // if it is one of the pairs that physically collides, 
+                    // do so. 
+                    if ((collider is Penguin && collidee is Penguin && 
+                         collider.Bounds.isCollision(collidee.Bounds)) ||
+                        (collider is Penguin && collidee is Shark &&
+                        collider.Bounds.isCollision(collidee.Bounds))||
+                        (collider is Shark && collidee is Penguin &&
+                        collider.Bounds.isCollision(collidee.Bounds)) ||
+                        collider is Fish && collidee is Fish)
+                    {
+                        Physics.separate(collider, collidee);
+                        Physics.collide(collider, collidee);
+                    }
                 }
             }
         }

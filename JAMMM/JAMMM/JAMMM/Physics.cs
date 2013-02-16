@@ -40,6 +40,70 @@ namespace JAMMM
             return res;
         }
 
+
+        /// Calculate the time of closest approach of two moving circles.  Also determine if the circles collide.
+        /// 
+        /// Input:
+        /// Pa - Position of circle A.
+        /// Pb - Position of circle B.
+        /// Va - Velocity of circle A.
+        /// Vb - Velocity of circle B.
+        /// Ra - Radius of circle A.
+        /// Rb - Radius of circle B.
+        /// 
+        /// Returns:
+        /// collision - Returns True if a collision occured, else False.
+        /// The method returns the time to impact if collision=true, else it returns the time of closest approach.
+        /// 
+        /// Notes:
+        /// This algorithm will work in any dimension.  Simply change the Vector2's to Vector3's to make this work
+        /// for spheres.  You can also set the radii to 0 to work with points/rays.
+        /// 
+        public static float TimeOfClosestApproach(Vector2 Pa, Vector2 Pb, Vector2 Va, Vector2 Vb, float Ra, float Rb, out bool collision)
+        {
+            Vector2 Pab = Pa - Pb;
+            Vector2 Vab = Va - Vb;
+            float a = Vector2.Dot(Vab, Vab);
+            float b = 2 * Vector2.Dot(Pab, Vab);
+            float c = Vector2.Dot(Pab, Pab) - (Ra + Rb) * (Ra + Rb);
+
+            // The quadratic discriminant.
+            float discriminant = b * b - 4 * a * c;
+
+            // Case 1:
+            // If the discriminant is negative, then there are no real roots, so there is no collision.  The time of
+            // closest approach is then given by the average of the imaginary roots, which is:  t = -b / 2a
+            float t;
+            if (discriminant < 0)
+            {
+                t = -b / (2 * a);
+                collision = false;
+            }
+            else
+            {
+                // Case 2 and 3:
+                // If the discriminant is zero, then there is exactly one real root, meaning that the circles just grazed each other.  If the 
+                // discriminant is positive, then there are two real roots, meaning that the circles penetrate each other.  In that case, the
+                // smallest of the two roots is the initial time of impact.  We handle these two cases identically.
+                float t0 = (-b + (float)Math.Sqrt(discriminant)) / (2 * a);
+                float t1 = (-b - (float)Math.Sqrt(discriminant)) / (2 * a);
+                t = Math.Min(t0, t1);
+
+                // We also have to check if the time to impact is negative.  If it is negative, then that means that the collision
+                // occured in the past.  Since we're only concerned about future events, we say that no collision occurs if t < 0.
+                if (t < 0)
+                    collision = false;
+                else
+                    collision = true;
+            }
+
+            // Finally, if the time is negative, then set it to zero, because, again, we want this function to respond only to future events.
+            if (t < 0)
+                t = 0;
+
+            return t;
+        }
+
         public static void separate(Actor a, Actor b)
         {
             if (a.changeInPosition.Length() >
@@ -118,6 +182,18 @@ namespace JAMMM
                 RotatePoint(sh.Bounds.center.X, sh.Bounds.center.Y, sh.Rotation, ref sh.mouthPoint);
 
                 sh.mouthCircle.center = sh.mouthPoint;
+            }
+
+            if (a is Penguin)
+            {
+                Penguin p = (Penguin)a;
+
+                p.spearPoint = p.Bounds.center;
+                p.spearPoint.X += p.spearLength;
+
+                RotatePoint(p.Bounds.center.X, p.Bounds.center.Y, p.Rotation, ref p.spearPoint);
+
+                p.spearCircle.center = p.spearPoint;
             }
 
             a.acceleration     *= accDecay;

@@ -207,8 +207,6 @@ namespace JAMMM
                         this.frameIndex = 0;
                     else
                     {
-                        stop();
-                        
                         owner.handleAnimationComplete(this.animationType);
                         return;
                     }

@@ -24,9 +24,10 @@ namespace JAMMM.Actors
         private const int MELEE_DAMAGE_MEDIUM = 10;
         private const int MELEE_DAMAGE_LARGE = 15;
 
-        private const float KNOCKBACK_SMALL = 300.0f;
-        private const float KNOCKBACK_MEDIUM = 600.0f;
-        private const float KNOCKBACK_LARGE = 900.0f;
+        private const float KNOCKBACK_SMALL = 400.0f;
+        private const float KNOCKBACK_MEDIUM = 500.0f;
+        private const float KNOCKBACK_LARGE = 600.0f;
+        private const float SHARK_KNOCKBACK = 150.0f;
 
         public const int SPEAR_SMALL_COST = 5;
         public const int SPEAR_MED_COST   = 10;
@@ -39,6 +40,13 @@ namespace JAMMM.Actors
         public const int MELEE_SMALL_COST = 0;
         public const int MELEE_MED_COST   = 1;
         public const int MELEE_LARGE_COST = 2;
+
+        public const int SPEAR_LENGTH_SMALL  = 26;
+        public const int SPEAR_RADIUS_SMALL  = 8;
+        public const int SPEAR_LENGTH_MEDIUM = 40;
+        public const int SPEAR_RADIUS_MEDIUM = 10;
+        public const int SPEAR_LENGTH_LARGE  = 64;
+        public const int SPEAR_RADIUS_LARGE  = 14;
 
         public const int SMALL_MASS = 100;
         public const int MEDIUM_MASS = 500;
@@ -59,6 +67,8 @@ namespace JAMMM.Actors
         {
             get { return meleeDamage; }
         }
+
+        public int spearLength;
 
         public bool spearAlive; 
 
@@ -408,6 +418,8 @@ namespace JAMMM.Actors
             this.MeleeCost = MELEE_SMALL_COST;
             this.meleeDamage = MELEE_DAMAGE_SMALL;
             this.knockbackAmount = KNOCKBACK_SMALL;
+            this.spearLength = SPEAR_LENGTH_SMALL;
+            this.spearCircle.Radius = SPEAR_RADIUS_SMALL;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
@@ -428,6 +440,8 @@ namespace JAMMM.Actors
             this.MeleeCost = MELEE_MED_COST;
             this.meleeDamage = MELEE_DAMAGE_MEDIUM;
             this.knockbackAmount = KNOCKBACK_MEDIUM;
+            this.spearLength = SPEAR_LENGTH_MEDIUM;
+            this.spearCircle.Radius = SPEAR_RADIUS_MEDIUM;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
@@ -448,6 +462,8 @@ namespace JAMMM.Actors
             this.MeleeCost = MELEE_LARGE_COST;
             this.meleeDamage = MELEE_DAMAGE_LARGE;
             this.knockbackAmount = KNOCKBACK_LARGE;
+            this.spearLength = SPEAR_LENGTH_LARGE;
+            this.spearCircle.Radius = SPEAR_RADIUS_LARGE;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
@@ -653,11 +669,13 @@ namespace JAMMM.Actors
                 pRotation.Normalize();
 
                 // give us an acceleration in that direction
-                this.miscAcceleration += pRotation * ((Spear)other).Owner.KnockbackAmount;
                 this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
             }
             else if (other is Shark)
             {
+                if (!other.Bounds.isCollision(this.Bounds))
+                    return;
+
                 // gain health
                 if (other.CurrState == state.Dying)
                 {
@@ -696,9 +714,6 @@ namespace JAMMM.Actors
                         getHit();
 
                         this.calories -= SHARK_DAMAGE;
-
-                        if (this.calories <= 0)
-                            ((Shark)other).Calories += 100;
                     }
                 }
             }
@@ -715,7 +730,9 @@ namespace JAMMM.Actors
             {
                 Penguin p = (Penguin)other;
 
-                if (p.CurrState == state.MeleeAttack)
+                if (p.CurrState == state.MeleeAttack && 
+                    this.Bounds.isCollision(p.spearCircle) &&
+                    !isBeingKnockedBack)
                 {
                     isBeingKnockedBack = true;
                     knockbackTime = KNOCKBACK_DURATION;
@@ -731,7 +748,7 @@ namespace JAMMM.Actors
                     pRotation.Normalize();
 
                     // give us an acceleration in that direction
-                    this.miscAcceleration += pRotation * p.KnockbackAmount;
+                    this.velocity += pRotation * p.KnockbackAmount;
                     this.Position += pRotation * Actor.MELEE_DISPLACEMENT;
                 }
 

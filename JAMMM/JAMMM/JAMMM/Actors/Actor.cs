@@ -37,7 +37,7 @@ namespace JAMMM
         public const float MAX_POSSIBLE_SPEED = 800.0f;
 
         public const float MELEE_DISPLACEMENT = 50.0f;
-        public const float SPEAR_DISPLACEMENT = 20.0f;
+        public const float SPEAR_DISPLACEMENT = 40.0f;
 
         public enum AnimationType
         {
@@ -377,7 +377,7 @@ namespace JAMMM
             newAnimation.stop();
 
             currentAnimation = newAnimation;
-            
+
             currentAnimation.play();
         }
 

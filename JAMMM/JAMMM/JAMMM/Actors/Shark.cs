@@ -11,8 +11,9 @@ namespace JAMMM.Actors
     public class Shark : Actor
     {
         public const int SHARK_BASE_HEALTH = 100;
-        private const float SHARK_ATTACK_THRESHOLD = 400;
-        private const float SHARK_AGGRESS_THRESHOLD = 800;
+        private const float SHARK_ATTACK_THRESHOLD = 350;
+        private const float SHARK_AGGRESS_THRESHOLD = 700;
+        private const float PENGUIN_KNOCKBACK = 100.0f;
 
         public Vector2 mouthPoint;
         public Circle mouthCircle;
@@ -24,11 +25,12 @@ namespace JAMMM.Actors
             set { calories = value; }
         }
 
-        public Shark() : base(0, 0, 160, 96, 60, 1500)
+        public Shark() : base(0, 0, 160, 96, 60, 20)
         {
             this.MaxAccDash = 1500;
-            this.MaxVelDash = 500;
+            this.MaxVelDash = 450;
             this.calories = SHARK_BASE_HEALTH;
+            this.DashTime = 0.5f;
 
             mouthCircle = new Circle(this.Bounds.center.X + 100, this.Bounds.center.Y, 35);
             mouthPoint = Vector2.Zero;
@@ -258,15 +260,15 @@ namespace JAMMM.Actors
 
                 pRotation.Normalize();
 
-                // give us an acceleration in that direction
-                this.miscAcceleration += pRotation * ((Spear)other).Owner.KnockbackAmount;
                 this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
 
                 getHit();
             }
             else if (other is Fish)
             {
-                if (other.CurrState == state.Moving)
+                if (other.CurrState == state.Moving &&
+                    this.CurrState != state.Dying &&
+                    this.IsAlive)
                 {
                     AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
@@ -277,7 +279,9 @@ namespace JAMMM.Actors
             {
                 Penguin p = (Penguin)other;
 
-                if (p.CurrState == state.MeleeAttack)
+                if (p.CurrState == state.MeleeAttack &&
+                    this.Bounds.isCollision(p.spearCircle) 
+                    && !isBeingKnockedBack)
                 {
                     isBeingKnockedBack = true;
                     knockbackTime = KNOCKBACK_DURATION;
@@ -292,8 +296,8 @@ namespace JAMMM.Actors
 
                     pRotation.Normalize();
 
-                    // give us an acceleration in that direction
-                    this.acceleration = pRotation * p.KnockbackAmount;
+                    this.velocity = pRotation * p.KnockbackAmount;
+                    this.acceleration = Vector2.Zero;
                     this.Position += pRotation * Actor.MELEE_DISPLACEMENT;
                 }
                 else if (other.CurrState == state.Dying)
@@ -301,6 +305,8 @@ namespace JAMMM.Actors
                     this.calories += PENGUIN_CALORIES;
                     other.die();
                 }
+                else if (this.Bounds.isCollision(other.Bounds))
+                    this.acceleration = Vector2.Zero;
             }
         }
 
