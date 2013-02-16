@@ -154,19 +154,48 @@ namespace JAMMM
             Vector2 currPos = this.Position;
             Vector2 destVel = this.velocity;
             Vector2 destPos = this.Position;
+            Vector2 changingAcceleration = this.acceleration;
+            float   angle = 0.0f;
+            Circle destBounds = this.Bounds;
 
-            destVel = gameTime * this.acceleration;
+            destVel = gameTime * changingAcceleration;
             destPos = destVel * gameTime + currPos;
+            destBounds.center.X = destPos.X;
+            destBounds.center.Y = destPos.Y;
 
             if (nearestShark != null)
             {
+                while (destBounds.isCollision(nearestShark.Bounds))
+                {
+                    // rotate 
+                    Physics.RotatePoint(0.0f, 0.0f, angle++, ref changingAcceleration);
 
+                    destVel = gameTime * changingAcceleration;
+                    destPos = destVel * gameTime + currPos;
+
+                    destBounds.center.X = destPos.X;
+                    destBounds.center.Y = destPos.Y;
+                }
             }
+
+            angle = 0.0f;
 
             if (nearestPlayer != null)
             {
+                while (destBounds.isCollision(nearestShark.Bounds))
+                {
+                    // rotate 
+                    Physics.RotatePoint(0.0f, 0.0f, angle++, ref changingAcceleration);
 
+                    destVel = gameTime * changingAcceleration;
+                    destPos = destVel * gameTime + currPos;
+
+                    destBounds.center.X = destPos.X;
+                    destBounds.center.Y = destPos.Y;
+                }
             }
+
+            this.acceleration = changingAcceleration;
         }
 
         /// <summary>
@@ -341,7 +370,7 @@ namespace JAMMM
                 Vector2 escapeDirection = this.Position - guyToAvoid.Position;
                 escapeDirection.Normalize();
 
-                this.miscAcceleration += 
+                this.acceleration += 
                     MaxAcc * escapeDirection;
 
                 this.isEvading = true;

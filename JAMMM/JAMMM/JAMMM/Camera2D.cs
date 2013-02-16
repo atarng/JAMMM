@@ -21,7 +21,7 @@ namespace JAMMM
         private const float EPSILON = 0.00001f;
 
         private const float slowZoom = 0.001f;
-        private const float medZoom = 0.002f;
+        private const float medZoom = 0.001f;
 
         public const float MIN_ZOOM = 0.5f;
         public const float MED_ZOOM = 0.75f;
