@@ -341,7 +341,7 @@ namespace JAMMM
                 Vector2 escapeDirection = this.Position - guyToAvoid.Position;
                 escapeDirection.Normalize();
 
-                this.miscAcceleration += 
+                this.Acceleration += 
                     MaxAcc * escapeDirection;
 
                 this.isEvading = true;
