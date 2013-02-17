@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace JAMMM
 {
-    class Timer
+    public class Timer
     {
 
         public float elapsedsec = 0;
@@ -17,8 +17,6 @@ namespace JAMMM
         {
             spriteBatch.DrawString(font, timestring(), new Vector2(graphics.PreferredBackBufferWidth * 0.05f,
                                                          graphics.PreferredBackBufferHeight * 0.01f), Color.Yellow);
-
-
         }
 
 
@@ -32,6 +30,10 @@ namespace JAMMM
             return string.Format("{0}:{1:00}", (int)(elapsedsec / 60), ((int)(elapsedsec % 60)));
         }
 
+        public int getTimer()
+        {
+            return (int)elapsedsec;
+        }
 
       }
 }
