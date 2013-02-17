@@ -80,6 +80,8 @@ namespace JAMMM
 
         private const float BACKGROUND_FADE_DURATION = 1.0f;
 
+        public const int TIME_EVENT_SHARK = 30; //seconds
+
         #endregion
 
         #region GAME_VARIABLES
@@ -157,6 +159,10 @@ namespace JAMMM
         private float fadeTime;
 
         private bool hasBeenCompletedOnce = false;
+
+        private Timer timer1;
+
+        private int numExtraSharks;
 
 #endregion
 
@@ -390,6 +396,10 @@ namespace JAMMM
                 }
                 case (GameState.Battle):
                 {
+
+
+                    timer1.Update(gameTime);           
+
                     // do regular game logic updating each player
                     for (int i = 0; i < players.Count; i++)
                     {
@@ -415,7 +425,7 @@ namespace JAMMM
                         keepInBounds(f);
                     }
 
-                    for (int i = 0; i < SHARK_POOL_SIZE; ++i)
+                    for (int i = 0; i < (SHARK_POOL_SIZE + numExtraSharks); ++i)
                     {
                         Shark s = sharkPool.ElementAt(i);
 
@@ -476,6 +486,24 @@ namespace JAMMM
 
                     updateCamera(gameTime);
                     camera.updateBounds();
+
+                    //spawn new sharks
+                    if (isNewSharkReady())
+                    {
+                        sharkPool.Add(new Shark());
+                        sharkRespawnTimes.Add(0.0f);
+                        Shark babyShark = sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1];
+                        collisions.Add(babyShark, new List<Actor>());
+                        //load new content
+                        babyShark.loadContent();
+                        //spawn
+                        (babyShark).spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                        while (isNearAPlayer(sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1]))
+                            babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                         
+                    }
+                    
 
                     break;
                 }
@@ -581,6 +609,8 @@ namespace JAMMM
                         spriteBatch.End();
 
                         spriteBatch.Begin();
+
+                        timer1.Draw(spriteBatch, font, graphics);
 
                         if (isPlayer1Connected)
                         {
@@ -783,7 +813,6 @@ namespace JAMMM
             }
         }
 
-
         /// <summary>
         /// The camera zooms in and out automatically depending on
         /// where players are on screen.
@@ -926,6 +955,13 @@ namespace JAMMM
         /// </summary>
         private void onEnteringBattle()
         {
+
+            //initialize the timer
+            timer1 = new Timer();
+
+            //initialize timebased constants
+            numExtraSharks = 0;
+
             // play the battle theme
             if (battleTheme.State != SoundState.Playing)
                 battleTheme.Play();
@@ -963,9 +999,16 @@ namespace JAMMM
         /// </summary>
         private void onEnteringVictory()
         {
-
+            cleanExtraSharks();
         }
 
+        private void cleanExtraSharks()
+        {
+            while (sharkPool.Count > SHARK_POOL_SIZE)
+            {
+                sharkPool.RemoveAt(sharkPool.Count - 1);
+            }
+        }
 
 
         private Vector2 getRandomPositionWithinBounds(Rectangle bounds)
@@ -1444,7 +1487,19 @@ namespace JAMMM
                (numLivePlayers == 0))
                 changeState(GameState.Victory);
         }
+
+        public bool isNewSharkReady()
+        {
+            if (timer1.getTimer() > (TIME_EVENT_SHARK) * (numExtraSharks + 1))
+            {
+                numExtraSharks++;
+                return true;
+            }
+            else return false;
+        }
+
     }
+
 
     /**
 protected void Flock(List<Fish> _boids, GameTime gametime)

@@ -94,6 +94,7 @@
     <Compile Include="Animation.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="Camera2D.cs" />
+    <Compile Include="Timer.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="ParticleBubble.cs" />
     <Compile Include="ParticleHitSpark.cs" />
