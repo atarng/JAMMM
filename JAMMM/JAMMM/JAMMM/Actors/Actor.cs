@@ -24,7 +24,7 @@ namespace JAMMM
 
         public const int SHARK_CALORIES = 100;
         public const int PENGUIN_CALORIES = 60;
-        public const int FISH_CALORIES = 50;
+        public const int FISH_CALORIES = 500;
 
         public const int SHARK_DAMAGE = 50;
 

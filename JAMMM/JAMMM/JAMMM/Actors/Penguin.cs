@@ -420,6 +420,8 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_SMALL;
             this.spearLength = SPEAR_LENGTH_SMALL;
             this.spearCircle.Radius = SPEAR_RADIUS_SMALL;
+            this.MaxAccDash = 400.0f;
+            this.MaxVelDash = 500.0f;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
@@ -442,6 +444,8 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_MEDIUM;
             this.spearLength = SPEAR_LENGTH_MEDIUM;
             this.spearCircle.Radius = SPEAR_RADIUS_MEDIUM;
+            this.MaxAccDash = 300.0f;
+            this.MaxVelDash = 400.0f;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
@@ -464,6 +468,8 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_LARGE;
             this.spearLength = SPEAR_LENGTH_LARGE;
             this.spearCircle.Radius = SPEAR_RADIUS_LARGE;
+            this.MaxAccDash = 200.0f;
+            this.MaxVelDash = 300.0f;
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
@@ -749,7 +755,7 @@ namespace JAMMM.Actors
 
                     // give us an acceleration in that direction
                     this.velocity += pRotation * p.KnockbackAmount;
-                    this.Position += pRotation * Actor.MELEE_DISPLACEMENT;
+                    this.Position += pRotation * (Actor.MELEE_DISPLACEMENT + p.calories / 10.0f);
                 }
 
             }

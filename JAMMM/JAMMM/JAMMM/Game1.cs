@@ -67,8 +67,8 @@ namespace JAMMM
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 80;
-        private const int SHARK_POOL_SIZE = 1;
+        private const int FISH_POOL_SIZE = 300;
+        private const int SHARK_POOL_SIZE = 0;
         private const int SPEAR_POOL_SIZE = 50;
 
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;

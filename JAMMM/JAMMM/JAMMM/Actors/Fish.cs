@@ -163,7 +163,7 @@ namespace JAMMM
             destBounds.center.X = destPos.X;
             destBounds.center.Y = destPos.Y;
 
-            if (nearestShark != null)
+            if (nearestShark != null && !this.Bounds.isCollision(nearestShark.Bounds))
             {
                 while (destBounds.isCollision(nearestShark.Bounds))
                 {
@@ -180,9 +180,9 @@ namespace JAMMM
 
             angle = 0.0f;
 
-            if (nearestPlayer != null)
+            if (nearestPlayer != null && !this.Bounds.isCollision(nearestPlayer.Bounds))
             {
-                while (destBounds.isCollision(nearestShark.Bounds))
+                while (destBounds.isCollision(nearestPlayer.Bounds))
                 {
                     // rotate 
                     Physics.RotatePoint(0.0f, 0.0f, angle++, ref changingAcceleration);
@@ -370,7 +370,7 @@ namespace JAMMM
                 Vector2 escapeDirection = this.Position - guyToAvoid.Position;
                 escapeDirection.Normalize();
 
-                this.acceleration += 
+                this.Acceleration += 
                     MaxAcc * escapeDirection;
 
                 this.isEvading = true;
@@ -437,6 +437,12 @@ namespace JAMMM
 
                 if (this.isLeader)
                     c = Color.Red;
+
+                if (this.isSchooling)
+                    c = Color.Yellow;
+
+                if (this.isEvading)
+                    c = Color.Green;
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                     currentAnimation.draw(batch, this.Position,
