@@ -128,6 +128,12 @@ namespace JAMMM.Actors
         private bool isRapidFire;
         public bool IsRapidFire { get { return isRapidFire; } }
 
+        private bool isRepellingSharks;
+        public bool IsRepellingSHarks { get { return isRepellingSharks; } }
+
+        private bool isDeflectingSpears;
+        public bool IsDeflectingSpears { get { return isDeflectingSpears; } }
+
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
@@ -528,6 +534,14 @@ namespace JAMMM.Actors
 
                 this.meleeCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
                 this.fireCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
+            }
+            else if (p is Powerups.SharkRepellentPowerup)
+            {
+                this.isRepellingSharks = true;
+            }
+            else if (p is Powerups.SpearDeflectionPowerup)
+            {
+                this.isDeflectingSpears = true;
             }
 
             AudioManager.getSound("Power_Up").Play();
