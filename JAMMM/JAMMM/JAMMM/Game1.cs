@@ -27,7 +27,8 @@ namespace JAMMM
 
         private const int MAX_NUM_PLAYERS = 4;
 
-        private const int SPEED_POWERUP_RARITY = 20;
+        private const int POWERUP_RARITY = 20;
+        private const int POWERUP_TIME = 17;
 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
@@ -66,6 +67,7 @@ namespace JAMMM
         public const string SHARK_DEATH = "Shark_Death";
 
         public const string POWERUP_SPEEDBOOST = "Speed_Boost";
+        public const string POWERUP_RAPIDFIRE = "Rapid_Fire";
 
         private const float EPSILON = 0.01f;
 
@@ -120,6 +122,7 @@ namespace JAMMM
         private List<Penguin> players;
         private List<Spear>   spears;
         private SpeedBoostPowerup speedBoost;
+        private RapidFirePowerup rapidFire;
 
         private bool isPlayer1Connected, isPlayer2Connected,
                      isPlayer3Connected, isPlayer4Connected;
@@ -180,7 +183,7 @@ namespace JAMMM
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            POWERUP_COLOR = new Color(255, 255, 255, 120);
+            POWERUP_COLOR = new Color(255, 255, 255, 200);
 
             fishPool  = new List<Fish>();
             sharkPool = new List<Shark>();
@@ -218,7 +221,7 @@ namespace JAMMM
             player3StartPosition = new Vector2(width * 0.8f,  height * 0.2f);
             player4StartPosition = new Vector2(width * 0.8f,  height * 0.8f);
 
-            powerupRectangle = new Rectangle(0, 0, 24, 24);
+            powerupRectangle = new Rectangle(0, 0, 48, 48);
         }
 
         #region INIT_GAME
@@ -255,6 +258,7 @@ namespace JAMMM
 
             // load the content for the sprite manager
             SpriteManager.addTexture(POWERUP_SPEEDBOOST, Content.Load<Texture2D>("Sprites/powerup_speedboost"));
+            SpriteManager.addTexture(POWERUP_RAPIDFIRE, Content.Load<Texture2D>("Sprites/powerup_rapidfire"));
 
             SpriteManager.addTexture(SHARK_SWIM, Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture(SHARK_EAT, Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
@@ -418,13 +422,13 @@ namespace JAMMM
                                               graphics.PreferredBackBufferHeight * 0.01f);
 
             // set the player powerup positions
-            playerPowerupPositions[0] = new Vector2(player1TextPosition.X - 2 - powerupRectangle.Width,
+            playerPowerupPositions[0] = new Vector2(player1TextPosition.X - 12 - powerupRectangle.Width,
                                                  player1TextPosition.Y);
-            playerPowerupPositions[1] = new Vector2(player2TextPosition.X - 2 - powerupRectangle.Width,
+            playerPowerupPositions[1] = new Vector2(player2TextPosition.X - 12 - powerupRectangle.Width,
                                                  player2TextPosition.Y);
-            playerPowerupPositions[2] = new Vector2(player3TextPosition.X - 2 - powerupRectangle.Width,
+            playerPowerupPositions[2] = new Vector2(player3TextPosition.X - 12 - powerupRectangle.Width,
                                                  player3TextPosition.Y);
-            playerPowerupPositions[3] = new Vector2(player4TextPosition.X - 2 - powerupRectangle.Width,
+            playerPowerupPositions[3] = new Vector2(player4TextPosition.X - 12 - powerupRectangle.Width,
                                                  player4TextPosition.Y);
 
             // set the player calorie label text positions
@@ -498,6 +502,7 @@ namespace JAMMM
             }
 
             speedBoost = new SpeedBoostPowerup();
+            rapidFire = new RapidFirePowerup();
         }
 
         #endregion
@@ -611,13 +616,43 @@ namespace JAMMM
                 // if we're dead, instantly respawn in a random location in gameplay bounds
                 if (!f.IsAlive)
                 {
-                    if (rng.Next(SPEED_POWERUP_RARITY) == SPEED_POWERUP_RARITY - 1)
-                        f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), this.speedBoost);
+                    int timeForPowerUp = rng.Next(POWERUP_RARITY);
+
+                    if (timeForPowerUp == POWERUP_TIME)
+                    {
+                        Powerup p = null;
+                        int whichPowerup = rng.Next(2);
+
+                        if (whichPowerup == 0)
+                            p = rapidFire;
+                        else if (whichPowerup == 1)
+                            p = speedBoost;
+
+                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), p);
+                    }
                     else
                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                 }
 
                 keepInBounds(f);
+            }
+
+            // spawn new sharks
+            if (isNewSharkReady() && numPlayersAlive() > 1)
+            {
+                numExtraSharks++;
+                sharkPool.Add(new Shark());
+                sharkRespawnTimes.Add(0.0f);
+                Shark babyShark = sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1];
+                collisions.Add(babyShark, new List<Actor>());
+                //load new content
+                babyShark.loadContent();
+                //spawn
+                (babyShark).spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                while (isNearAPlayer(sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1]))
+                    babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
             }
 
             for (int i = 0; i < (SHARK_POOL_SIZE + numExtraSharks); ++i)
@@ -681,23 +716,6 @@ namespace JAMMM
 
             updateCamera(gameTime);
             camera.updateBounds();
-
-            //spawn new sharks
-            if (isNewSharkReady() && numPlayersAlive() > 1)
-            {
-                sharkPool.Add(new Shark());
-                sharkRespawnTimes.Add(0.0f);
-                Shark babyShark = sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1];
-                collisions.Add(babyShark, new List<Actor>());
-                //load new content
-                babyShark.loadContent();
-                //spawn
-                (babyShark).spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                while (isNearAPlayer(sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1]))
-                    babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-                         
-            }
         }
 
         private void UpdateVictory(GameTime gameTime)
@@ -845,13 +863,13 @@ namespace JAMMM
             {
                 Penguin p = players.ElementAt(i);
 
-                if (p.IsSpeedy)
-                {
-                    powerupRectangle.X = (int)playerPowerupPositions[i].X;
-                    powerupRectangle.Y = (int)playerPowerupPositions[i].Y;
+                powerupRectangle.X = (int)playerPowerupPositions[i].X;
+                powerupRectangle.Y = (int)playerPowerupPositions[i].Y;
 
+                if (p.IsSpeedy)
                     spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEEDBOOST), powerupRectangle, POWERUP_COLOR);
-                }
+                else if (p.IsRapidFire)
+                    spriteBatch.Draw(SpriteManager.getTexture(POWERUP_RAPIDFIRE), powerupRectangle, POWERUP_COLOR);
             }
 
             timer1.Draw(spriteBatch, font, graphics);
@@ -1285,7 +1303,6 @@ namespace JAMMM
         {
             if (timer1.getTimer() > (TIME_EVENT_SHARK) * (numExtraSharks + 1))
             {
-                numExtraSharks++;
                 return true;
             }
             else return false;

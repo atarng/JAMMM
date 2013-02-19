@@ -53,7 +53,18 @@ namespace JAMMM.Actors
         public const int LARGE_MASS = 1500;
 
         private float meleeCooldown;
+        public float MeleeCooldown
+        {
+            get { return meleeCooldown; }
+            set { meleeCooldown = value; }
+        }
+
         private float fireCooldown;
+        public float FireCooldown
+        {
+            get { return FireCooldown; }
+            set { FireCooldown = value; }
+        }
 
         private float knockbackAmount;
         public float KnockbackAmount
@@ -114,6 +125,9 @@ namespace JAMMM.Actors
         private bool isSpeedy;
         public bool IsSpeedy { get { return isSpeedy; } }
 
+        private bool isRapidFire;
+        public bool IsRapidFire { get { return isRapidFire; } }
+
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
@@ -136,6 +150,9 @@ namespace JAMMM.Actors
             this.DashCost         = DASH_SMALL_COST;
             this.SpearCost        = SPEAR_SMALL_COST;
             this.MeleeCost        = MELEE_SMALL_COST;
+
+            this.meleeCooldown    = MELEE_COOLDOWN;
+            this.fireCooldown     = FIRE_COOLDOWN;
 
             this.isHit = false;
             this.canMelee = true;
@@ -505,6 +522,13 @@ namespace JAMMM.Actors
             {
                 this.isSpeedy = true;
             }
+            else if (p is Powerups.RapidFirePowerup)
+            {
+                this.isRapidFire = true;
+
+                this.meleeCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
+                this.fireCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
+            }
 
             AudioManager.getSound("Power_Up").Play();
         }
@@ -535,6 +559,14 @@ namespace JAMMM.Actors
                 }
 
                 this.isSpeedy = false;
+                this.powerup = null;
+            }
+            else if (p is Powerups.RapidFirePowerup)
+            {
+                this.meleeCooldown = MELEE_COOLDOWN;
+                this.fireCooldown = FIRE_COOLDOWN;
+
+                this.isRapidFire = false;
                 this.powerup = null;
             }
         }
@@ -609,6 +641,8 @@ namespace JAMMM.Actors
                 {
                     if (isSpeedy)
                         c = Color.Yellow;
+                    else if (isRapidFire)
+                        c = Color.Maroon;
                     else
                         c = Color.White;
                 }

@@ -95,6 +95,7 @@
     <Compile Include="AudioManager.cs" />
     <Compile Include="Camera2D.cs" />
     <Compile Include="Powerups\Powerup.cs" />
+    <Compile Include="Powerups\RapidFirePowerup.cs" />
     <Compile Include="Powerups\SpeedBoostPowerup.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Particle.cs" />
