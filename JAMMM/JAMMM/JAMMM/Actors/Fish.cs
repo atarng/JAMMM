@@ -48,7 +48,7 @@ namespace JAMMM
         private Fish partner;
 
         private bool isPoweredUp;
-        public bool IsPoweredUp { get; }
+        public bool IsPoweredUp { get { return isPoweredUp; } }
 
         public Rectangle schoolingBounds;
 
@@ -57,8 +57,8 @@ namespace JAMMM
             randomX = rnd.NextDouble() * 6.28;
             randomY = rnd.NextDouble() * 6.28;
 
-            this.MaxVel = 400;
-            this.MaxAcc = 500;
+            this.MaxVel = 200;
+            this.MaxAcc = 300;
 
             this.isSchooling = false;
             this.isLeader = false;
@@ -80,23 +80,34 @@ namespace JAMMM
                 SpriteManager.getTexture(Game1.FISH_DEATH), 8, false, 0.1f);
         }
 
-        public override void spawnAt(Vector2 position, Powerup p)
+        public void spawnAt(Vector2 position, Powerup p)
         {
             base.spawnAt(position);
 
-            if (p != null)
-            {
-                this.powerup = p;
-                this.isPoweredUp = true;
-                this.MaxVel = 999;
-                this.MaxAcc = 1000;
-            }
-            else
-            {
-                this.isPoweredUp = false;
-                this.MaxVel = 400;
-                this.MaxAcc = 500;
-            }
+            this.powerup = p;
+            this.isPoweredUp = true;
+            this.MaxVel = 999;
+            this.MaxAcc = 1000;
+
+            changeState(state.Moving);
+
+            randomX = rnd.NextDouble() * 2 - rnd.NextDouble();
+            randomY = rnd.NextDouble() * 2 - rnd.NextDouble();
+
+            this.isSchooling = false;
+            this.isLeader = false;
+            this.partner = null;
+            this.gettingIntoSchoolRange = false;
+        }
+
+        public override void spawnAt(Vector2 position)
+        {
+            base.spawnAt(position);
+
+            this.powerup     = null;
+            this.isPoweredUp = false;
+            this.MaxVel      = 300;
+            this.MaxAcc      = 300;
 
             changeState(state.Moving);
 
@@ -177,6 +188,7 @@ namespace JAMMM
         public void TryToSchool(List<Fish> fishPool)
         {
             if (this.CurrState == state.Dying) return;
+            if (this.isPoweredUp) return;
 
             float distToNearestLeader = 0.0f;
             Fish nearestLeader = getNearestFish(fishPool, ref distToNearestLeader, true);

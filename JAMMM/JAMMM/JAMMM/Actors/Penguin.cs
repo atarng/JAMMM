@@ -247,6 +247,9 @@ namespace JAMMM.Actors
         {
             if (!this.IsAlive) return;
 
+            if (this.powerup != null)
+                this.powerup.update((float)delta.ElapsedGameTime.TotalSeconds);
+
             tryToGrow();
 
             tryToDie();
@@ -424,8 +427,12 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_SMALL;
             this.spearLength = SPEAR_LENGTH_SMALL;
             this.spearCircle.Radius = SPEAR_RADIUS_SMALL;
-            this.MaxAccDash = 500.0f;
-            this.MaxVelDash = 550.0f;
+
+            if (!isSpeedy)
+            {
+                this.MaxAccDash = 500.0f;
+                this.MaxVelDash = 550.0f;
+            }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_SMALL + colorCode), 1);
@@ -448,8 +455,12 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_MEDIUM;
             this.spearLength = SPEAR_LENGTH_MEDIUM;
             this.spearCircle.Radius = SPEAR_RADIUS_MEDIUM;
-            this.MaxAccDash = 400.0f;
-            this.MaxVelDash = 450.0f;
+
+            if (!isSpeedy)
+            {
+                this.MaxAccDash = 400.0f;
+                this.MaxVelDash = 450.0f;
+            }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_MEDIUM + colorCode), 1);
@@ -472,8 +483,12 @@ namespace JAMMM.Actors
             this.knockbackAmount = KNOCKBACK_LARGE;
             this.spearLength = SPEAR_LENGTH_LARGE;
             this.spearCircle.Radius = SPEAR_RADIUS_LARGE;
-            this.MaxAccDash = 300.0f;
-            this.MaxVelDash = 350.0f;
+
+            if (!isSpeedy)
+            {
+                this.MaxAccDash = 300.0f;
+                this.MaxVelDash = 350.0f;
+            }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
             dashAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_DASH_LARGE + colorCode), 1);
@@ -491,6 +506,8 @@ namespace JAMMM.Actors
             {
                 this.isSpeedy = true;
             }
+
+            AudioManager.getSound("Power_Up").Play();
         }
 
         public override void onPowerupRemoval(Powerup p) 
@@ -504,8 +521,8 @@ namespace JAMMM.Actors
             {
                 if (this.CurrentSize == Size.Large)
                 {
-                    this.MaxAccDash = 500.0f;
-                    this.MaxVelDash = 550.0f;
+                    this.MaxAccDash = 300.0f;
+                    this.MaxVelDash = 350.0f;
                 }
                 else if (this.CurrentSize == Size.Medium)
                 {
@@ -514,11 +531,12 @@ namespace JAMMM.Actors
                 }
                 else if (this.CurrentSize == Size.Small)
                 {
-                    this.MaxAccDash = 300.0f;
-                    this.MaxVelDash = 350.0f;
+                    this.MaxAccDash = 500.0f;
+                    this.MaxVelDash = 550.0f;
                 }
 
                 this.isSpeedy = false;
+                this.powerup = null;
             }
         }
 
@@ -783,6 +801,12 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
+
+                    if (other.Powerup != null)
+                    {
+                        this.Powerup = other.Powerup;
+                        this.Powerup.apply(this);
+                    }
                 }
             }
             else if (other is Penguin)

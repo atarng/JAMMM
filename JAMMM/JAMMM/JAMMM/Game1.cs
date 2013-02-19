@@ -243,6 +243,7 @@ namespace JAMMM
             AudioManager.addSound("Actor_Dash", Content.Load<SoundEffect>("Sounds/sound_3"));
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
+            AudioManager.addSound("Power_Up", Content.Load<SoundEffect>("Sounds/powerup"));
 
             AudioManager.addSound("Death_Penguin", Content.Load<SoundEffect>("Sounds/death_penguin"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
@@ -493,6 +494,8 @@ namespace JAMMM
                 spears.Add(new Spear());
                 collisions.Add(spears[i], new List<Actor>());
             }
+
+            speedBoost = new SpeedBoostPowerup();
         }
 
         #endregion
@@ -606,10 +609,10 @@ namespace JAMMM
                 // if we're dead, instantly respawn in a random location in gameplay bounds
                 if (!f.IsAlive)
                 {
-                    if (rng.Next(50) == 49)
+                    if (rng.Next(10) == 9)
                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), this.speedBoost);
                     else
-                        f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), null);
+                        f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                 }
 
                 keepInBounds(f);
@@ -812,14 +815,6 @@ namespace JAMMM
                     spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
                     new Vector2(p.Position.X - 75, p.Position.Y + 60),
                     Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-                    if (p.IsSpeedy)
-                    {
-                        powerupRectangle.X = (int)playerPowerupPositions[i].X;
-                        powerupRectangle.Y = (int)playerPowerupPositions[i].Y;
-
-                        spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEEDBOOST), powerupRectangle, POWERUP_COLOR);
-                    }
                 }
             }
 
@@ -845,6 +840,19 @@ namespace JAMMM
             spriteBatch.End();
 
             spriteBatch.Begin();
+
+            for (int i = 0; i < players.Count; ++i)
+            {
+                Penguin p = players.ElementAt(i);
+
+                if (p.IsSpeedy)
+                {
+                    powerupRectangle.X = (int)playerPowerupPositions[i].X;
+                    powerupRectangle.Y = (int)playerPowerupPositions[i].Y;
+
+                    spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEEDBOOST), powerupRectangle, POWERUP_COLOR);
+                }
+            }
 
             timer1.Draw(spriteBatch, font, graphics);
 
