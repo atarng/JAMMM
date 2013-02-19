@@ -24,7 +24,7 @@ namespace JAMMM
 
         public const int SHARK_CALORIES = 100;
         public const int PENGUIN_CALORIES = 60;
-        public const int FISH_CALORIES = 500;
+        public const int FISH_CALORIES = 20;
 
         public const int SHARK_DAMAGE = 50;
 
@@ -368,6 +368,24 @@ namespace JAMMM
         protected virtual void onMoving()       { }
         protected virtual void onTurning()      { }
         protected virtual void onMeleeAttack()  { }
+
+        /// <summary>
+        /// Returns a float representing the distance between
+        /// this actor and the other actor.
+        /// </summary>
+        public static float DistanceBetween(Actor a, Actor b)
+        {
+            return Vector2.Distance(a.Position, b.Position);
+        }
+
+        /// <summary>
+        /// Returns a normalized vector pointing to the other actor
+        /// from ourselves.
+        /// </summary>
+        public Vector2 DirectionTo(Actor other)
+        {
+            return Vector2.Normalize(other.position - this.Position);
+        }
 
         protected void changeAnimation(Animation newAnimation)
         {

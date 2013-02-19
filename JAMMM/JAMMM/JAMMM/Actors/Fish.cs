@@ -13,19 +13,24 @@ namespace JAMMM
     {
         public const float SCHOOLING_RANGE = 250.0f;
         public const float LEADER_RANGE = 500.0f;
+        public const float MAX_RANGE = 500.0f;
 
         public const float MINIMUM_AVOIDANCE_SPEED = 20.0f;
 
-        public const float PLAYER_RANGE = 500.0f;
-        public const float SHARK_RANGE = 700.0f;
+        public const float PLAYER_RANGE = 300.0f;
+        public const float THREAT_RADIUS = 250.0f;
+        public const float SHARK_RANGE = 400.0f;
 
         private Penguin nearestPlayer;
         private Shark nearestShark;
 
+        private Circle boundsChecker;
+
         private double randomX;
         private double randomY;
 
-        private bool isEvading;
+        private bool gettingIntoSchoolRange;
+        private bool evading;
 
         private bool isLeader;
         public bool IsLeader
@@ -42,15 +47,25 @@ namespace JAMMM
 
         private Fish partner;
 
+        public Rectangle schoolingBounds;
+
         public Fish() : base(0, 0, 32, 32, 16, 10) 
         {
             randomX = rnd.NextDouble() * 6.28;
             randomY = rnd.NextDouble() * 6.28;
 
-            this.MaxVel = 300;
-            this.MaxAcc = 400;
+            this.MaxVel = 400;
+            this.MaxAcc = 500;
 
-            isEvading = false;
+            this.isSchooling = false;
+            this.isLeader = false;
+            this.partner = null;
+
+            schoolingBounds = Rectangle.Empty;
+
+            this.gettingIntoSchoolRange = false;
+
+            boundsChecker = new Circle(0, 0, 0);
         }
 
         public override void loadContent()
@@ -72,6 +87,8 @@ namespace JAMMM
 
             this.isSchooling = false;
             this.isLeader = false;
+            this.partner = null;
+            this.gettingIntoSchoolRange = false;
         }
 
         public override void respawn()
@@ -86,54 +103,43 @@ namespace JAMMM
         
         public override void update(GameTime gameTime)
         {
-            if (!isEvading)
+            // update our process of getting into range
+            updateSchoolRange();
+
+            // update our delinquency status
+            updateDelinquency();
+
+            // try to avoid nearby threats
+            evading = avoidThreats();
+
+            if (!evading)
             {
-                // following someone else
-                if (this.isSchooling && !this.isLeader)
-                {
-                    if (this.partner != null
-                        && (!this.partner.IsAlive || this.partner.CurrState == Actor.state.Dying))
-                    {
-                        this.isSchooling = false;
-                        this.partner = null;
-
-                        // do other behavior immediately instead of a 1 frame delay
-                        update(gameTime);
-                    }
-                    else
-                    {
-                        float distBetween = (this.Position - this.partner.Position).Length();
-
-                        if (distBetween > SCHOOLING_RANGE)
-                        {
-                            Vector2 dirToPartner = this.partner.Position - this.Position;
-                            dirToPartner.Normalize();
-
-                            // accelerate to close the schooling gap with the new
-                            // fish you are following
-                            this.acceleration = (distBetween - SCHOOLING_RANGE) * dirToPartner;
-                        }
-                        else
-                            this.acceleration = this.partner.acceleration;
-                    }
-                }
-                else
+                // if we're a leader or a delinquent, do random movement
+                if (this.isLeader || (!this.isLeader && !this.isSchooling))
                 {
                     acceleration.X = (float)Math.Cos(randomX + gameTime.TotalGameTime.TotalSeconds * 2)
                         * MaxAcc * ((float)randomX + 1.0f) / 6.28f;
 
                     acceleration.Y = (float)Math.Sin(randomY + gameTime.TotalGameTime.TotalSeconds * 2)
                         * MaxAcc * (float)randomY / 12.56f;
-
-                    if (rnd.NextDouble() > 0.99)
-                    {
-                        randomX = rnd.NextDouble() * 6.28;
-                        randomY = rnd.NextDouble() * 6.28 * 2;
-                    }
+                }
+                // if we're schooling, then just follow our partner
+                else
+                {
+                    if (!this.gettingIntoSchoolRange)
+                        this.acceleration = this.partner.acceleration;
                 }
             }
 
-            avoidNearestPredators((float)gameTime.ElapsedGameTime.TotalSeconds);
+            // if simulating our motion puts us out of bounds, then shoot us back in to bounds
+            updateSchoolingInBounds((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+            // update our random variable
+            if (rnd.NextDouble() > 0.99)
+            {
+                randomX = rnd.NextDouble() * 6.28;
+                randomY = rnd.NextDouble() * 6.28 * 2;
+            }
 
             if ((this.velocity.Length() / MaxVel) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble,
@@ -144,117 +150,141 @@ namespace JAMMM
         }
 
         /// <summary>
-        /// Simulates our movement for the current frame.
-        /// If it will move us into attack range of a predator
-        /// then rotate our acceleration for this frame until
-        /// we will no longer endanger ourselves.
+        /// If there is a nearby leader in range, follow it.
+        /// Otherwise, find the nearest fish. If it is in range,
+        /// we're not following it or our partner is dead, and
+        /// we're not a leader, then follow it. If that nearest
+        /// fish is a delinquent, then make it a leader.
         /// </summary>
-        private void avoidNearestPredators(float gameTime)
+        public void TryToSchool(List<Fish> fishPool)
+        {
+            if (this.CurrState == state.Dying) return;
+
+            float distToNearestLeader = 0.0f;
+            Fish nearestLeader = getNearestFish(fishPool, ref distToNearestLeader, true);
+
+            float distToNearestFish = 0.0f;
+            Fish nearestFish = getNearestFish(fishPool, ref distToNearestFish, false);
+
+            // if there is a nearby leader to follow and we're not already following it
+            // and it is within range, then follow it. If we're a leader, then 
+            // we are now a follower
+            if (nearestLeader != null 
+            && this.partner != nearestLeader
+            && Actor.DistanceBetween(this, nearestLeader) < LEADER_RANGE)
+            {
+                this.isLeader = false;
+
+                this.partner = nearestLeader;
+
+                this.isSchooling = true;
+
+                this.acceleration = 
+                    Math.Abs(SCHOOLING_RANGE - distToNearestLeader) * this.DirectionTo(nearestLeader);
+
+                this.gettingIntoSchoolRange = true;
+            }
+            // otherwise, if there is another fish to follow that we're not already following
+            // or our partner is dead and we're not a leader and it is in range, then follow it. 
+            // If it is a delinquent, make it a leader.
+            else if (nearestFish != null 
+                && (this.partner == null || 
+                (this.partner != null && (!this.partner.IsAlive || this.partner.CurrState == state.Dying)))
+                && !this.isLeader  && !nearestFish.isLeader && !nearestFish.IsSchooling
+                && Actor.DistanceBetween(this, nearestFish) < SCHOOLING_RANGE)
+            {
+                this.partner = nearestFish;
+
+                this.isSchooling = true;
+
+                this.acceleration =
+                    (SCHOOLING_RANGE - distToNearestFish) * this.DirectionTo(nearestFish);
+
+                this.gettingIntoSchoolRange = true;
+                nearestFish.IsLeader = true;
+            }
+        }
+
+        /// <summary>
+        /// Updates the school range variable.
+        /// </summary>
+        private void updateSchoolRange()
+        {
+            if (this.partner != null && this.gettingIntoSchoolRange)
+            {
+                if (Actor.DistanceBetween(this, this.partner) <=
+                    SCHOOLING_RANGE)
+                    this.gettingIntoSchoolRange = false;
+                else if (Actor.DistanceBetween(this, this.partner) <=
+                    MAX_RANGE && Actor.DistanceBetween(this, this.partner) >
+                    SCHOOLING_RANGE)
+                    this.acceleration += this.DirectionTo(this.partner) *
+                        (Actor.DistanceBetween(this, this.partner) - SCHOOLING_RANGE);
+                else
+                    resetSchooling();
+            }
+
+            // if we go out of schooling range but not out of max range then
+            // try to get back in
+            if (this.partner != null && !this.gettingIntoSchoolRange &&
+                Actor.DistanceBetween(this, this.partner) > SCHOOLING_RANGE &&
+                Actor.DistanceBetween(this, this.partner) <= MAX_RANGE)
+            {
+                this.gettingIntoSchoolRange = true;
+                this.acceleration += this.DirectionTo(this.partner) *
+                        (Actor.DistanceBetween(this, this.partner) - SCHOOLING_RANGE);
+            }
+        }
+
+        /// <summary>
+        /// Become a delinquent if we get too far away
+        /// from our school.
+        /// </summary>
+        private void updateDelinquency()
+        {
+            // if our partner becomes further than SCHOOLING_RANGE
+            // when we're not trying to catch up to them then we become a delinquent.
+            if (!this.gettingIntoSchoolRange &&
+                this.partner != null &&
+                !this.isLeader &&
+                Actor.DistanceBetween(this, this.partner) > MAX_RANGE)
+                resetSchooling();
+
+            // if our partner dies or is dying we become a delinquent
+            if (this.partner != null && 
+                (!this.partner.IsAlive || this.partner.CurrState == state.Dying))
+                resetSchooling();
+        }
+
+        /// <summary>
+        /// If simulating our motion will put us out of bounds,
+        /// then give us a push back inward. If we're a leader,
+        /// then give us a huge push.
+        /// </summary>
+        private void updateSchoolingInBounds(float gameTime)
         {
             Vector2 currPos = this.Position;
             Vector2 destVel = this.velocity;
             Vector2 destPos = this.Position;
             Vector2 changingAcceleration = this.acceleration;
-            float   angle = 0.0f;
+            float angle = 0.0f;
             Circle destBounds = this.Bounds;
 
             destVel = gameTime * changingAcceleration;
             destPos = destVel * gameTime + currPos;
             destBounds.center.X = destPos.X;
             destBounds.center.Y = destPos.Y;
-
-            if (nearestShark != null && !this.Bounds.isCollision(nearestShark.Bounds))
-            {
-                while (destBounds.isCollision(nearestShark.Bounds))
-                {
-                    // rotate 
-                    Physics.RotatePoint(0.0f, 0.0f, angle++, ref changingAcceleration);
-
-                    destVel = gameTime * changingAcceleration;
-                    destPos = destVel * gameTime + currPos;
-
-                    destBounds.center.X = destPos.X;
-                    destBounds.center.Y = destPos.Y;
-                }
-            }
-
-            angle = 0.0f;
-
-            if (nearestPlayer != null && !this.Bounds.isCollision(nearestPlayer.Bounds))
-            {
-                while (destBounds.isCollision(nearestPlayer.Bounds))
-                {
-                    // rotate 
-                    Physics.RotatePoint(0.0f, 0.0f, angle++, ref changingAcceleration);
-
-                    destVel = gameTime * changingAcceleration;
-                    destPos = destVel * gameTime + currPos;
-
-                    destBounds.center.X = destPos.X;
-                    destBounds.center.Y = destPos.Y;
-                }
-            }
-
-            this.acceleration = changingAcceleration;
         }
 
         /// <summary>
-        /// If this is not currently schooling and not a leader,
-        /// then find a fish nearby to follow. If we have a partner
-        /// that is not a leader or no partner then try to find 
-        /// a leader to follow nearby.
+        /// Just reset all schooling variables.
         /// </summary>
-        public void TryToSchool(List<Fish> fishPool)
+        private void resetSchooling()
         {
-            if (!this.isLeader && !this.isSchooling)
-            {
-                float dist = 5000.0f;
-                Fish f = getNearestFish(fishPool, ref dist, false);
-
-                if (f != null)
-                {
-                    if (dist < SCHOOLING_RANGE)
-                    {
-                        // make it a leader if it isn't one and isn't already
-                        // schooling with other fish
-                        if (!f.IsLeader && !f.IsSchooling)
-                            f.IsLeader = true;
-
-                        this.partner = f;
-                        this.isSchooling = true;
-
-                        Vector2 dirToPartner = f.Position - this.Position;
-                        dirToPartner.Normalize();
-
-                        // accelerate to close the schooling gap with the new
-                        // fish you are following
-                        this.MiscAcceleration = (SCHOOLING_RANGE - dist) * dirToPartner;
-                    }
-                }
-            }
-            else if ((this.partner != null &&
-                        !this.partner.isLeader) || this.partner == null)
-            {
-                float dist = 5000.0f;
-                Fish f = getNearestFish(fishPool, ref dist, true);
-
-                if (f != null)
-                {
-                    if (dist < LEADER_RANGE)
-                    {
-                        this.partner = f;
-                        this.isLeader = false;
-                        this.isSchooling = true;
-
-                        Vector2 dirToPartner = f.Position - this.Position;
-                        dirToPartner.Normalize();
-
-                        // accelerate to close the schooling gap with the new
-                        // fish you are following
-                        this.acceleration = (LEADER_RANGE - dist) * dirToPartner;
-                    }
-                }
-            }
+            this.gettingIntoSchoolRange = false;
+            this.partner                = null;
+            this.isSchooling            = false;
+            this.isLeader               = false;
         }
 
         /// <summary>
@@ -262,120 +292,98 @@ namespace JAMMM
         /// and sharks, allowing the other fish to follow suit and
         /// making it not quite as easy to catch fish.
         /// </summary>
-        public void TryToEvade(List<Penguin> players, List<Shark> sharks)
+        private bool avoidThreats()
         {
+            // dead fish don't need to evade
+            if (CurrState == state.Dying || !this.IsAlive)
+                return false;
+
+            if (nearestPlayer != null)
+            {
+                boundsChecker.center.X = nearestPlayer.Bounds.Center.X;
+                boundsChecker.center.Y = nearestPlayer.Bounds.Center.Y;
+                boundsChecker.Radius = PLAYER_RANGE;
+
+                if (boundsChecker.containsPoint(this.Position))
+                {
+                    this.acceleration 
+                        = nearestPlayer.DirectionTo(this) * this.MaxAcc;
+
+                    return true;
+                }
+            }
+
+            if (nearestShark != null)
+            {
+                boundsChecker.center.X = nearestShark.Bounds.Center.X;
+                boundsChecker.center.Y = nearestShark.Bounds.Center.Y;
+                boundsChecker.Radius = SHARK_RANGE;
+
+                if (boundsChecker.containsPoint(this.Position))
+                {
+                    this.acceleration
+                        = nearestShark.DirectionTo(this) * this.MaxAcc;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Sets the nearest threatening actors for this fish 
+        /// among the provided actors.
+        /// </summary>
+        public void SetNearestThreats(List<Penguin> players, List<Shark> sharks)
+        {
+            // dead finish don't need threats
             if (CurrState == state.Dying || !this.IsAlive)
                 return;
-            if (!isSchooling && !isLeader)
-                return;
 
-            float distBetween = 0.0f;
-            Vector2 currCloser = Vector2.Zero;
-            Vector2 fastestCloser = Vector2.Zero;
-            Actor guyToAvoid = null;
-            float minTimeToCollision = 5000.0f;
-            Penguin nearestP = null;
-            float distToNearestP = 5000.0f;
-            float distToNearestS = 5000.0f;
-            Shark nearestS = null;
-            float currTimeToCollision = 0.0f;
+            float   distBetween    = 0.0f;
 
-            // for each player
+            float   distToNearestP = 5000.0f;
+            float   distToNearestS = 5000.0f;
+
+            Penguin nearestP       = null;
+            Shark   nearestS       = null;
+
             foreach (Penguin p in players)
             {
                 if (!p.IsAlive || p.CurrState == state.Dying)
                     continue;
 
-                distBetween = (p.Position - this.Position).Length();
+                distBetween = Actor.DistanceBetween(this, p);
 
                 if (distBetween < distToNearestP)
                 {
                     distToNearestP = distBetween;
+
                     nearestP = p;
-                }
-
-                // player is in range
-                if (distBetween <= PLAYER_RANGE)
-                {
-                    // if the player will not collide with our school along
-                    // his path, continue
-                    bool willCollide = false;
-
-                    currTimeToCollision = 
-                        Physics.TimeOfClosestApproach(p.Position, this.Position, p.velocity, this.velocity,
-                                                      p.Bounds.Radius, SCHOOLING_RANGE, out willCollide);
-
-                    if (!willCollide)
-                        continue;
-
-                    // otherwise, accumulate
-                    currCloser = p.velocity;
-
-                    if (currTimeToCollision < minTimeToCollision)
-                    {
-                        minTimeToCollision = currTimeToCollision;
-                        fastestCloser = currCloser;
-                        guyToAvoid = p;
-                    }
                 }
             }
 
-            // evade sharks
             foreach (Shark s in sharks)
             {
                 if (!s.IsAlive || s.CurrState == state.Dying)
                     continue;
 
-                distBetween = (s.Position - this.Position).Length();
+                distBetween = Actor.DistanceBetween(this, s);
 
                 if (distBetween < distToNearestS)
                 {
                     distToNearestS = distBetween;
+
                     nearestS = s;
-                }
-
-                if (distBetween <= SHARK_RANGE)
-                {
-                    // if the player will not collide with our school along
-                    // his path, continue
-                    bool willCollide = false;
-                    float timeToCollision = 0.0f;
-
-                    timeToCollision = Physics.TimeOfClosestApproach(s.Position, this.Position, s.velocity, this.velocity,
-                                                                    s.Bounds.Radius, SCHOOLING_RANGE, out willCollide);
-
-                    if (!willCollide)
-                        continue;
-
-                    // otherwise, accumulate
-                    currCloser = s.velocity;
-
-                    if (currTimeToCollision < minTimeToCollision)
-                    {
-                        minTimeToCollision = currTimeToCollision;
-                        fastestCloser = currCloser;
-                        guyToAvoid = s;
-                    }
                 }
             }
 
             if (nearestP != null)
                 this.nearestPlayer = nearestP;
+
             if (nearestS != null)
                 this.nearestShark = nearestS;
-
-            // somebody will collide so we must evade
-            if (guyToAvoid != null && minTimeToCollision < 0.167f)
-            {
-                Vector2 escapeDirection = this.Position - guyToAvoid.Position;
-                escapeDirection.Normalize();
-
-                this.Acceleration += 
-                    MaxAcc * escapeDirection;
-
-                this.isEvading = true;
-            }
-            else this.isEvading = false;
         }
 
         /// <summary>
@@ -390,6 +398,9 @@ namespace JAMMM
             foreach (Fish f in fishPool)
             {
                 if (f == this)
+                    continue;
+
+                if (!f.IsAlive)
                     continue;
 
                 if (wantsLeader && !f.isLeader)
@@ -435,14 +446,18 @@ namespace JAMMM
             {
                 Color c = Color.White;
 
+                // green for leaders
                 if (this.isLeader)
-                    c = Color.Red;
-
-                if (this.isSchooling)
-                    c = Color.Yellow;
-
-                if (this.isEvading)
                     c = Color.Green;
+                // purple for delinquents
+                else if (!this.isLeader && !this.isSchooling)
+                    c = Color.Purple;
+                // red for followers
+                else
+                    c = Color.Red;
+                // blue for coward evaders
+                if (this.evading)
+                    c = Color.Blue;
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                     currentAnimation.draw(batch, this.Position,

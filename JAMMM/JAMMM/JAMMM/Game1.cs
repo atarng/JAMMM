@@ -12,9 +12,6 @@ using JAMMM.Actors;
 
 namespace JAMMM
 {
-    /// <summary>
-    /// This is the main type for your game
-    /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         enum GameState
@@ -67,7 +64,7 @@ namespace JAMMM
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 300;
+        private const int FISH_POOL_SIZE = 20;
         private const int SHARK_POOL_SIZE = 0;
         private const int SPEAR_POOL_SIZE = 50;
 
@@ -413,12 +410,18 @@ namespace JAMMM
                     // if that is the case, spawn a new fishy
                     foreach (Fish f in fishPool)
                     {
+                        // try to school
                         f.TryToSchool(fishPool);
-                        f.TryToEvade(players, sharkPool);
 
+                        // set threats
+                        f.SetNearestThreats(players, sharkPool);
+
+                        // update state by deciding what to do given the above
                         f.update(gameTime);
+
                         Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
 
+                        // if we're dead, instantly respawn in a random location in gameplay bounds
                         if (!f.IsAlive)
                             f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
 
@@ -488,6 +491,7 @@ namespace JAMMM
                     camera.updateBounds();
 
                     //spawn new sharks
+                    /*
                     if (isNewSharkReady())
                     {
                         sharkPool.Add(new Shark());
@@ -503,7 +507,7 @@ namespace JAMMM
                             babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                          
                     }
-                    
+                     */
 
                     break;
                 }
@@ -982,7 +986,10 @@ namespace JAMMM
 
             // spawn some fishies
             foreach (Fish p in fishPool)
+            {
+                p.schoolingBounds = gameplayBoundaries;
                 p.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+            }
 
             // spawn some sharkies
             foreach (Shark s in sharkPool)
@@ -1087,6 +1094,43 @@ namespace JAMMM
                     //if (a.acceleration.Y > 0.0f)
                     //    a.acceleration.Y = 0.0f;
                     a.acceleration.Y = -(a.acceleration.Y);
+                }
+            }
+        }
+
+        private void wrapAround(Actor a)
+        {
+            Rectangle aBounds = a.getBufferedRectangleBounds(0);
+
+            if (!gameplayBoundaries.Contains(aBounds))
+            {
+                // 1.) determine the wall(s) with which we are colliding
+                // 2.) if we are completely outside on that wall, then 
+                //     reflect to the other side of the stage.
+                // off the right side
+                if (aBounds.Left >= gameplayBoundaries.Right)
+                {
+                    a.move(-(float)(gameplayBoundaries.Width + (aBounds.Left - gameplayBoundaries.Right)), 
+                                           0.0f);
+                }
+                // off the left side
+                if (aBounds.Right <= gameplayBoundaries.Left)
+                {
+                    a.move((float)(gameplayBoundaries.Width + (gameplayBoundaries.Left - aBounds.Right)),
+                       0.0f);
+                }
+                // off the bottom side
+                if (aBounds.Top >= gameplayBoundaries.Bottom)
+                {
+                    a.move(0.0f, 
+                        -(float)((aBounds.Top - gameplayBoundaries.Bottom) + gameplayBoundaries.Height));
+
+                }
+                // off the top side
+                if (aBounds.Bottom <= gameplayBoundaries.Top)
+                {
+                    a.move(0.0f, 
+                        (float)((gameplayBoundaries.Top - aBounds.Bottom) + gameplayBoundaries.Height));
                 }
             }
         }
