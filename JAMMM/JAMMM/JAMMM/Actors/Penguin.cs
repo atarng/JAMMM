@@ -52,9 +52,8 @@ namespace JAMMM.Actors
         public const int MEDIUM_MASS = 500;
         public const int LARGE_MASS = 1500;
 
-        public const float fireCooldown = 0.5F;
-
-        public const float meleeCooldown = 0.5F;
+        private float meleeCooldown;
+        private float fireCooldown;
 
         private float knockbackAmount;
         public float KnockbackAmount
@@ -756,8 +755,18 @@ namespace JAMMM.Actors
                 // gain health
                 if (other.CurrState == state.Dying)
                 {
-                    this.calories += SHARK_CALORIES;
+                    if (other.Powerup != null)
+                        this.calories += 2 * SHARK_CALORIES;
+                    else
+                        this.calories += SHARK_CALORIES;
+
                     other.die();
+
+                    if (other.Powerup != null)
+                    {
+                        this.Powerup = other.Powerup;
+                        this.Powerup.apply(this);
+                    }
                 }
                 // take damage
                 else if (other.CurrState == state.Dashing)

@@ -25,6 +25,9 @@ namespace JAMMM.Actors
             set { calories = value; }
         }
 
+        private bool isSpeedy;
+        public bool IsSpeedy { get { return isSpeedy; } }
+
         public Shark() : base(0, 0, 160, 96, 60, 20)
         {
             this.MaxAccDash = 1500;
@@ -90,6 +93,9 @@ namespace JAMMM.Actors
                     ParticleManager.Instance.createParticle(ParticleType.Bubble,
                         new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),
                         new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+
+            if (this.powerup != null)
+                this.powerup.update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             tryToBlink(gameTime);
 
@@ -217,6 +223,33 @@ namespace JAMMM.Actors
                 changeState(state.Moving);
         }
 
+        public override void onPowerupApplication(Powerup p)
+        {
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                this.isSpeedy = true;
+            }
+
+            AudioManager.getSound("Power_Up").Play();
+        }
+
+        public override void onPowerupRemoval(Powerup p)
+        {
+            // we need to correct for the change in these
+            // fields while the powerup was active. They could
+            // have changed while the powerup was active and then
+            // when the powerup was removed they would have no
+            // longer been accurate
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                this.MaxAccDash = 1500;
+                this.MaxVelDash = 450;
+
+                this.isSpeedy = false;
+                this.powerup = null;
+            }
+        }
+
         public override void collideWith(Actor other)
         {
             if (other is Spear)
@@ -273,6 +306,12 @@ namespace JAMMM.Actors
                     AudioManager.getSound("Fish_Eat").Play();
                     this.calories += FISH_CALORIES;
                     other.startDying();
+
+                    if (other.Powerup != null)
+                    {
+                        this.Powerup = other.Powerup;
+                        this.Powerup.apply(this);
+                    }
                 }
             }
             else if (other is Penguin)
@@ -320,7 +359,12 @@ namespace JAMMM.Actors
             if (this.Calories < 50 || this.isBlink)
                 healthColor = Color.Red;
             else
-                healthColor = Color.White;
+            {
+                if (isSpeedy)
+                    healthColor = Color.Yellow;
+                else
+                    healthColor = Color.White;
+            }
 
             if (Math.Abs(Rotation) > Math.PI / 2)
                 currentAnimation.draw(batch, this.Position,

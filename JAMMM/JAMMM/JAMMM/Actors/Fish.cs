@@ -476,17 +476,17 @@ namespace JAMMM
                 Color c = Color.White;
 
                 // green for leaders
-                if (this.isLeader)
-                    c = Color.Green;
+                //if (this.isLeader)
+                //    c = Color.Green;
                 // purple for delinquents
-                else if (!this.isLeader && !this.isSchooling)
-                    c = Color.Purple;
+                //else if (!this.isLeader && !this.isSchooling)
+                //    c = Color.Purple;
                 // red for followers
-                else
-                    c = Color.Red;
+                //else
+                //    c = Color.Red;
                 // blue for coward evaders
-                if (this.evading)
-                    c = Color.Blue;
+                //if (this.evading)
+                //    c = Color.Blue;
 
                 if (this.isPoweredUp)
                 {

@@ -27,6 +27,8 @@ namespace JAMMM
 
         private const int MAX_NUM_PLAYERS = 4;
 
+        private const int SPEED_POWERUP_RARITY = 20;
+
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
         private const string player1Text = "Player 1";
@@ -67,8 +69,8 @@ namespace JAMMM
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 20;
-        private const int SHARK_POOL_SIZE = 0;
+        private const int FISH_POOL_SIZE = 30;
+        private const int SHARK_POOL_SIZE = 2;
         private const int SPEAR_POOL_SIZE = 50;
 
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
@@ -80,7 +82,7 @@ namespace JAMMM
 
         private const float BACKGROUND_FADE_DURATION = 1.0f;
 
-        public const int TIME_EVENT_SHARK = 30; //seconds
+        public const int TIME_EVENT_SHARK = 60; //seconds
 
         private Color POWERUP_COLOR;
 
@@ -609,7 +611,7 @@ namespace JAMMM
                 // if we're dead, instantly respawn in a random location in gameplay bounds
                 if (!f.IsAlive)
                 {
-                    if (rng.Next(10) == 9)
+                    if (rng.Next(SPEED_POWERUP_RARITY) == SPEED_POWERUP_RARITY - 1)
                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), this.speedBoost);
                     else
                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
@@ -681,8 +683,7 @@ namespace JAMMM
             camera.updateBounds();
 
             //spawn new sharks
-            /*
-            if (isNewSharkReady())
+            if (isNewSharkReady() && numPlayersAlive() > 1)
             {
                 sharkPool.Add(new Shark());
                 sharkRespawnTimes.Add(0.0f);
@@ -697,7 +698,6 @@ namespace JAMMM
                     babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                          
             }
-             */
         }
 
         private void UpdateVictory(GameTime gameTime)
