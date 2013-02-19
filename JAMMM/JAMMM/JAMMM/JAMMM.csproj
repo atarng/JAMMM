@@ -96,6 +96,8 @@
     <Compile Include="Camera2D.cs" />
     <Compile Include="Powerups\Powerup.cs" />
     <Compile Include="Powerups\RapidFirePowerup.cs" />
+    <Compile Include="Powerups\SharkRepellantPowerup.cs" />
+    <Compile Include="Powerups\SpearDeflectionPowerup.cs" />
     <Compile Include="Powerups\SpeedBoostPowerup.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Particle.cs" />

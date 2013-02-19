@@ -121,8 +121,11 @@ namespace JAMMM
         private List<float>   sharkRespawnTimes;
         private List<Penguin> players;
         private List<Spear>   spears;
-        private SpeedBoostPowerup speedBoost;
-        private RapidFirePowerup rapidFire;
+
+        private SpeedBoostPowerup       speedBoost;
+        private RapidFirePowerup        rapidFire;
+        private SharkRepellentPowerup   sharkRepellent;
+        private SpearDeflectionPowerup  spearDeflection;
 
         private bool isPlayer1Connected, isPlayer2Connected,
                      isPlayer3Connected, isPlayer4Connected;
@@ -621,12 +624,16 @@ namespace JAMMM
                     if (timeForPowerUp == POWERUP_TIME)
                     {
                         Powerup p = null;
-                        int whichPowerup = rng.Next(2);
+                        int whichPowerup = rng.Next(4);
 
                         if (whichPowerup == 0)
                             p = rapidFire;
                         else if (whichPowerup == 1)
                             p = speedBoost;
+                        else if (whichPowerup == 2)
+                            p = sharkRepellent;
+                        else if (whichPowerup == 3)
+                            p = spearDeflection;
 
                          f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), p);
                     }
