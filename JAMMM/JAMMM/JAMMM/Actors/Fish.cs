@@ -47,6 +47,9 @@ namespace JAMMM
 
         private Fish partner;
 
+        private bool isPoweredUp;
+        public bool IsPoweredUp { get; }
+
         public Rectangle schoolingBounds;
 
         public Fish() : base(0, 0, 32, 32, 16, 10) 
@@ -60,6 +63,7 @@ namespace JAMMM
             this.isSchooling = false;
             this.isLeader = false;
             this.partner = null;
+            this.isPoweredUp = false;
 
             schoolingBounds = Rectangle.Empty;
 
@@ -76,9 +80,23 @@ namespace JAMMM
                 SpriteManager.getTexture(Game1.FISH_DEATH), 8, false, 0.1f);
         }
 
-        public override void spawnAt(Vector2 position)
+        public override void spawnAt(Vector2 position, Powerup p)
         {
             base.spawnAt(position);
+
+            if (p != null)
+            {
+                this.powerup = p;
+                this.isPoweredUp = true;
+                this.MaxVel = 999;
+                this.MaxAcc = 1000;
+            }
+            else
+            {
+                this.isPoweredUp = false;
+                this.MaxVel = 400;
+                this.MaxAcc = 500;
+            }
 
             changeState(state.Moving);
 
@@ -267,7 +285,6 @@ namespace JAMMM
             Vector2 destVel = this.velocity;
             Vector2 destPos = this.Position;
             Vector2 changingAcceleration = this.acceleration;
-            float angle = 0.0f;
             Circle destBounds = this.Bounds;
 
             destVel = gameTime * changingAcceleration;
@@ -458,6 +475,14 @@ namespace JAMMM
                 // blue for coward evaders
                 if (this.evading)
                     c = Color.Blue;
+
+                if (this.isPoweredUp)
+                {
+                    c.R = (byte)rnd.Next(256);
+                    c.G = (byte)rnd.Next(256);
+                    c.B = (byte)rnd.Next(256);
+                    c.A = 255;
+                }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                     currentAnimation.draw(batch, this.Position,

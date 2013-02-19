@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using JAMMM.Powerups;
 
 namespace JAMMM
 {
@@ -251,6 +252,13 @@ namespace JAMMM
         }
         protected bool isBlink;
 
+        protected Powerup powerup;
+        public Powerup Powerup
+        {
+            get { return powerup; }
+            set { powerup = value; }
+        }
+
         protected bool isBeingKnockedBack;
         public bool IsBeingKnockedBack
         {
@@ -360,14 +368,17 @@ namespace JAMMM
             this.currState = newState;
         }
 
-        protected virtual void onDash()         { }
-        protected virtual void onDashCooldown() { }
-        protected virtual void onDashing()      { }
-        protected virtual void onDashReady()    { }
-        protected virtual void onDying()        { }
-        protected virtual void onMoving()       { }
-        protected virtual void onTurning()      { }
-        protected virtual void onMeleeAttack()  { }
+        protected virtual void onDash()           { }
+        protected virtual void onDashCooldown()   { }
+        protected virtual void onDashing()        { }
+        protected virtual void onDashReady()      { }
+        protected virtual void onDying()          { }
+        protected virtual void onMoving()         { }
+        protected virtual void onTurning()        { }
+        protected virtual void onMeleeAttack()    { }
+
+        public virtual void onPowerupApplication(Powerup p) { }
+        public virtual void onPowerupRemoval(Powerup p) { }
 
         /// <summary>
         /// Returns a float representing the distance between

@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using JAMMM.Actors;
+using JAMMM.Powerups;
 
 namespace JAMMM
 {
@@ -22,9 +23,9 @@ namespace JAMMM
             Victory
         }
 
-
-
         #region GAME_CONSTANTS
+
+        private const int MAX_NUM_PLAYERS = 4;
 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
@@ -62,6 +63,8 @@ namespace JAMMM
         public const string SHARK_TURN = "Shark_Turn";
         public const string SHARK_DEATH = "Shark_Death";
 
+        public const string POWERUP_SPEEDBOOST = "Speed_Boost";
+
         private const float EPSILON = 0.01f;
 
         private const int FISH_POOL_SIZE = 20;
@@ -78,6 +81,8 @@ namespace JAMMM
         private const float BACKGROUND_FADE_DURATION = 1.0f;
 
         public const int TIME_EVENT_SHARK = 30; //seconds
+
+        private Color POWERUP_COLOR;
 
         #endregion
 
@@ -101,6 +106,8 @@ namespace JAMMM
                         player3StartPosition,
                         player4StartPosition;
 
+        private Vector2[] playerPowerupPositions = new Vector2[MAX_NUM_PLAYERS];
+
         private Vector2 titlePosition;
 
         private Dictionary<Actor, List<Actor>> collisions;
@@ -110,6 +117,7 @@ namespace JAMMM
         private List<float>   sharkRespawnTimes;
         private List<Penguin> players;
         private List<Spear>   spears;
+        private SpeedBoostPowerup speedBoost;
 
         private bool isPlayer1Connected, isPlayer2Connected,
                      isPlayer3Connected, isPlayer4Connected;
@@ -161,14 +169,16 @@ namespace JAMMM
 
         private int numExtraSharks;
 
+        private Rectangle powerupRectangle;
+
 #endregion
-
-
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            POWERUP_COLOR = new Color(255, 255, 255, 120);
 
             fishPool  = new List<Fish>();
             sharkPool = new List<Shark>();
@@ -205,9 +215,11 @@ namespace JAMMM
             player2StartPosition = new Vector2(width * 0.2f, height * 0.8f);
             player3StartPosition = new Vector2(width * 0.8f,  height * 0.2f);
             player4StartPosition = new Vector2(width * 0.8f,  height * 0.8f);
+
+            powerupRectangle = new Rectangle(0, 0, 24, 24);
         }
 
-
+        #region INIT_GAME
 
         protected override void Initialize()
         {
@@ -239,6 +251,8 @@ namespace JAMMM
             battleTheme = AudioManager.getSound("Battle_Theme").CreateInstance();
 
             // load the content for the sprite manager
+            SpriteManager.addTexture(POWERUP_SPEEDBOOST, Content.Load<Texture2D>("Sprites/powerup_speedboost"));
+
             SpriteManager.addTexture(SHARK_SWIM, Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture(SHARK_EAT, Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
             SpriteManager.addTexture(SHARK_TURN, Content.Load<Texture2D>("Sprites/Shark_Turn_80_48"));
@@ -336,351 +350,6 @@ namespace JAMMM
             loadContentDependentInitialization();
         }
 
-        protected override void UnloadContent() {}
-
-        protected override void Update(GameTime gameTime)
-        {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
-                this.Exit();
-
-            // the basic game logic outer switch
-            switch (this.currentGameState)
-            {
-                case (GameState.FindingPlayers):
-                {
-                    // check controller connectivity for each player
-                    TryToAddPlayers();
-
-                    // check controller state to ready each player
-                    TryToReadyPlayers();
-
-                    // check controller state for player 1 to start the game
-                    TryToStartGame();
-
-                    break;
-                }
-                case (GameState.TransitionIntoBattle):
-                {
-                    fadeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                    if (fadeTime >= BACKGROUND_FADE_DURATION)
-                        changeState(GameState.Battle);
-                    // update the fade color
-                    else
-                    {
-                        float fadeRatio = (fadeTime / BACKGROUND_FADE_DURATION);
-
-                        backgroundFadeColor.A = (byte)(50 + (int)(fadeRatio * 205));
-
-                        titleFadeColor.A = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.R = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.G = (byte)(255 - fadeRatio * 255);
-                        titleFadeColor.B = (byte)(255 - fadeRatio * 255);
-
-                        expandingView.X = screenRectangle.X +
-                            (int)((camera.maxView.X - screenRectangle.X) * fadeRatio);
-                        expandingView.Y = screenRectangle.Y +
-                            (int)((camera.maxView.Y - screenRectangle.Y) * fadeRatio);
-                        expandingView.Width = screenRectangle.Width +
-                            (int)((camera.maxView.Width - screenRectangle.Width) * fadeRatio);
-                        expandingView.Height = screenRectangle.Height +
-                            (int)((camera.maxView.Height - screenRectangle.Height) * fadeRatio);
-                    }
-
-                    break;
-                }
-                case (GameState.Battle):
-                {
-
-
-                    timer1.Update(gameTime);           
-
-                    // do regular game logic updating each player
-                    for (int i = 0; i < players.Count; i++)
-                    {
-                        players[i].update(gameTime);
-                        Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-                        players[i].TrySpear(i, spears);
-                        keepInBounds(players[i]);
-                    }
-
-                    // for each fishy, check if was alive last frame and is dead this one
-                    // if that is the case, spawn a new fishy
-                    foreach (Fish f in fishPool)
-                    {
-                        // try to school
-                        f.TryToSchool(fishPool);
-
-                        // set threats
-                        f.SetNearestThreats(players, sharkPool);
-
-                        // update state by deciding what to do given the above
-                        f.update(gameTime);
-
-                        Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
-                        // if we're dead, instantly respawn in a random location in gameplay bounds
-                        if (!f.IsAlive)
-                            f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                        keepInBounds(f);
-                    }
-
-                    for (int i = 0; i < (SHARK_POOL_SIZE + numExtraSharks); ++i)
-                    {
-                        Shark s = sharkPool.ElementAt(i);
-
-                        s.update(gameTime);
-
-                        if (s.CurrState != Actor.state.Dying)
-                        {
-                            s.TryToAggressTowardPlayers(s, players);
-                            s.TryToAttackPlayers(s, players);
-                        }
-
-                        Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
-
-                        if (!s.IsAlive)
-                        {
-                            if (numPlayersAlive() > 1)
-                            {
-                                sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                                if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
-                                {
-                                    sharkRespawnTimes[i] = 0.0f;
-
-                                    s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                                    while (isNearAPlayer(s))
-                                        s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-                                }
-                            }
-                        }
-
-                        keepInBounds(s);
-                    }
-
-                    // update spears
-                    foreach (Spear s in spears)
-                    {
-                        s.update(gameTime);
-                        Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
-
-                        if (s.IsAlive && isOffScreen(s))
-                            s.die();
-                    }
-
-                    // collision detection and resolution
-                    detectCollisions();
-                    resolveCollisions();
-
-                    // update particles
-                    ParticleManager.Instance.update(gameTime);
-
-                    // check sfx
-                    if (battleTheme.State == SoundState.Stopped)
-                        battleTheme.Play();
-
-                    // check if there is only 1 player left. if so, end the game
-                    TryToEndGame();
-
-                    updateCamera(gameTime);
-                    camera.updateBounds();
-
-                    //spawn new sharks
-                    /*
-                    if (isNewSharkReady())
-                    {
-                        sharkPool.Add(new Shark());
-                        sharkRespawnTimes.Add(0.0f);
-                        Shark babyShark = sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1];
-                        collisions.Add(babyShark, new List<Actor>());
-                        //load new content
-                        babyShark.loadContent();
-                        //spawn
-                        (babyShark).spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-
-                        while (isNearAPlayer(sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1]))
-                            babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
-                         
-                    }
-                     */
-
-                    break;
-                }
-                case (GameState.Victory):
-                {
-                    // check if player1 wants to restart the match
-                    // TODO: We might want more options here like doing a new
-                    // match altogether, but we have plenty of time to figure that out
-                    TryToRestartGame();
-                    break;
-                }
-            }
-
-            base.Update(gameTime);
-        }
-
-        protected override void Draw(GameTime gameTime)
-        {
-            switch (this.currentGameState)
-            {
-                case (GameState.FindingPlayers):
-                    {
-                        GraphicsDevice.Clear(Color.DarkSeaGreen);
-
-                        spriteBatch.Begin();
-                        //
-                        spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
-                        spriteBatch.Draw(title, titlePosition, Color.White);
-
-                        foreach (Penguin p in players)
-                            p.draw(gameTime, spriteBatch);
-
-                        if (isPlayer1Ready)
-                            spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
-                        if (isPlayer2Ready)
-                            spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
-                        if (isPlayer3Ready)
-                            spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
-                        if (isPlayer4Ready)
-                            spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
-                        //
-                        spriteBatch.End();
-
-                        break;
-                    }
-                case (GameState.TransitionIntoBattle):
-                    {
-                        GraphicsDevice.Clear(Color.DarkSeaGreen);
-
-                        spriteBatch.Begin();
-
-                        spriteBatch.Draw(background, expandingView, backgroundFadeColor);
-
-                        spriteBatch.Draw(title, titlePosition, titleFadeColor);
-
-                        foreach (Penguin p in players)
-                            p.draw(gameTime, spriteBatch);
-
-                        spriteBatch.End();
-
-                        break;
-                    }
-                case (GameState.Battle):
-                    {
-                        GraphicsDevice.Clear(Color.Blue);
-
-                        spriteBatch.Begin(SpriteSortMode.Immediate,
-                            BlendState.AlphaBlend, null, null, null, null,
-                            camera.getTransformation());
-
-                        spriteBatch.Draw(background, camera.maxView, Color.White);
-
-                        foreach (Penguin p in players)
-                        {
-                            p.draw(gameTime, spriteBatch);
-
-                            if (p.CurrState != Actor.state.Dying &&
-                                p.IsAlive)
-                                spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
-                                new Vector2(p.Position.X - 75, p.Position.Y + 60),
-                                Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-                        }
-
-                        foreach (Fish fish in fishPool)
-                            fish.draw(gameTime, spriteBatch);
-
-                        foreach (Shark s in sharkPool)
-                        {
-                            s.draw(gameTime, spriteBatch);
-
-                            if (s.CurrState != Actor.state.Dying &&
-                                s.IsAlive)
-                                spriteBatch.DrawString(Game1.font, "Calories: " + s.Calories,
-                                new Vector2(s.Position.X - 75, s.Position.Y + 100),
-                                Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-                        }
-
-                        foreach (Spear spear in spears)
-                            spear.draw(gameTime, spriteBatch);
-
-                        ParticleManager.Instance.draw(gameTime, spriteBatch);
-
-                        spriteBatch.End();
-
-                        spriteBatch.Begin();
-
-                        timer1.Draw(spriteBatch, font, graphics);
-
-                        if (isPlayer1Connected)
-                        {
-                            spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
-                        }
-                        if (isPlayer2Connected)
-                        {
-                            spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
-                        }
-                        if (isPlayer3Connected)
-                        {
-                            spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
-                        }
-                        if (isPlayer4Connected)
-                        {
-                            spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
-                            spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
-                        }
-
-                        spriteBatch.End();
-
-                        break;
-                    }
-                case (GameState.Victory):
-                    {
-                        GraphicsDevice.Clear(Color.DarkSeaGreen);
-
-                        spriteBatch.Begin();
-
-                        if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
-                        {
-                            spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
-                        }
-                        else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
-                        {
-                            spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
-                        }
-                        else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
-                        {
-                            spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
-                        }
-                        else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
-                        {
-                            spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
-                        }
-                        else
-                            spriteBatch.DrawString(font, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
-
-                        spriteBatch.End();
-
-                        break;
-                    }
-            }
-
-            base.Draw(gameTime);
-        }
-
-
-
         /// <summary>
         /// The positions of the hardcoded text locations for each of the things
         /// on the battle screen and the finding players screen need to have
@@ -745,6 +414,16 @@ namespace JAMMM
                                               font.MeasureString(player4Text).X / 2.0f,
                                               graphics.PreferredBackBufferHeight * 0.01f);
 
+            // set the player powerup positions
+            playerPowerupPositions[0] = new Vector2(player1TextPosition.X - 2 - powerupRectangle.Width,
+                                                 player1TextPosition.Y);
+            playerPowerupPositions[1] = new Vector2(player2TextPosition.X - 2 - powerupRectangle.Width,
+                                                 player2TextPosition.Y);
+            playerPowerupPositions[2] = new Vector2(player3TextPosition.X - 2 - powerupRectangle.Width,
+                                                 player3TextPosition.Y);
+            playerPowerupPositions[3] = new Vector2(player4TextPosition.X - 2 - powerupRectangle.Width,
+                                                 player4TextPosition.Y);
+
             // set the player calorie label text positions
             player1CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
                                               font.MeasureString(caloriesLabelText).X / 2.0f,
@@ -781,7 +460,6 @@ namespace JAMMM
             gameplayBoundaries = camera.maxView;
         }
 
-
         /// <summary>
         /// Creates the object pools for each kind of object
         /// other than the players. For now, the players are
@@ -817,6 +495,216 @@ namespace JAMMM
             }
         }
 
+        #endregion
+
+        #region UPDATING_CURRENT_GAME_STATE
+
+        protected override void Update(GameTime gameTime)
+        {
+            // Allows the game to exit
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
+                this.Exit();
+
+            // the basic game logic outer switch
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                    {
+                        UpdateFindingPlayers(gameTime);
+                        break;
+                    }
+                case (GameState.TransitionIntoBattle):
+                    {
+                        UpdateTransitionIntoBattle(gameTime);
+                        break;
+                    }
+                case (GameState.Battle):
+                    {
+                        UpdateBattle(gameTime);
+                        break;
+                    }
+                case (GameState.Victory):
+                    {
+                        UpdateVictory(gameTime);
+                        break;
+                    }
+            }
+
+            base.Update(gameTime);
+        }
+
+        private void UpdateFindingPlayers(GameTime gameTime)
+        {
+            // check controller connectivity for each player
+            TryToAddPlayers();
+
+            // check controller state to ready each player
+            TryToReadyPlayers();
+
+            // check controller state for player 1 to start the game
+            TryToStartGame();
+        }
+
+        private void UpdateTransitionIntoBattle(GameTime gameTime)
+        {
+            fadeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (fadeTime >= BACKGROUND_FADE_DURATION)
+                changeState(GameState.Battle);
+            // update the fade color
+            else
+            {
+                float fadeRatio = (fadeTime / BACKGROUND_FADE_DURATION);
+
+                backgroundFadeColor.A = (byte)(50 + (int)(fadeRatio * 205));
+
+                titleFadeColor.A = (byte)(255 - fadeRatio * 255);
+                titleFadeColor.R = (byte)(255 - fadeRatio * 255);
+                titleFadeColor.G = (byte)(255 - fadeRatio * 255);
+                titleFadeColor.B = (byte)(255 - fadeRatio * 255);
+
+                expandingView.X = screenRectangle.X +
+                    (int)((camera.maxView.X - screenRectangle.X) * fadeRatio);
+                expandingView.Y = screenRectangle.Y +
+                    (int)((camera.maxView.Y - screenRectangle.Y) * fadeRatio);
+                expandingView.Width = screenRectangle.Width +
+                    (int)((camera.maxView.Width - screenRectangle.Width) * fadeRatio);
+                expandingView.Height = screenRectangle.Height +
+                    (int)((camera.maxView.Height - screenRectangle.Height) * fadeRatio);
+            }
+        }
+
+        private void UpdateBattle(GameTime gameTime)
+        {
+            timer1.Update(gameTime);
+
+            // do regular game logic updating each player
+            for (int i = 0; i < players.Count; i++)
+            {
+                players[i].update(gameTime);
+                Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                players[i].TrySpear(i, spears);
+                keepInBounds(players[i]);
+            }
+
+            // for each fishy, check if was alive last frame and is dead this one
+            // if that is the case, spawn a new fishy
+            foreach (Fish f in fishPool)
+            {
+                // try to school
+                f.TryToSchool(fishPool);
+
+                // set threats
+                f.SetNearestThreats(players, sharkPool);
+
+                // update state by deciding what to do given the above
+                f.update(gameTime);
+
+                Physics.applyMovement(f, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                // if we're dead, instantly respawn in a random location in gameplay bounds
+                if (!f.IsAlive)
+                {
+                    if (rng.Next(50) == 49)
+                        f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), this.speedBoost);
+                    else
+                        f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), null);
+                }
+
+                keepInBounds(f);
+            }
+
+            for (int i = 0; i < (SHARK_POOL_SIZE + numExtraSharks); ++i)
+            {
+                Shark s = sharkPool.ElementAt(i);
+
+                s.update(gameTime);
+
+                if (s.CurrState != Actor.state.Dying)
+                {
+                    s.TryToAggressTowardPlayers(s, players);
+                    s.TryToAttackPlayers(s, players);
+                }
+
+                Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+
+                if (!s.IsAlive)
+                {
+                    if (numPlayersAlive() > 1)
+                    {
+                        sharkRespawnTimes[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                        if (sharkRespawnTimes[i] >= SHARK_RESPAWN_TIME)
+                        {
+                            sharkRespawnTimes[i] = 0.0f;
+
+                            s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                            while (isNearAPlayer(s))
+                                s.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                        }
+                    }
+                }
+
+                keepInBounds(s);
+            }
+
+            // update spears
+            foreach (Spear s in spears)
+            {
+                s.update(gameTime);
+                Physics.applyMovement(s, (float)gameTime.ElapsedGameTime.TotalSeconds, false);
+
+                if (s.IsAlive && isOffScreen(s))
+                    s.die();
+            }
+
+            // collision detection and resolution
+            detectCollisions();
+            resolveCollisions();
+
+            // update particles
+            ParticleManager.Instance.update(gameTime);
+
+            // check sfx
+            if (battleTheme.State == SoundState.Stopped)
+                battleTheme.Play();
+
+            // check if there is only 1 player left. if so, end the game
+            TryToEndGame();
+
+            updateCamera(gameTime);
+            camera.updateBounds();
+
+            //spawn new sharks
+            /*
+            if (isNewSharkReady())
+            {
+                sharkPool.Add(new Shark());
+                sharkRespawnTimes.Add(0.0f);
+                Shark babyShark = sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1];
+                collisions.Add(babyShark, new List<Actor>());
+                //load new content
+                babyShark.loadContent();
+                //spawn
+                (babyShark).spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+
+                while (isNearAPlayer(sharkPool[(SHARK_POOL_SIZE + numExtraSharks) - 1]))
+                    babyShark.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
+                         
+            }
+             */
+        }
+
+        private void UpdateVictory(GameTime gameTime)
+        {
+            // check if player1 wants to restart the match
+            // TODO: We might want more options here like doing a new
+            // match altogether, but we have plenty of time to figure that out
+            TryToRestartGame();
+        }
+
         /// <summary>
         /// The camera zooms in and out automatically depending on
         /// where players are on screen.
@@ -829,6 +717,196 @@ namespace JAMMM
             camera.TryZoomIn(delta, players);
         }
 
+        #endregion
+
+        #region DRAWING_CURRENT_GAME_STATE
+
+        protected override void Draw(GameTime gameTime)
+        {
+            switch (this.currentGameState)
+            {
+                case (GameState.FindingPlayers):
+                    {
+                        DrawFindingPlayers(gameTime);
+                        break;
+                    }
+                case (GameState.TransitionIntoBattle):
+                    {
+                        DrawTransitionIntoBattle(gameTime);
+                        break;
+                    }
+                case (GameState.Battle):
+                    {
+                        DrawBattle(gameTime);
+                        break;
+                    }
+                case (GameState.Victory):
+                    {
+                        DrawVictory(gameTime);
+                        break;
+                    }
+            }
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawFindingPlayers(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+            spriteBatch.Begin();
+            //
+            spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
+            spriteBatch.Draw(title, titlePosition, Color.White);
+
+            foreach (Penguin p in players)
+                p.draw(gameTime, spriteBatch);
+
+            if (isPlayer1Ready)
+                spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
+            if (isPlayer2Ready)
+                spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
+            if (isPlayer3Ready)
+                spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
+            if (isPlayer4Ready)
+                spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
+            //
+            spriteBatch.End();
+        }
+
+        private void DrawTransitionIntoBattle(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+            spriteBatch.Begin();
+
+            spriteBatch.Draw(background, expandingView, backgroundFadeColor);
+
+            spriteBatch.Draw(title, titlePosition, titleFadeColor);
+
+            foreach (Penguin p in players)
+                p.draw(gameTime, spriteBatch);
+
+            spriteBatch.End();
+        }
+
+        private void DrawBattle(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.Blue);
+
+            spriteBatch.Begin(SpriteSortMode.Immediate,
+                BlendState.AlphaBlend, null, null, null, null,
+                camera.getTransformation());
+
+            spriteBatch.Draw(background, camera.maxView, Color.White);
+
+            for (int i = 0; i < players.Count; ++i)
+            {
+                Penguin p = players.ElementAt(i);
+
+                p.draw(gameTime, spriteBatch);
+
+                if (p.CurrState != Actor.state.Dying &&
+                    p.IsAlive)
+                {
+                    spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
+                    new Vector2(p.Position.X - 75, p.Position.Y + 60),
+                    Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+
+                    if (p.IsSpeedy)
+                    {
+                        powerupRectangle.X = (int)playerPowerupPositions[i].X;
+                        powerupRectangle.Y = (int)playerPowerupPositions[i].Y;
+
+                        spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEEDBOOST), powerupRectangle, POWERUP_COLOR);
+                    }
+                }
+            }
+
+            foreach (Fish fish in fishPool)
+                fish.draw(gameTime, spriteBatch);
+
+            foreach (Shark s in sharkPool)
+            {
+                s.draw(gameTime, spriteBatch);
+
+                if (s.CurrState != Actor.state.Dying &&
+                    s.IsAlive)
+                    spriteBatch.DrawString(Game1.font, "Calories: " + s.Calories,
+                    new Vector2(s.Position.X - 75, s.Position.Y + 100),
+                    Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            }
+
+            foreach (Spear spear in spears)
+                spear.draw(gameTime, spriteBatch);
+
+            ParticleManager.Instance.draw(gameTime, spriteBatch);
+
+            spriteBatch.End();
+
+            spriteBatch.Begin();
+
+            timer1.Draw(spriteBatch, font, graphics);
+
+            if (isPlayer1Connected)
+            {
+                spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
+            }
+            if (isPlayer2Connected)
+            {
+                spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
+            }
+            if (isPlayer3Connected)
+            {
+                spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
+            }
+            if (isPlayer4Connected)
+            {
+                spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
+            }
+
+            spriteBatch.End();
+        }
+
+        private void DrawVictory(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.DarkSeaGreen);
+
+            spriteBatch.Begin();
+
+            if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
+            {
+                spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
+            }
+            else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
+            {
+                spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
+            }
+            else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
+            {
+                spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
+            }
+            else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
+            {
+                spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
+            }
+            else
+                spriteBatch.DrawString(font, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
+
+            spriteBatch.End();
+        }
+
+        #endregion
+
+        #region CHANGING_STATES
 
         /// <summary>
         /// This is the function called to change the 
@@ -1009,6 +1087,10 @@ namespace JAMMM
             cleanExtraSharks();
         }
 
+        #endregion
+
+        #region HELPER_FUNCTIONS
+
         private void cleanExtraSharks()
         {
             while (sharkPool.Count > SHARK_POOL_SIZE)
@@ -1016,7 +1098,6 @@ namespace JAMMM
                 sharkPool.RemoveAt(sharkPool.Count - 1);
             }
         }
-
 
         private Vector2 getRandomPositionWithinBounds(Rectangle bounds)
         {
@@ -1181,8 +1262,6 @@ namespace JAMMM
             return false;
         }
 
-
-
         private int numPlayersAlive()
         {
             int numPlayersAlive = 0;
@@ -1194,7 +1273,19 @@ namespace JAMMM
             return numPlayersAlive;
         }
 
+        public bool isNewSharkReady()
+        {
+            if (timer1.getTimer() > (TIME_EVENT_SHARK) * (numExtraSharks + 1))
+            {
+                numExtraSharks++;
+                return true;
+            }
+            else return false;
+        }
 
+        #endregion
+
+        #region PHYSICS
 
         private void detectCollisions()
         {
@@ -1379,7 +1470,9 @@ namespace JAMMM
             }
         }
 
+        #endregion
 
+        #region GAME_STATE_TRANSITION_LOGIC
 
         private void TryToAddPlayers()
         {
@@ -1532,16 +1625,7 @@ namespace JAMMM
                 changeState(GameState.Victory);
         }
 
-        public bool isNewSharkReady()
-        {
-            if (timer1.getTimer() > (TIME_EVENT_SHARK) * (numExtraSharks + 1))
-            {
-                numExtraSharks++;
-                return true;
-            }
-            else return false;
-        }
-
+        #endregion
     }
 
 

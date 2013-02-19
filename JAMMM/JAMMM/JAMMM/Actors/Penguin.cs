@@ -112,6 +112,9 @@ namespace JAMMM.Actors
 
         public Color color;
 
+        private bool isSpeedy;
+        public bool IsSpeedy { get { return isSpeedy; } }
+
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
@@ -129,6 +132,7 @@ namespace JAMMM.Actors
             this.startingPosition = pos;
             this.Calories         = START_CALORIES;
             this.CurrentSize      = Size.Small;
+            this.isSpeedy         = false;
 
             this.DashCost         = DASH_SMALL_COST;
             this.SpearCost        = SPEAR_SMALL_COST;
@@ -481,6 +485,43 @@ namespace JAMMM.Actors
             this.Mass = LARGE_MASS;
         }
 
+        public override void onPowerupApplication(Powerup p)
+        {
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                this.isSpeedy = true;
+            }
+        }
+
+        public override void onPowerupRemoval(Powerup p) 
+        {
+            // we need to correct for the change in these
+            // fields while the powerup was active. They could
+            // have changed while the powerup was active and then
+            // when the powerup was removed they would have no
+            // longer been accurate
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                if (this.CurrentSize == Size.Large)
+                {
+                    this.MaxAccDash = 500.0f;
+                    this.MaxVelDash = 550.0f;
+                }
+                else if (this.CurrentSize == Size.Medium)
+                {
+                    this.MaxAccDash = 400.0f;
+                    this.MaxVelDash = 450.0f;
+                }
+                else if (this.CurrentSize == Size.Small)
+                {
+                    this.MaxAccDash = 300.0f;
+                    this.MaxVelDash = 350.0f;
+                }
+
+                this.isSpeedy = false;
+            }
+        }
+
         private void tryToDie()
         {
             if (this.calories <= 0 
@@ -525,11 +566,18 @@ namespace JAMMM.Actors
 
             resetBlink();
 
+            resetPowerups();
+
             becomeSmall();
 
             resetPhysics();
 
             changeState(state.DashReady);
+        }
+
+        private void resetPowerups()
+        {
+            this.isSpeedy = false;
         }
 
         public override void draw(GameTime delta, SpriteBatch batch)
@@ -541,7 +589,12 @@ namespace JAMMM.Actors
                 if (this.isBlink)
                     c = Color.Pink;
                 else
-                    c = Color.White;
+                {
+                    if (isSpeedy)
+                        c = Color.Yellow;
+                    else
+                        c = Color.White;
+                }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                     currentAnimation.draw(batch, this.Position,
