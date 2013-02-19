@@ -27,8 +27,8 @@ namespace JAMMM
 
         private const int MAX_NUM_PLAYERS = 4;
 
-        private const int POWERUP_RARITY = 20;
-        private const int POWERUP_TIME = 17;
+        private const int POWERUP_RARITY = 2;
+        private const int POWERUP_TIME = 1;
 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
@@ -68,11 +68,16 @@ namespace JAMMM
 
         public const string POWERUP_SPEEDBOOST = "Speed_Boost";
         public const string POWERUP_RAPIDFIRE = "Rapid_Fire";
+        public const string POWERUP_SHARKREPELLENT = "Shark_Repellent";
+        public const string POWERUP_SPEARDEFLECTION = "Spear_Deflection";
+
+        public const string SHARKREPELLENT_AURA = "Shark_Repellent_Aura";
+        public const string SPEARDEFLECTION_AURA = "Spear_Deflection_Aura";
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 30;
-        private const int SHARK_POOL_SIZE = 2;
+        private const int FISH_POOL_SIZE = 90;
+        private const int SHARK_POOL_SIZE = 0;
         private const int SPEAR_POOL_SIZE = 50;
 
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
@@ -262,6 +267,11 @@ namespace JAMMM
             // load the content for the sprite manager
             SpriteManager.addTexture(POWERUP_SPEEDBOOST, Content.Load<Texture2D>("Sprites/powerup_speedboost"));
             SpriteManager.addTexture(POWERUP_RAPIDFIRE, Content.Load<Texture2D>("Sprites/powerup_rapidfire"));
+            SpriteManager.addTexture(POWERUP_SHARKREPELLENT, Content.Load<Texture2D>("Sprites/powerup_sharkrepellent"));
+            SpriteManager.addTexture(POWERUP_SPEARDEFLECTION, Content.Load<Texture2D>("Sprites/powerup_speardeflection"));
+
+            SpriteManager.addTexture(SHARKREPELLENT_AURA, Content.Load<Texture2D>("Sprites/shark_repellent"));
+            SpriteManager.addTexture(SPEARDEFLECTION_AURA, Content.Load<Texture2D>("Sprites/spear_deflector"));
 
             SpriteManager.addTexture(SHARK_SWIM, Content.Load<Texture2D>("Sprites/Shark_Swim_80_48"));
             SpriteManager.addTexture(SHARK_EAT, Content.Load<Texture2D>("Sprites/Shark_Eat_80_48"));
@@ -506,6 +516,8 @@ namespace JAMMM
 
             speedBoost = new SpeedBoostPowerup();
             rapidFire = new RapidFirePowerup();
+            sharkRepellent = new SharkRepellentPowerup();
+            spearDeflection = new SpearDeflectionPowerup(60.0f);
         }
 
         #endregion
@@ -877,6 +889,10 @@ namespace JAMMM
                     spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEEDBOOST), powerupRectangle, POWERUP_COLOR);
                 else if (p.IsRapidFire)
                     spriteBatch.Draw(SpriteManager.getTexture(POWERUP_RAPIDFIRE), powerupRectangle, POWERUP_COLOR);
+                else if (p.IsDeflectingSpears)
+                    spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEARDEFLECTION), powerupRectangle, POWERUP_COLOR);
+                else if (p.IsRepellingSHarks)
+                    spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SHARKREPELLENT), powerupRectangle, POWERUP_COLOR);
             }
 
             timer1.Draw(spriteBatch, font, graphics);

@@ -573,7 +573,6 @@ namespace JAMMM.Actors
                 }
 
                 this.isSpeedy = false;
-                this.powerup = null;
             }
             else if (p is Powerups.RapidFirePowerup)
             {
@@ -581,8 +580,17 @@ namespace JAMMM.Actors
                 this.fireCooldown = FIRE_COOLDOWN;
 
                 this.isRapidFire = false;
-                this.powerup = null;
             }
+            else if (p is Powerups.SpearDeflectionPowerup)
+            {
+                this.isDeflectingSpears = false;
+            }
+            else if (p is Powerups.SharkRepellentPowerup)
+            {
+                this.isRepellingSharks = false;
+            }
+
+            this.powerup = null;
         }
 
         private void tryToDie()
@@ -659,6 +667,20 @@ namespace JAMMM.Actors
                         c = Color.Maroon;
                     else
                         c = Color.White;
+                }
+
+                Vector2 auraPosition = this.Position;
+
+                auraPosition.X -= 75;
+                auraPosition.Y -= 75;
+
+                if (this.isRepellingSharks)
+                {
+                    batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA), auraPosition, Color.White);
+                }
+                else if (this.isDeflectingSpears)
+                {
+                    batch.Draw(SpriteManager.getTexture(Game1.SPEARDEFLECTION_AURA), auraPosition, Color.White);
                 }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
@@ -745,6 +767,16 @@ namespace JAMMM.Actors
         {
             if (other is Spear)
             {
+                if (this.isDeflectingSpears)
+                {
+                    other.acceleration = Vector2.Zero;
+
+                    other.velocity 
+                        = other.MaxVel * this.DirectionTo(other);
+
+                    // play deflection sound
+                }
+
                 // Set delay so we can't immediately fire a spear after being hit
                 this.FireTime = fireCooldown * 1.5f;
                 this.Fire = false;
@@ -812,6 +844,8 @@ namespace JAMMM.Actors
 
                     if (other.Powerup != null)
                     {
+                        if (this.powerup != null)
+                            this.Powerup.remove();
                         this.Powerup = other.Powerup;
                         this.Powerup.apply(this);
                     }
@@ -861,6 +895,9 @@ namespace JAMMM.Actors
 
                     if (other.Powerup != null)
                     {
+                        if (this.powerup != null)
+                            this.Powerup.remove();
+
                         this.Powerup = other.Powerup;
                         this.Powerup.apply(this);
                     }

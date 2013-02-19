@@ -155,6 +155,8 @@ namespace JAMMM.Actors
             {
                 if (!p.IsAlive)
                     continue;
+                if (p.IsRepellingSHarks)
+                    continue;
 
                 distance.X = p.Position.X - s.Position.X;
                 distance.Y = p.Position.Y - s.Position.Y;
@@ -192,6 +194,8 @@ namespace JAMMM.Actors
             foreach (Penguin p in players)
             {
                 if (!p.IsAlive)
+                    continue;
+                if (p.IsRepellingSHarks)
                     continue;
 
                 distance.X = p.Position.X - s.Position.X;

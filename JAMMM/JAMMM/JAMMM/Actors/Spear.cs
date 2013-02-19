@@ -119,8 +119,15 @@ namespace JAMMM.Actors
 
         public override void collideWith(Actor other)
         {
-            if (other is Penguin || other is Shark)
+            if (other is Shark)
+            {
                 die();
+            }
+            else if (other is Penguin)
+            {
+                if (!((Penguin)other).IsDeflectingSpears)
+                    die();
+            }
         }
     }
 }
