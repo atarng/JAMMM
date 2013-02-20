@@ -10,10 +10,15 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        public const int SHARK_BASE_HEALTH = 100;
-        private const float SHARK_ATTACK_THRESHOLD = 350;
-        private const float SHARK_AGGRESS_THRESHOLD = 700;
-        private const float PENGUIN_KNOCKBACK = 100.0f;
+        public  const   int SHARK_BASE_HEALTH       = 100;
+        private const float SHARK_ATTACK_THRESHOLD  = 350;
+        private const float SHARK_AGGRESS_THRESHOLD = 1200;
+        private const float PENGUIN_KNOCKBACK       = 100.0f;
+        private const float SHARK_DASH_SPEED        = 450.0f;
+        private const float SHARK_DASH_ACCELERATION = 1500.0f;
+        private const float SHARK_SPEED             = 300.0f;
+        private const float SHARK_ACCELERATION      = 400.0f;
+        private const int   SHARK_FISH_CALORIES     = 4;
 
         public Vector2 mouthPoint;
         public Circle mouthCircle;
@@ -22,7 +27,13 @@ namespace JAMMM.Actors
         public int Calories
         {
             get { return calories; }
-            set { calories = value; }
+            set 
+            {
+                calories = value; 
+
+                if (calories > MAX_HEALTH)
+                    calories = MAX_HEALTH;
+            }
         }
 
         private bool isSpeedy;
@@ -30,8 +41,8 @@ namespace JAMMM.Actors
 
         public Shark() : base(0, 0, 160, 96, 60, 20)
         {
-            this.MaxAccDash = 1500;
-            this.MaxVelDash = 450;
+            this.MaxAccDash = SHARK_DASH_ACCELERATION;
+            this.MaxVelDash = SHARK_DASH_SPEED;
             this.calories = SHARK_BASE_HEALTH;
             this.DashTime = 0.5f;
 
@@ -79,9 +90,24 @@ namespace JAMMM.Actors
 
             this.calories = SHARK_BASE_HEALTH;
 
+            this.isHit = false;
             resetBlink();
 
+            resetPowerups();
+
             changeState(state.Moving);
+        }
+
+        private void resetPowerups()
+        {
+            this.isSpeedy = false;
+
+            this.MaxAccDash = SHARK_DASH_ACCELERATION;
+            this.MaxVelDash = SHARK_DASH_SPEED;
+            this.MaxVel = SHARK_SPEED;
+            this.MaxAcc = SHARK_ACCELERATION;
+
+            this.powerup = null;
         }
 
         public override void update(GameTime gameTime)
@@ -234,6 +260,8 @@ namespace JAMMM.Actors
                 this.isSpeedy = true;
             }
 
+            this.powerup = p;
+
             AudioManager.getSound("Power_Up").Play();
         }
 
@@ -246,11 +274,12 @@ namespace JAMMM.Actors
             // longer been accurate
             if (p is Powerups.SpeedBoostPowerup)
             {
-                this.MaxAccDash = 1500;
-                this.MaxVelDash = 450;
+                this.MaxAccDash = SHARK_DASH_ACCELERATION;
+                this.MaxVelDash = SHARK_DASH_SPEED;
+                this.MaxVel     = SHARK_SPEED;
+                this.MaxAcc     = SHARK_ACCELERATION;
 
                 this.isSpeedy = false;
-                this.powerup = null;
             }
         }
 
@@ -308,13 +337,15 @@ namespace JAMMM.Actors
                     this.IsAlive)
                 {
                     AudioManager.getSound("Fish_Eat").Play();
-                    this.calories += FISH_CALORIES;
+                    this.calories += SHARK_FISH_CALORIES;
                     other.startDying();
 
                     if (other.Powerup != null)
                     {
-                        this.Powerup = other.Powerup;
-                        this.Powerup.apply(this);
+                        if (this.powerup != null)
+                            this.Powerup.remove();
+
+                        other.Powerup.apply(this);
                     }
                 }
             }

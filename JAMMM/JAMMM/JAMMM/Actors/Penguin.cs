@@ -34,8 +34,8 @@ namespace JAMMM.Actors
         public const int SPEAR_LARGE_COST = 15;
 
         public const int DASH_SMALL_COST = 0;
-        public const int DASH_MED_COST   = 3;
-        public const int DASH_LARGE_COST = 5;
+        public const int DASH_MED_COST   = 1;
+        public const int DASH_LARGE_COST = 3;
 
         public const int MELEE_SMALL_COST = 0;
         public const int MELEE_MED_COST   = 1;
@@ -100,7 +100,13 @@ namespace JAMMM.Actors
         public int Calories
         {
             get { return calories; }
-            set { calories = value; }
+            set 
+            { 
+                calories = value;
+
+                if (calories > MAX_HEALTH)
+                    calories = MAX_HEALTH;
+            }
         }
 
         private PlayerIndex controller;
@@ -133,6 +139,8 @@ namespace JAMMM.Actors
 
         private bool isDeflectingSpears;
         public bool IsDeflectingSpears { get { return isDeflectingSpears; } }
+
+        public Circle spearDeflectorAura;
 
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
@@ -167,6 +175,7 @@ namespace JAMMM.Actors
 
             spearPoint = Vector2.Zero;
             spearCircle = new Circle(this.Bounds.center.X + 50, this.Bounds.center.Y, 15);
+            spearDeflectorAura = new Circle(0, 0, 75);
         }
 
         public override void processInput()
@@ -186,7 +195,7 @@ namespace JAMMM.Actors
                 //if the acceleration is > max acc (means we were dashing)
                 if (!(CurrState == state.Dashing &&
                     (Vector2.Normalize(accController) == Vector2.Normalize(Acceleration) 
-                    || Vector2.Zero == accController)) && !isHit)
+                    || Vector2.Zero == accController)))
                     Acceleration = accController;
 
                 if ( this.calories > DashCost 
@@ -269,7 +278,7 @@ namespace JAMMM.Actors
         {
             if (!this.IsAlive) return;
 
-            if (this.powerup != null)
+            if (this.powerup != null && this.powerup.IsApplied)
                 this.powerup.update((float)delta.ElapsedGameTime.TotalSeconds);
 
             tryToGrow();
@@ -530,10 +539,11 @@ namespace JAMMM.Actors
             }
             else if (p is Powerups.RapidFirePowerup)
             {
-                this.isRapidFire = true;
+                this.isRapidFire    = true;
 
-                this.meleeCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
-                this.fireCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
+                this.meleeCooldown  = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
+                this.fireCooldown   = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
+                this.SpearCost      = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
             }
             else if (p is Powerups.SharkRepellentPowerup)
             {
@@ -543,6 +553,8 @@ namespace JAMMM.Actors
             {
                 this.isDeflectingSpears = true;
             }
+
+            this.powerup = p;
 
             AudioManager.getSound("Power_Up").Play();
         }
@@ -578,6 +590,7 @@ namespace JAMMM.Actors
             {
                 this.meleeCooldown = MELEE_COOLDOWN;
                 this.fireCooldown = FIRE_COOLDOWN;
+                this.SpearCost = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
 
                 this.isRapidFire = false;
             }
@@ -589,15 +602,15 @@ namespace JAMMM.Actors
             {
                 this.isRepellingSharks = false;
             }
-
-            this.powerup = null;
         }
 
         private void tryToDie()
         {
-            if (this.calories <= 0 
+            if (this.calories <= 0
                 && this.CurrState != state.Dying)
+            {
                 changeState(state.Dying);
+            }
         }
 
         public override void die()
@@ -649,6 +662,15 @@ namespace JAMMM.Actors
         private void resetPowerups()
         {
             this.isSpeedy = false;
+            this.isDeflectingSpears = false;
+            this.isRepellingSharks = false;
+            this.isRapidFire = false;
+
+            this.meleeCooldown = MELEE_COOLDOWN;
+            this.fireCooldown = FIRE_COOLDOWN;
+            this.SpearCost = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
+            this.MaxAccDash = 500.0f;
+            this.MaxVelDash = 550.0f;
         }
 
         public override void draw(GameTime delta, SpriteBatch batch)
@@ -665,6 +687,10 @@ namespace JAMMM.Actors
                         c = Color.Yellow;
                     else if (isRapidFire)
                         c = Color.Maroon;
+                    else if (isDeflectingSpears)
+                        c = Color.Silver;
+                    else if (isRepellingSharks)
+                        c = Color.LightGoldenrodYellow;
                     else
                         c = Color.White;
                 }
@@ -771,61 +797,84 @@ namespace JAMMM.Actors
                 {
                     other.acceleration = Vector2.Zero;
 
-                    other.velocity 
-                        = other.MaxVel * this.DirectionTo(other);
+                    Vector2 reflectingVector = this.DirectionTo(other);
+                    float reflectingRotation = Physics.VectorToAngle(reflectingVector);
 
-                    // play deflection sound
+                    other.velocity
+                        = other.MaxVel * reflectingVector;
+
+                    ((Spear)other).Owner = this;
+
+                    other.Rotation = reflectingRotation;
+
+                    AudioManager.getSound("Ding").Play();
                 }
-
-                // Set delay so we can't immediately fire a spear after being hit
-                this.FireTime = fireCooldown * 1.5f;
-                this.Fire = false;
-
-                // take damage based on the spear's owner's size
-                if (other.CurrentSize == Size.Large)
+                else
                 {
-                    AudioManager.getSound("Actor_Hit").Play();
-                    this.calories -= SPEAR_MAX_DAMAGE;
+                    // Set delay so we can't immediately fire a spear after being hit
+                    this.FireTime = fireCooldown * 1.5f;
+                    this.Fire = false;
+
+                    // take damage based on the spear's owner's size
+                    if (other.CurrentSize == Size.Large)
+                    {
+                        AudioManager.getSound("Actor_Hit").Play();
+
+                        if (((Spear)other).Owner.isRapidFire)
+                            this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_LARGE;
+                        else
+                            this.calories -= SPEAR_MAX_DAMAGE;
+                    }
+                    else if (other.CurrentSize == Size.Medium)
+                    {
+                        if (((Spear)other).Owner.isRapidFire)
+                            this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_MEDIUM;
+                        else
+                            this.calories -= SPEAR_MED_DAMAGE;
+                    }
+                    else if (other.CurrentSize == Size.Small)
+                    {
+                        if (((Spear)other).Owner.isRapidFire)
+                            this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_SMALL;
+                        else
+                            this.calories -= SPEAR_SMALL_DAMAGE;
+                    }
+
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
+                        new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
+                        (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
+
+                    getHit();
+
+                    isBeingKnockedBack = true;
+                    knockbackTime = KNOCKBACK_DURATION;
+
+                    // get physics rotation to p's rotation, 
+                    // normalize that, and magnify by the amount
+                    Vector2 pRotation = Physics.AngleToVector(other.Rotation);
+
+                    pRotation.Normalize();
+
+                    // give us an acceleration in that direction
+                    this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
                 }
-                else if (other.CurrentSize == Size.Medium)
-                    this.calories -= SPEAR_MED_DAMAGE;
-                else if (other.CurrentSize == Size.Small)
-                    this.calories -= SPEAR_SMALL_DAMAGE;
-
-                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
-                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
-                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
-                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
-                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
-                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
-                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
-                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
-                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
-                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
-                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
-                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
-                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-                ParticleManager.Instance.createParticle(ParticleType.HitSpark,
-                    new Vector2(this.Position.X + rnd.Next(-20, 20), this.Position.Y + rnd.Next(-20, 20)),
-                    new Vector2(0, 0), (float)(rnd.NextDouble() * 6.29f), 0.1f,
-                    (float)rnd.NextDouble(), -(float)rnd.NextDouble() * 3, 1, 1 + (float)rnd.NextDouble() * 2f, 1f);
-
-                getHit();
-
-                isBeingKnockedBack = true;
-                knockbackTime = KNOCKBACK_DURATION;
-
-                // get physics rotation to p's rotation, 
-                // normalize that, and magnify by the amount
-                Vector2 pRotation = Physics.AngleToVector(other.Rotation);
-
-                pRotation.Normalize();
-
-                // give us an acceleration in that direction
-                this.Position += pRotation * Actor.SPEAR_DISPLACEMENT;
             }
             else if (other is Shark)
             {
@@ -845,9 +894,15 @@ namespace JAMMM.Actors
                     if (other.Powerup != null)
                     {
                         if (this.powerup != null)
-                            this.Powerup.remove();
-                        this.Powerup = other.Powerup;
-                        this.Powerup.apply(this);
+                        {
+                            this.powerup.remove();
+
+                            //System.Diagnostics.Trace.Assert(other.Powerup != this.powerup);
+                        }
+
+                        other.Powerup.remove();
+
+                        other.Powerup.apply(this);
                     }
                 }
                 // take damage
@@ -896,10 +951,13 @@ namespace JAMMM.Actors
                     if (other.Powerup != null)
                     {
                         if (this.powerup != null)
-                            this.Powerup.remove();
+                        {
+                            //System.Diagnostics.Trace.Assert(other.Powerup != this.powerup);
+                            
+                            this.powerup.remove();
+                        }
 
-                        this.Powerup = other.Powerup;
-                        this.Powerup.apply(this);
+                        other.Powerup.apply(this);
                     }
                 }
             }

@@ -20,8 +20,8 @@ namespace JAMMM
 
         private const float EPSILON = 0.00001f;
 
-        private const float slowZoom = 0.001f;
-        private const float medZoom = 0.001f;
+        private const float slowZoom = 0.0005f;
+        private const float medZoom = 0.0005f;
 
         public const float MIN_ZOOM = 0.5f;
         public const float MED_ZOOM = 0.75f;
@@ -186,6 +186,8 @@ namespace JAMMM
         public void zoomOutByVelocity(float changeInPosition, bool isXAxis)
         {
             float changeInZoom = 0.0f;
+
+            changeInPosition *= 2.0f;
 
             if (isXAxis)
                 changeInZoom = zoomRatioX * changeInPosition;

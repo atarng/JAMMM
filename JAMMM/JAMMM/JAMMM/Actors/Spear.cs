@@ -20,6 +20,7 @@ namespace JAMMM.Actors
         public Penguin Owner
         {
             get { return owner; }
+            set { owner = value; }
         }
         private Penguin owner;
 
@@ -47,11 +48,11 @@ namespace JAMMM.Actors
 
                 double time = delta.ElapsedGameTime.TotalMilliseconds;
 
-                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
-                    ParticleManager.Instance.createParticle(ParticleType.Bubble, 
-                        new Vector2(this.Position.X + rnd.Next(-15, 15), 
-                            this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 
-                            3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
+                //if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(400, 500) || rnd.Next(1, 100) == 1)
+                //    ParticleManager.Instance.createParticle(ParticleType.Bubble, 
+                //        new Vector2(this.Position.X + rnd.Next(-15, 15), 
+                //            this.Position.Y + rnd.Next(-15, 15)), new Vector2(0, 0), 
+                //            3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
                 currentAnimation.update(delta);
             }
@@ -61,7 +62,7 @@ namespace JAMMM.Actors
         {
             if (IsAlive)
             {
-                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(1, 500) || rnd.Next(1, 100) == 1)
+                if ((this.velocity.Length() / MaxVelDash) * 100 > rnd.Next(200, 500) || rnd.Next(1, 100) == 1)
                     ParticleManager.Instance.createParticle(ParticleType.Bubble, 
                         new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y 
                             + rnd.Next(-15, 15)), new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);

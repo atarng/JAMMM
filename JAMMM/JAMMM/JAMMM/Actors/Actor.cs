@@ -20,12 +20,12 @@ namespace JAMMM
     public class Actor
     {
         public const int SPEAR_SMALL_DAMAGE = 20;
-        public const int SPEAR_MED_DAMAGE = 40;
-        public const int SPEAR_MAX_DAMAGE = 60;
+        public const int SPEAR_MED_DAMAGE = 30;
+        public const int SPEAR_MAX_DAMAGE = 40;
 
         public const int SHARK_CALORIES = 100;
         public const int PENGUIN_CALORIES = 60;
-        public const int FISH_CALORIES = 20;
+        public const int FISH_CALORIES = 10;
 
         public const int SHARK_DAMAGE = 50;
 
@@ -36,6 +36,8 @@ namespace JAMMM
         public const float KNOCKBACK_DURATION = 0.5f;
 
         public const float MAX_POSSIBLE_SPEED = 800.0f;
+
+        public const int   MAX_HEALTH = 300;
 
         public const float MELEE_DISPLACEMENT = 50.0f;
         public const float SPEAR_DISPLACEMENT = 40.0f;

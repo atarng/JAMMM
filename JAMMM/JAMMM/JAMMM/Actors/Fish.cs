@@ -17,12 +17,16 @@ namespace JAMMM
 
         public const float MINIMUM_AVOIDANCE_SPEED = 20.0f;
 
-        public const float PLAYER_RANGE = 300.0f;
+        public const float PLAYER_RANGE = 200.0f;
         public const float THREAT_RADIUS = 250.0f;
         public const float SHARK_RANGE = 400.0f;
 
+        public const float CENTER_RANGE = 900.0f;
+
         private Penguin nearestPlayer;
         private Shark nearestShark;
+
+        private bool movingToCenter;
 
         private Circle boundsChecker;
 
@@ -86,8 +90,8 @@ namespace JAMMM
 
             this.powerup = p;
             this.isPoweredUp = true;
-            this.MaxVel = 999;
-            this.MaxAcc = 1000;
+            this.MaxVel = 777;
+            this.MaxAcc = 800;
 
             changeState(state.Moving);
 
@@ -139,6 +143,7 @@ namespace JAMMM
             updateDelinquency();
 
             // try to avoid nearby threats
+            updateSchoolingInBounds((float)gameTime.ElapsedGameTime.TotalSeconds);
             evading = avoidThreats();
 
             if (!evading)
@@ -146,11 +151,14 @@ namespace JAMMM
                 // if we're a leader or a delinquent, do random movement
                 if (this.isLeader || (!this.isLeader && !this.isSchooling))
                 {
-                    acceleration.X = (float)Math.Cos(randomX + gameTime.TotalGameTime.TotalSeconds * 2)
-                        * MaxAcc * ((float)randomX + 1.0f) / 6.28f;
+                    //if (!movingToCenter)
+                    //{
+                        acceleration.X += (float)Math.Cos(randomX + gameTime.TotalGameTime.TotalSeconds * 2)
+                            * MaxAcc * ((float)randomX + 1.0f) / 6.28f;
 
-                    acceleration.Y = (float)Math.Sin(randomY + gameTime.TotalGameTime.TotalSeconds * 2)
-                        * MaxAcc * (float)randomY / 12.56f;
+                        acceleration.Y += (float)Math.Sin(randomY + gameTime.TotalGameTime.TotalSeconds * 2)
+                            * MaxAcc * (float)randomY / 12.56f;
+                    //}
                 }
                 // if we're schooling, then just follow our partner
                 else
@@ -160,9 +168,6 @@ namespace JAMMM
                 }
             }
 
-            // if simulating our motion puts us out of bounds, then shoot us back in to bounds
-            updateSchoolingInBounds((float)gameTime.ElapsedGameTime.TotalSeconds);
-
             // update our random variable
             if (rnd.NextDouble() > 0.99)
             {
@@ -170,7 +175,7 @@ namespace JAMMM
                 randomY = rnd.NextDouble() * 6.28 * 2;
             }
 
-            if ((this.velocity.Length() / MaxVel) * 100 > rnd.Next(1, 700) || rnd.Next(1, 100) == 1)
+            if ((this.velocity.Length() / MaxVel) * 100 > rnd.Next(500, 700) || rnd.Next(1, 100) == 1)
                 ParticleManager.Instance.createParticle(ParticleType.Bubble,
                     new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),
                     new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.1f, -0.20f, 1, 0.5f, 10f);
@@ -296,13 +301,50 @@ namespace JAMMM
             Vector2 currPos = this.Position;
             Vector2 destVel = this.velocity;
             Vector2 destPos = this.Position;
+
             Vector2 changingAcceleration = this.acceleration;
-            Circle destBounds = this.Bounds;
+
+            Rectangle destBounds = Rectangle.Empty;
+            destBounds.Width = 32;
+            destBounds.Height = 32;
 
             destVel = gameTime * changingAcceleration;
             destPos = destVel * gameTime + currPos;
-            destBounds.center.X = destPos.X;
-            destBounds.center.Y = destPos.Y;
+            destBounds.X = (int)destPos.X - 16;
+            destBounds.Y = (int)destPos.Y - 16;
+
+            Vector2 center = Vector2.Zero;
+            center.X = schoolingBounds.Center.X;
+            center.Y = schoolingBounds.Center.Y;
+
+            if (movingToCenter)
+            {
+                float dist = Vector2.Distance(this.Position, center);
+
+                if (dist <= CENTER_RANGE)
+                {
+                    movingToCenter = false;
+                }
+                //else
+                //{
+                //    Vector2 dirToCenter = Vector2.Normalize(center - this.Position);
+
+                //    this.acceleration = dirToCenter * this.MaxAcc;
+                //}
+            }
+            else
+            {
+                // if we're going to exit the boundaries
+                if (destBounds.Intersects(schoolingBounds) ||
+                    !schoolingBounds.Contains(destBounds))
+                {
+                    movingToCenter = true;
+
+                    Vector2 dirToCenter = Vector2.Normalize(center - this.Position);
+
+                    this.acceleration += dirToCenter * this.MaxAcc;
+                }
+            }
         }
 
         /// <summary>
@@ -336,7 +378,7 @@ namespace JAMMM
                 if (boundsChecker.containsPoint(this.Position))
                 {
                     this.acceleration 
-                        = nearestPlayer.DirectionTo(this) * this.MaxAcc;
+                        += nearestPlayer.DirectionTo(this) * this.MaxAcc;
 
                     return true;
                 }

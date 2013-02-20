@@ -23,12 +23,29 @@ namespace JAMMM
             Victory
         }
 
+        #region GAME_BALANCING_CONSTANTS
+        private const int POWERUP_RARITY                    = 10;
+        private const int POWERUP_TIME                      = 7;
+
+        private const float SPEAR_DEFLECTION_DURATION       = 10.0f;
+        private const float SHARK_REPELLENT_DURATION        = 10.0f;
+        private const float SPEED_BOOST_DURATION            = 7.0f;
+        private const float RAPID_FIRE_DURATION             = 7.0f;
+
+        private const int FISH_POOL_SIZE                    = 40;
+        private const int SHARK_POOL_SIZE                   = 2;
+        private const int SPEAR_POOL_SIZE                   = 200;
+        private const int POWERUP_POOL_SIZE                 = 10;
+
+        private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 350;
+        private const float SHARK_RESPAWN_TIME              = 1.0f;
+
+        public const int TIME_EVENT_SHARK                   = 30;
+        #endregion
+
         #region GAME_CONSTANTS
 
         private const int MAX_NUM_PLAYERS = 4;
-
-        private const int POWERUP_RARITY = 2;
-        private const int POWERUP_TIME = 1;
 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
@@ -76,20 +93,12 @@ namespace JAMMM
 
         private const float EPSILON = 0.01f;
 
-        private const int FISH_POOL_SIZE = 90;
-        private const int SHARK_POOL_SIZE = 0;
-        private const int SPEAR_POOL_SIZE = 50;
-
-        private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 450;
+        private const float BACKGROUND_FADE_DURATION = 1.0f;
 
         public static int WINDOW_WIDTH = 1600;
         public static int WINDOW_HEIGHT = 900;
 
-        private const float SHARK_RESPAWN_TIME = 1.0f;
 
-        private const float BACKGROUND_FADE_DURATION = 1.0f;
-
-        public const int TIME_EVENT_SHARK = 60; //seconds
 
         private Color POWERUP_COLOR;
 
@@ -127,10 +136,10 @@ namespace JAMMM
         private List<Penguin> players;
         private List<Spear>   spears;
 
-        private SpeedBoostPowerup       speedBoost;
-        private RapidFirePowerup        rapidFire;
-        private SharkRepellentPowerup   sharkRepellent;
-        private SpearDeflectionPowerup  spearDeflection;
+        private List<SpeedBoostPowerup>       speedBoost;
+        private List<RapidFirePowerup>        rapidFire;
+        private List<SharkRepellentPowerup>   sharkRepellent;
+        private List<SpearDeflectionPowerup>  spearDeflection;
 
         private bool isPlayer1Connected, isPlayer2Connected,
                      isPlayer3Connected, isPlayer4Connected;
@@ -257,6 +266,7 @@ namespace JAMMM
             AudioManager.addSound("Actor_Hit", Content.Load<SoundEffect>("Sounds/hit_3"));
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
             AudioManager.addSound("Power_Up", Content.Load<SoundEffect>("Sounds/powerup"));
+            AudioManager.addSound("Ding", Content.Load<SoundEffect>("Sounds/ding"));
 
             AudioManager.addSound("Death_Penguin", Content.Load<SoundEffect>("Sounds/death_penguin"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
@@ -514,10 +524,18 @@ namespace JAMMM
                 collisions.Add(spears[i], new List<Actor>());
             }
 
-            speedBoost = new SpeedBoostPowerup();
-            rapidFire = new RapidFirePowerup();
-            sharkRepellent = new SharkRepellentPowerup();
-            spearDeflection = new SpearDeflectionPowerup(60.0f);
+            speedBoost      = new List<SpeedBoostPowerup>();
+            rapidFire       = new List<RapidFirePowerup>();
+            sharkRepellent  = new List<SharkRepellentPowerup>();
+            spearDeflection = new List<SpearDeflectionPowerup>();
+
+            for (int i = 0; i < POWERUP_POOL_SIZE; ++i)
+            {
+                speedBoost.Add(new SpeedBoostPowerup(SPEED_BOOST_DURATION));
+                rapidFire.Add(new RapidFirePowerup(RAPID_FIRE_DURATION));
+                sharkRepellent.Add(new SharkRepellentPowerup(SHARK_REPELLENT_DURATION));
+                spearDeflection.Add(new SpearDeflectionPowerup(SPEAR_DEFLECTION_DURATION));
+            }
         }
 
         #endregion
@@ -639,15 +657,18 @@ namespace JAMMM
                         int whichPowerup = rng.Next(4);
 
                         if (whichPowerup == 0)
-                            p = rapidFire;
+                            p = getFirstAvailableRapidFire(rapidFire);
                         else if (whichPowerup == 1)
-                            p = speedBoost;
+                            p = getFirstAvailableSpeedBoost(speedBoost);
                         else if (whichPowerup == 2)
-                            p = sharkRepellent;
+                            p = getFirstAvailableSharkRepellent(sharkRepellent);
                         else if (whichPowerup == 3)
-                            p = spearDeflection;
+                            p = getFirstAvailableSpearDeflection(spearDeflection);
 
-                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), p);
+                        if (p != null)
+                            f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), p);
+                        else
+                            f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
                     }
                     else
                         f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries));
@@ -1331,6 +1352,70 @@ namespace JAMMM
             else return false;
         }
 
+        private Powerup getFirstAvailableSpeedBoost(List<SpeedBoostPowerup> powerups)
+        {
+            for (int i = 0; i < POWERUP_POOL_SIZE; ++i)
+            {
+                if (!powerups[i].IsApplied)
+                {
+                    foreach (Penguin p in players)
+                        if (p.Powerup == powerups[i])
+                            continue;
+
+                    return powerups[i];
+                }
+            }
+            return null;
+        }
+
+        private Powerup getFirstAvailableRapidFire(List<RapidFirePowerup> powerups)
+        {
+            for (int i = 0; i < POWERUP_POOL_SIZE; ++i)
+            {
+                if (!powerups[i].IsApplied)
+                {
+                    foreach (Penguin p in players)
+                        if (p.Powerup == powerups[i])
+                            continue;
+
+                    return powerups[i];
+                }
+            }
+            return null;
+        }
+
+        private Powerup getFirstAvailableSharkRepellent(List<SharkRepellentPowerup> powerups)
+        {
+            for (int i = 0; i < POWERUP_POOL_SIZE; ++i)
+            {
+                if (!powerups[i].IsApplied)
+                {
+                    foreach (Penguin p in players)
+                        if (p.Powerup == powerups[i])
+                            continue;
+
+                    return powerups[i];
+                }
+            }
+            return null;
+        }
+
+        private Powerup getFirstAvailableSpearDeflection(List<SpearDeflectionPowerup> powerups)
+        {
+            for (int i = 0; i < POWERUP_POOL_SIZE; ++i)
+            {
+                if (!powerups[i].IsApplied)
+                {
+                    foreach (Penguin p in players)
+                        if (p.Powerup == powerups[i])
+                            continue;
+
+                    return powerups[i];
+                }
+            }
+            return null;
+        }
+
         #endregion
 
         #region PHYSICS
@@ -1388,9 +1473,11 @@ namespace JAMMM
                 // spears with players
                 for (int j = 0; j < players.Count; j++)
                 {
-                    if (j == spears[i].Id || !players[j].IsAlive) continue;
+                    if (players[j] == spears[i].Owner || !players[j].IsAlive) continue;
 
-                    if (spears[i].bounds.isCollision(players[j].Bounds))
+                    if (spears[i].bounds.isCollision(players[j].Bounds) || 
+                        (spears[i].bounds.isCollision(players[j].spearDeflectorAura) &&
+                        players[j].IsDeflectingSpears))
                     {
                         if (!collisions[spears[i]].Contains(players[j]) &&
                             !collisions[players[j]].Contains(spears[i]))
@@ -1406,7 +1493,7 @@ namespace JAMMM
             // fish collisions
             for (int i = 0; i < fishPool.Count; ++i)
             {
-                if (!fishPool[i].IsAlive)
+                if (!fishPool[i].IsAlive || fishPool[i].CurrState == Actor.state.Dying)
                     continue;
                 
                 // fish with players
@@ -1664,9 +1751,9 @@ namespace JAMMM
             int numLivePlayers = numPlayersAlive();
             
             // huehuehue
-            foreach (Shark s in sharkPool)
-                if (s.CurrState != Actor.state.Dying)
-                    numAlive++;
+            //foreach (Shark s in sharkPool)
+            //    if (s.CurrState != Actor.state.Dying)
+            //        numAlive++;
 
             if ((numAlive == 0 && numLivePlayers == 1) ||
                (numLivePlayers == 0))

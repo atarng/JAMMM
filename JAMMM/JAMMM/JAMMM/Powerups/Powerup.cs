@@ -11,6 +11,11 @@ namespace JAMMM
         public float Duration { get { return duration; } set { duration = value; } }
 
         private bool applied;
+        public bool IsApplied
+        {
+            get { return applied; }
+        }
+
         private float timeAlive;
 
         protected Actor empowered;
@@ -35,7 +40,7 @@ namespace JAMMM
         {
             this.empowered = a;
             this.timeAlive = 0.0f;
-            this.applied = true;
+            this.applied   = true;
 
             onApply();
 
@@ -50,7 +55,7 @@ namespace JAMMM
 
             this.empowered.onPowerupRemoval(this);
 
-            this.empowered = null;
+            //this.empowered = null;
             this.timeAlive = 0.0f;
             this.applied = false;
         }

@@ -194,6 +194,8 @@ namespace JAMMM
                 RotatePoint(p.Bounds.center.X, p.Bounds.center.Y, p.Rotation, ref p.spearPoint);
 
                 p.spearCircle.center = p.spearPoint;
+
+                p.spearDeflectorAura.center = p.Position;
             }
 
             a.acceleration     *= accDecay;
