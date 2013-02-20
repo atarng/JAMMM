@@ -18,9 +18,5 @@ namespace JAMMM.Powerups
         public const int RAPID_FIRE_COST          = 3;
 
         public RapidFirePowerup(float duration = 10.0f) : base(duration) { }
-
-        protected override void onApply() {}
-
-        protected override void onRemove() {}
     }
 }

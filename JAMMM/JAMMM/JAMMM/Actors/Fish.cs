@@ -54,6 +54,8 @@ namespace JAMMM
         private bool isPoweredUp;
         public bool IsPoweredUp { get { return isPoweredUp; } }
 
+        private bool isColorCoded;
+
         public Rectangle schoolingBounds;
 
         public Fish() : base(0, 0, 32, 32, 16, 10) 
@@ -84,9 +86,11 @@ namespace JAMMM
                 SpriteManager.getTexture(Game1.FISH_DEATH), 8, false, 0.1f);
         }
 
-        public void spawnAt(Vector2 position, Powerup p)
+        public void spawnAt(Vector2 position, Powerup p, bool isColorCoded)
         {
             base.spawnAt(position);
+
+            this.isColorCoded = isColorCoded;
 
             this.powerup = p;
             this.isPoweredUp = true;
@@ -108,6 +112,7 @@ namespace JAMMM
         {
             base.spawnAt(position);
 
+            this.isColorCoded = false;
             this.powerup     = null;
             this.isPoweredUp = false;
             this.MaxVel      = 300;
@@ -517,6 +522,8 @@ namespace JAMMM
             {
                 Color c = Color.White;
 
+                float scale = 1.0f;
+
                 // green for leaders
                 //if (this.isLeader)
                 //    c = Color.Green;
@@ -532,18 +539,42 @@ namespace JAMMM
 
                 if (this.isPoweredUp)
                 {
-                    c.R = (byte)rnd.Next(256);
-                    c.G = (byte)rnd.Next(256);
-                    c.B = (byte)rnd.Next(256);
-                    c.A = 255;
+                    if (isColorCoded)
+                    {
+                        if (this.powerup is Powerups.SpeedBoostPowerup)
+                        {
+                            c = Color.Yellow;
+                        }
+                        else if (this.powerup is Powerups.RapidFirePowerup)
+                        {
+                            c = Color.Brown;
+                        }
+                        else if (this.powerup is Powerups.SharkRepellentPowerup)
+                        {
+                            c = Color.Purple;
+                        }
+                        else if (this.powerup is Powerups.SpearDeflectionPowerup)
+                        {
+                            c = Color.LightBlue;
+                        }
+                    }
+                    else
+                    {
+                        c.R = (byte)rnd.Next(256);
+                        c.G = (byte)rnd.Next(256);
+                        c.B = (byte)rnd.Next(256);
+                        c.A = 255;
+                    }
+
+                    scale = 1.5f;
                 }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
                     currentAnimation.draw(batch, this.Position,
-                        c, SpriteEffects.FlipVertically, this.Rotation, 1.0f);
+                        c, SpriteEffects.FlipVertically, this.Rotation, scale);
                 else
                     currentAnimation.draw(batch, this.Position, 
-                        c, SpriteEffects.None, this.Rotation, 1.0f);
+                        c, SpriteEffects.None, this.Rotation, scale);
             }
         }
     }

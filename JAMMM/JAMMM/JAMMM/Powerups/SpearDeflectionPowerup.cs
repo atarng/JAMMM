@@ -10,9 +10,5 @@ namespace JAMMM.Powerups
         public const int DEFLECTION_RADIUS = 75;
 
         public SpearDeflectionPowerup(float duration = 10.0f) : base(duration) { }
-
-        protected override void onApply() { }
-
-        protected override void onRemove() { }
     }
 }

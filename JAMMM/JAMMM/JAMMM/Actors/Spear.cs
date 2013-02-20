@@ -126,7 +126,7 @@ namespace JAMMM.Actors
             }
             else if (other is Penguin)
             {
-                if (!((Penguin)other).IsDeflectingSpears)
+                if (((Penguin)other).PowerupState != powerupstate.SpearDeflection)
                     die();
             }
         }

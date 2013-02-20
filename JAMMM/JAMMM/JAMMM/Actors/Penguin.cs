@@ -52,6 +52,13 @@ namespace JAMMM.Actors
         public const int MEDIUM_MASS = 500;
         public const int LARGE_MASS = 1500;
 
+        private const float DASH_SPEED_SMALL  = 500.0f;
+        private const float DASH_ACCEL_SMALL  = 550.0f;
+        private const float DASH_SPEED_MEDIUM = 400.0f;
+        private const float DASH_ACCEL_MEDIUM = 450.0f;
+        private const float DASH_SPEED_LARGE  = 300.0f;
+        private const float DASH_ACCEL_LARGE  = 350.0f;
+
         private float meleeCooldown;
         public float MeleeCooldown
         {
@@ -128,18 +135,6 @@ namespace JAMMM.Actors
 
         public Color color;
 
-        private bool isSpeedy;
-        public bool IsSpeedy { get { return isSpeedy; } }
-
-        private bool isRapidFire;
-        public bool IsRapidFire { get { return isRapidFire; } }
-
-        private bool isRepellingSharks;
-        public bool IsRepellingSHarks { get { return isRepellingSharks; } }
-
-        private bool isDeflectingSpears;
-        public bool IsDeflectingSpears { get { return isDeflectingSpears; } }
-
         public Circle spearDeflectorAura;
 
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
@@ -159,7 +154,6 @@ namespace JAMMM.Actors
             this.startingPosition = pos;
             this.Calories         = START_CALORIES;
             this.CurrentSize      = Size.Small;
-            this.isSpeedy         = false;
 
             this.DashCost         = DASH_SMALL_COST;
             this.SpearCost        = SPEAR_SMALL_COST;
@@ -278,8 +272,7 @@ namespace JAMMM.Actors
         {
             if (!this.IsAlive) return;
 
-            if (this.powerup != null && this.powerup.IsApplied)
-                this.powerup.update((float)delta.ElapsedGameTime.TotalSeconds);
+            updatePowerupState(delta);
 
             tryToGrow();
 
@@ -459,10 +452,10 @@ namespace JAMMM.Actors
             this.spearLength = SPEAR_LENGTH_SMALL;
             this.spearCircle.Radius = SPEAR_RADIUS_SMALL;
 
-            if (!isSpeedy)
+            if (this.powerupState != powerupstate.SpeedBoost)
             {
-                this.MaxAccDash = 500.0f;
-                this.MaxVelDash = 550.0f;
+                this.MaxAccDash = DASH_ACCEL_SMALL;
+                this.MaxVelDash = DASH_SPEED_SMALL;
             }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_SMALL + colorCode), 4);
@@ -487,10 +480,10 @@ namespace JAMMM.Actors
             this.spearLength = SPEAR_LENGTH_MEDIUM;
             this.spearCircle.Radius = SPEAR_RADIUS_MEDIUM;
 
-            if (!isSpeedy)
+            if (this.powerupState != powerupstate.SpeedBoost)
             {
-                this.MaxAccDash = 400.0f;
-                this.MaxVelDash = 450.0f;
+                this.MaxAccDash = DASH_ACCEL_MEDIUM;
+                this.MaxVelDash = DASH_SPEED_MEDIUM;
             }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_MEDIUM + colorCode), 4);
@@ -515,10 +508,10 @@ namespace JAMMM.Actors
             this.spearLength = SPEAR_LENGTH_LARGE;
             this.spearCircle.Radius = SPEAR_RADIUS_LARGE;
 
-            if (!isSpeedy)
+            if (this.powerupState != powerupstate.SpeedBoost)
             {
-                this.MaxAccDash = 300.0f;
-                this.MaxVelDash = 350.0f;
+                this.MaxAccDash = DASH_ACCEL_LARGE;
+                this.MaxVelDash = DASH_SPEED_LARGE;
             }
 
             moveAnimation.replaceSpriteSheet(SpriteManager.getTexture(Game1.PENGUIN_MOVE_LARGE + colorCode), 8);
@@ -529,79 +522,6 @@ namespace JAMMM.Actors
             this.Bounds.Radius = LARGE_SIZE;
 
             this.Mass = LARGE_MASS;
-        }
-
-        public override void onPowerupApplication(Powerup p)
-        {
-            if (p is Powerups.SpeedBoostPowerup)
-            {
-                this.isSpeedy = true;
-            }
-            else if (p is Powerups.RapidFirePowerup)
-            {
-                this.isRapidFire    = true;
-
-                this.meleeCooldown  = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
-                this.fireCooldown   = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
-                this.SpearCost      = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
-            }
-            else if (p is Powerups.SharkRepellentPowerup)
-            {
-                this.isRepellingSharks = true;
-            }
-            else if (p is Powerups.SpearDeflectionPowerup)
-            {
-                this.isDeflectingSpears = true;
-            }
-
-            this.powerup = p;
-
-            AudioManager.getSound("Power_Up").Play();
-        }
-
-        public override void onPowerupRemoval(Powerup p) 
-        {
-            // we need to correct for the change in these
-            // fields while the powerup was active. They could
-            // have changed while the powerup was active and then
-            // when the powerup was removed they would have no
-            // longer been accurate
-            if (p is Powerups.SpeedBoostPowerup)
-            {
-                if (this.CurrentSize == Size.Large)
-                {
-                    this.MaxAccDash = 300.0f;
-                    this.MaxVelDash = 350.0f;
-                }
-                else if (this.CurrentSize == Size.Medium)
-                {
-                    this.MaxAccDash = 400.0f;
-                    this.MaxVelDash = 450.0f;
-                }
-                else if (this.CurrentSize == Size.Small)
-                {
-                    this.MaxAccDash = 500.0f;
-                    this.MaxVelDash = 550.0f;
-                }
-
-                this.isSpeedy = false;
-            }
-            else if (p is Powerups.RapidFirePowerup)
-            {
-                this.meleeCooldown = MELEE_COOLDOWN;
-                this.fireCooldown = FIRE_COOLDOWN;
-                this.SpearCost = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
-
-                this.isRapidFire = false;
-            }
-            else if (p is Powerups.SpearDeflectionPowerup)
-            {
-                this.isDeflectingSpears = false;
-            }
-            else if (p is Powerups.SharkRepellentPowerup)
-            {
-                this.isRepellingSharks = false;
-            }
         }
 
         private void tryToDie()
@@ -650,7 +570,7 @@ namespace JAMMM.Actors
 
             resetBlink();
 
-            resetPowerups();
+            resetPowerupState();
 
             becomeSmall();
 
@@ -659,18 +579,70 @@ namespace JAMMM.Actors
             changeState(state.DashReady);
         }
 
-        private void resetPowerups()
+        public override void applyPowerup(Powerup p)
         {
-            this.isSpeedy = false;
-            this.isDeflectingSpears = false;
-            this.isRepellingSharks = false;
-            this.isRapidFire = false;
+            resetPowerupState();
 
+            powerupTimer = p.Duration;
+
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                this.powerupState = powerupstate.SpeedBoost;
+
+                this.MaxVel = Powerups.SpeedBoostPowerup.SPEED_BOOST_SPEED;
+                this.MaxVelDash = Powerups.SpeedBoostPowerup.SPEED_BOOST_DASH_SPEED;
+                this.MaxAcc = Powerups.SpeedBoostPowerup.SPEED_BOOST_ACCEL;
+                this.MaxAccDash = Powerups.SpeedBoostPowerup.SPEED_BOOST_DASH_ACCEL;
+            }
+            else if (p is Powerups.RapidFirePowerup)
+            {
+                this.powerupState = powerupstate.RapidFire;
+
+                this.meleeCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_MELEE_COOLDOWN;
+                this.fireCooldown = Powerups.RapidFirePowerup.RAPID_FIRE_FIRE_COOLDOWN;
+                this.SpearCost = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
+            }
+            else if (p is Powerups.SharkRepellentPowerup)
+            {
+                this.powerupState = powerupstate.SharkRepellent;
+            }
+            else if (p is Powerups.SpearDeflectionPowerup)
+            {
+                this.powerupState = powerupstate.SpearDeflection;
+            }
+
+            AudioManager.getSound("Power_Up").Play();
+        }
+
+        protected override void resetPowerupState()
+        {
             this.meleeCooldown = MELEE_COOLDOWN;
-            this.fireCooldown = FIRE_COOLDOWN;
-            this.SpearCost = Powerups.RapidFirePowerup.RAPID_FIRE_COST;
-            this.MaxAccDash = 500.0f;
-            this.MaxVelDash = 550.0f;
+            this.fireCooldown  = FIRE_COOLDOWN;
+
+            if (this.CurrentSize == Size.Large)
+            {
+                this.MaxAccDash = DASH_ACCEL_LARGE;
+                this.MaxVelDash = DASH_SPEED_LARGE;
+                this.SpearCost = SPEAR_LARGE_COST;
+            }
+            else if (this.CurrentSize == Size.Medium)
+            {
+                this.MaxAccDash = DASH_ACCEL_MEDIUM;
+                this.MaxVelDash = DASH_SPEED_MEDIUM;
+                this.SpearCost = SPEAR_MED_COST;
+            }
+            else
+            {
+                this.MaxAccDash = DASH_ACCEL_SMALL;
+                this.MaxVelDash = DASH_SPEED_SMALL;
+                this.SpearCost = SPEAR_SMALL_COST;
+            }
+
+            this.MaxAcc     = BASE_ACCEL;
+            this.MaxVel     = BASE_SPEED;
+
+            this.powerupTimer = 0.0f;
+            this.powerupState = powerupstate.None;
         }
 
         public override void draw(GameTime delta, SpriteBatch batch)
@@ -683,30 +655,43 @@ namespace JAMMM.Actors
                     c = Color.Pink;
                 else
                 {
-                    if (isSpeedy)
-                        c = Color.Yellow;
-                    else if (isRapidFire)
-                        c = Color.Maroon;
-                    else if (isDeflectingSpears)
-                        c = Color.Silver;
-                    else if (isRepellingSharks)
-                        c = Color.LightGoldenrodYellow;
-                    else
-                        c = Color.White;
-                }
+                    Vector2 auraPosition = this.Position;
 
-                Vector2 auraPosition = this.Position;
+                    auraPosition.X -= 75;
+                    auraPosition.Y -= 75;
 
-                auraPosition.X -= 75;
-                auraPosition.Y -= 75;
-
-                if (this.isRepellingSharks)
-                {
-                    batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA), auraPosition, Color.White);
-                }
-                else if (this.isDeflectingSpears)
-                {
-                    batch.Draw(SpriteManager.getTexture(Game1.SPEARDEFLECTION_AURA), auraPosition, Color.White);
+                    switch (this.powerupState)
+                    {
+                        case powerupstate.SpeedBoost:
+                        {
+                            c = Color.Yellow;
+                            break;
+                        }
+                        case powerupstate.RapidFire:
+                        {
+                            c = Color.SandyBrown;
+                            break;
+                        }
+                        case powerupstate.SharkRepellent:
+                        {
+                            c = Color.Purple;
+                            batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA), 
+                                auraPosition, Color.White);
+                            break;
+                        }
+                        case powerupstate.SpearDeflection:
+                        {
+                            c = Color.LightBlue;
+                            batch.Draw(SpriteManager.getTexture(Game1.SPEARDEFLECTION_AURA), 
+                                auraPosition, Color.White);
+                            break;
+                        }
+                        default:
+                        {
+                            c = Color.White;
+                            break;
+                        }
+                    }
                 }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)
@@ -793,7 +778,7 @@ namespace JAMMM.Actors
         {
             if (other is Spear)
             {
-                if (this.isDeflectingSpears)
+                if (this.powerupState == powerupstate.SpearDeflection)
                 {
                     other.acceleration = Vector2.Zero;
 
@@ -820,21 +805,21 @@ namespace JAMMM.Actors
                     {
                         AudioManager.getSound("Actor_Hit").Play();
 
-                        if (((Spear)other).Owner.isRapidFire)
+                        if (((Spear)other).Owner.powerupState == powerupstate.RapidFire)
                             this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_LARGE;
                         else
                             this.calories -= SPEAR_MAX_DAMAGE;
                     }
                     else if (other.CurrentSize == Size.Medium)
                     {
-                        if (((Spear)other).Owner.isRapidFire)
+                        if (((Spear)other).Owner.powerupState == powerupstate.RapidFire)
                             this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_MEDIUM;
                         else
                             this.calories -= SPEAR_MED_DAMAGE;
                     }
                     else if (other.CurrentSize == Size.Small)
                     {
-                        if (((Spear)other).Owner.isRapidFire)
+                        if (((Spear)other).Owner.powerupState == powerupstate.RapidFire)
                             this.calories -= Powerups.RapidFirePowerup.RAPID_FIRE_DAMAGE_SMALL;
                         else
                             this.calories -= SPEAR_SMALL_DAMAGE;
@@ -890,20 +875,6 @@ namespace JAMMM.Actors
                         this.calories += SHARK_CALORIES;
 
                     other.die();
-
-                    if (other.Powerup != null)
-                    {
-                        if (this.powerup != null)
-                        {
-                            this.powerup.remove();
-
-                            //System.Diagnostics.Trace.Assert(other.Powerup != this.powerup);
-                        }
-
-                        other.Powerup.remove();
-
-                        other.Powerup.apply(this);
-                    }
                 }
                 // take damage
                 else if (other.CurrState == state.Dashing)
@@ -949,16 +920,7 @@ namespace JAMMM.Actors
                     other.startDying();
 
                     if (other.Powerup != null)
-                    {
-                        if (this.powerup != null)
-                        {
-                            //System.Diagnostics.Trace.Assert(other.Powerup != this.powerup);
-                            
-                            this.powerup.remove();
-                        }
-
-                        other.Powerup.apply(this);
-                    }
+                        applyPowerup(other.Powerup);
                 }
             }
             else if (other is Penguin)

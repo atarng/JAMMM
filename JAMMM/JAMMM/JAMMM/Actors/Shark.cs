@@ -36,9 +36,6 @@ namespace JAMMM.Actors
             }
         }
 
-        private bool isSpeedy;
-        public bool IsSpeedy { get { return isSpeedy; } }
-
         public Shark() : base(0, 0, 160, 96, 60, 20)
         {
             this.MaxAccDash = SHARK_DASH_ACCELERATION;
@@ -93,21 +90,39 @@ namespace JAMMM.Actors
             this.isHit = false;
             resetBlink();
 
-            resetPowerups();
+            resetPowerupState();
 
             changeState(state.Moving);
         }
 
-        private void resetPowerups()
+        public override void applyPowerup(Powerup p)
         {
-            this.isSpeedy = false;
+            if (p is Powerups.SpeedBoostPowerup)
+            {
+                resetPowerupState();
 
+                powerupTimer = p.Duration;
+
+                this.powerupState = powerupstate.SpeedBoost;
+
+                this.MaxVel = Powerups.SpeedBoostPowerup.SPEED_BOOST_SPEED;
+                this.MaxVelDash = Powerups.SpeedBoostPowerup.SPEED_BOOST_DASH_SPEED;
+                this.MaxAcc = Powerups.SpeedBoostPowerup.SPEED_BOOST_ACCEL;
+                this.MaxAccDash = Powerups.SpeedBoostPowerup.SPEED_BOOST_DASH_ACCEL;
+
+                AudioManager.getSound("Power_Up").Play();
+            }
+        }
+
+        protected override void resetPowerupState()
+        {
             this.MaxAccDash = SHARK_DASH_ACCELERATION;
             this.MaxVelDash = SHARK_DASH_SPEED;
             this.MaxVel = SHARK_SPEED;
             this.MaxAcc = SHARK_ACCELERATION;
 
-            this.powerup = null;
+            this.powerupTimer = 0.0f;
+            this.powerupState = powerupstate.None;
         }
 
         public override void update(GameTime gameTime)
@@ -120,8 +135,7 @@ namespace JAMMM.Actors
                         new Vector2(this.Position.X + rnd.Next(-15, 15), this.Position.Y + rnd.Next(-15, 15)),
                         new Vector2(0, 0), 3.14f / 2.0f, 0.9f, 0.4f, -0.20f, 1, 0.5f, 10f);
 
-            if (this.powerup != null)
-                this.powerup.update((float)gameTime.ElapsedGameTime.TotalSeconds);
+            updatePowerupState(gameTime);
 
             tryToBlink(gameTime);
 
@@ -181,7 +195,7 @@ namespace JAMMM.Actors
             {
                 if (!p.IsAlive)
                     continue;
-                if (p.IsRepellingSHarks)
+                if (p.PowerupState == powerupstate.SharkRepellent)
                     continue;
 
                 distance.X = p.Position.X - s.Position.X;
@@ -221,7 +235,7 @@ namespace JAMMM.Actors
             {
                 if (!p.IsAlive)
                     continue;
-                if (p.IsRepellingSHarks)
+                if (p.PowerupState == powerupstate.SharkRepellent)
                     continue;
 
                 distance.X = p.Position.X - s.Position.X;
@@ -251,36 +265,6 @@ namespace JAMMM.Actors
         {
             if (t == Actor.AnimationType.Dash)
                 changeState(state.Moving);
-        }
-
-        public override void onPowerupApplication(Powerup p)
-        {
-            if (p is Powerups.SpeedBoostPowerup)
-            {
-                this.isSpeedy = true;
-            }
-
-            this.powerup = p;
-
-            AudioManager.getSound("Power_Up").Play();
-        }
-
-        public override void onPowerupRemoval(Powerup p)
-        {
-            // we need to correct for the change in these
-            // fields while the powerup was active. They could
-            // have changed while the powerup was active and then
-            // when the powerup was removed they would have no
-            // longer been accurate
-            if (p is Powerups.SpeedBoostPowerup)
-            {
-                this.MaxAccDash = SHARK_DASH_ACCELERATION;
-                this.MaxVelDash = SHARK_DASH_SPEED;
-                this.MaxVel     = SHARK_SPEED;
-                this.MaxAcc     = SHARK_ACCELERATION;
-
-                this.isSpeedy = false;
-            }
         }
 
         public override void collideWith(Actor other)
@@ -341,12 +325,7 @@ namespace JAMMM.Actors
                     other.startDying();
 
                     if (other.Powerup != null)
-                    {
-                        if (this.powerup != null)
-                            this.Powerup.remove();
-
-                        other.Powerup.apply(this);
-                    }
+                        applyPowerup(other.Powerup);
                 }
             }
             else if (other is Penguin)
@@ -391,15 +370,21 @@ namespace JAMMM.Actors
 
             Color healthColor;
 
-            if (this.Calories < 50 || this.isBlink)
-                healthColor = Color.Red;
+            if (this.isBlink)
+                healthColor = Color.Gray;
             else
             {
-                if (isSpeedy)
+                if (this.powerupState == powerupstate.SpeedBoost)
                     healthColor = Color.Yellow;
                 else
                     healthColor = Color.White;
             }
+
+            if (this.calories < 50)
+                healthColor = Color.Orange;
+
+            if (this.CurrState == state.Dying)
+                healthColor = Color.Red;
 
             if (Math.Abs(Rotation) > Math.PI / 2)
                 currentAnimation.draw(batch, this.Position,

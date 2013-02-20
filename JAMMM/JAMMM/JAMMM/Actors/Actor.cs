@@ -19,6 +19,9 @@ namespace JAMMM
     /// </summary>
     public class Actor
     {
+        public const float BASE_SPEED = 250.0f;
+        public const float BASE_ACCEL = 200.0f;
+
         public const int SPEAR_SMALL_DAMAGE = 20;
         public const int SPEAR_MED_DAMAGE = 30;
         public const int SPEAR_MAX_DAMAGE = 40;
@@ -69,6 +72,23 @@ namespace JAMMM
             Dying,
             MeleeAttack
         }
+
+        public enum powerupstate
+        {
+            SpeedBoost,
+            RapidFire,
+            SharkRepellent,
+            SpearDeflection,
+            None
+        }
+
+        protected powerupstate powerupState;
+        public powerupstate PowerupState
+        {
+            get { return powerupState; }
+        }
+
+        protected float powerupTimer;
 
         #region Animations
         protected Animation currentAnimation;
@@ -415,6 +435,17 @@ namespace JAMMM
             currentAnimation.play();
         }
 
+        /// <summary>
+        /// This handles application of a powerup which triggers changePowerupState
+        /// and resetPowerupState as well as resetting the timer
+        /// </summary>
+        public virtual void applyPowerup(Powerup p) {}
+
+        /// <summary>
+        /// Resets all of the state associated with the previous powerup.
+        /// </summary>
+        protected virtual void resetPowerupState() {}
+
         protected virtual void resetBlink()
         {
             this.isBlink = false;
@@ -540,6 +571,17 @@ namespace JAMMM
             processInput();
         }
 
+        protected void updatePowerupState(GameTime delta)
+        {
+            if (powerupTimer > 0.0f)
+            {
+                powerupTimer -= (float)delta.ElapsedGameTime.TotalSeconds;
+
+                if (powerupTimer <= 0.0f)
+                    resetPowerupState();
+            }
+        }
+
         public virtual void draw(GameTime delta, SpriteBatch batch)
         {
             if (printPhysics)
@@ -571,9 +613,9 @@ namespace JAMMM
 
         public Actor(float x, float y, float offX, float offY, float radius, float mass)
         {
-            this.MaxAcc = 250;
+            this.MaxAcc = BASE_ACCEL;
             this.MaxAccDash = 200;
-            this.MaxVel = 200;
+            this.MaxVel = BASE_SPEED;
             this.MaxVelDash = 300;
             this.dashTime = 0.25f;
             this.dashCost = 1;

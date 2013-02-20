@@ -8,9 +8,5 @@ namespace JAMMM.Powerups
     public class SharkRepellentPowerup : Powerup
     {
         public SharkRepellentPowerup(float duration = 10.0f) : base(duration) { }
-
-        protected override void onApply() { }
-
-        protected override void onRemove() { }
     }
 }
