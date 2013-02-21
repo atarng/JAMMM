@@ -39,7 +39,7 @@ namespace JAMMM
 
         public override void draw(GameTime gameTime, SpriteBatch batch)
         {
-            animation.draw(batch, this.location + this.offset, Color.White * this.alpha, SpriteEffects.None, this.angle, this.size);
+            animation.draw(batch, this.location + this.offset, this.color * alpha, SpriteEffects.None, this.angle, this.size);
         }
 
         public override bool update(GameTime gameTime)

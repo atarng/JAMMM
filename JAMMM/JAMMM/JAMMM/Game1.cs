@@ -33,7 +33,7 @@ namespace JAMMM
         private const float RAPID_FIRE_DURATION             = 5.0f;
 
         private const int FISH_POOL_SIZE                    = 60;
-        private const int SHARK_POOL_SIZE                   = 2;
+        private const int SHARK_POOL_SIZE                   = 0;
         private const int SPEAR_POOL_SIZE                   = 200;
         private const int POWERUP_POOL_SIZE                 = 10;
 
@@ -177,6 +177,7 @@ namespace JAMMM
         SoundEffectInstance battleTheme;
 
         public static SpriteFont font;
+        public static SpriteFont bigFont;
 
         private Color backgroundFadeColor;
         private Color titleFadeColor;
@@ -258,6 +259,7 @@ namespace JAMMM
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Peric");
+            bigFont = Content.Load<SpriteFont>("Miramonte");
             background = Content.Load<Texture2D>("Sprites/Background");
             title = Content.Load<Texture2D>("Sprites/title");
 
@@ -414,35 +416,35 @@ namespace JAMMM
 
             // set the victory text positions
             player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     font.MeasureString(player1VictoryText).X / 2.0f,
+                                                     bigFont.MeasureString(player1VictoryText).X / 2.0f,
                                                      graphics.PreferredBackBufferHeight / 2.0f -
-                                                     font.MeasureString(player1VictoryText).Y / 2.0f);
+                                                     bigFont.MeasureString(player1VictoryText).Y / 2.0f);
             player2VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     font.MeasureString(player2VictoryText).X / 2.0f,
+                                                     bigFont.MeasureString(player2VictoryText).X / 2.0f,
                                                      graphics.PreferredBackBufferHeight / 2.0f -
-                                                     font.MeasureString(player2VictoryText).Y / 2.0f);
+                                                     bigFont.MeasureString(player2VictoryText).Y / 2.0f);
             player3VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     font.MeasureString(player3VictoryText).X / 2.0f,
+                                                     bigFont.MeasureString(player3VictoryText).X / 2.0f,
                                                      graphics.PreferredBackBufferHeight / 2.0f -
-                                                     font.MeasureString(player3VictoryText).Y / 2.0f);
+                                                     bigFont.MeasureString(player3VictoryText).Y / 2.0f);
             player4VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     font.MeasureString(player4VictoryText).X / 2.0f,
+                                                     bigFont.MeasureString(player4VictoryText).X / 2.0f,
                                                      graphics.PreferredBackBufferHeight / 2.0f -
-                                                     font.MeasureString(player4VictoryText).Y / 2.0f);
+                                                     bigFont.MeasureString(player4VictoryText).Y / 2.0f);
 
             // set the player name text positions
             player1TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
-                                              font.MeasureString(player1Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.01f);
+                                              bigFont.MeasureString(player1Text).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.92f);
             player2TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
-                                              font.MeasureString(player2Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.01f);
+                                              bigFont.MeasureString(player2Text).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.92f);
             player3TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
-                                              font.MeasureString(player3Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.01f);
+                                              bigFont.MeasureString(player3Text).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.92f);
             player4TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
-                                              font.MeasureString(player4Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.01f);
+                                              bigFont.MeasureString(player4Text).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.92f);
 
             // set the player powerup positions
             playerPowerupPositions[0] = new Vector2(player1TextPosition.X - 12 - powerupRectangle.Width,
@@ -456,31 +458,31 @@ namespace JAMMM
 
             // set the player calorie label text positions
             player1CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
-                                              font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player2CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
-                                              font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player3CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
-                                              font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player4CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
-                                              font.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
 
             // set the player calorie value positions
             player1CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f +
-                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player2CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f +
-                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player3CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f +
-                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
             player4CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f +
-                                              font.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.03f);
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
 
             // set the finding player penguin rectangle
             //playerPenguinRectangle = new Rectangle(0, 0, playerPenguin.Width, playerPenguin.Height);
@@ -933,31 +935,31 @@ namespace JAMMM
                 }
             }
 
-            timer1.Draw(spriteBatch, font, graphics);
+            timer1.Draw(spriteBatch, bigFont, graphics);
 
             if (isPlayer1Connected)
             {
-                spriteBatch.DrawString(font, player1Text, player1TextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
+                spriteBatch.DrawString(bigFont, player1Text, player1TextPosition, Color.Blue);
+                spriteBatch.DrawString(bigFont, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(bigFont, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
             }
             if (isPlayer2Connected)
             {
-                spriteBatch.DrawString(font, player2Text, player2TextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
+                spriteBatch.DrawString(bigFont, player2Text, player2TextPosition, Color.Red);
+                spriteBatch.DrawString(bigFont, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(bigFont, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
             }
             if (isPlayer3Connected)
             {
-                spriteBatch.DrawString(font, player3Text, player3TextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
+                spriteBatch.DrawString(bigFont, player3Text, player3TextPosition, Color.Purple);
+                spriteBatch.DrawString(bigFont, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(bigFont, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
             }
             if (isPlayer4Connected)
             {
-                spriteBatch.DrawString(font, player4Text, player4TextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(font, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
+                spriteBatch.DrawString(bigFont, player4Text, player4TextPosition, Color.Green);
+                spriteBatch.DrawString(bigFont, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
+                spriteBatch.DrawString(bigFont, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
             }
 
             spriteBatch.End();
@@ -971,22 +973,22 @@ namespace JAMMM
 
             if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
             {
-                spriteBatch.DrawString(font, player1VictoryText, player1VictoryTextPosition, Color.Gold);
+                spriteBatch.DrawString(bigFont, player1VictoryText, player1VictoryTextPosition, Color.Gold);
             }
             else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
             {
-                spriteBatch.DrawString(font, player2VictoryText, player2VictoryTextPosition, Color.Gold);
+                spriteBatch.DrawString(bigFont, player2VictoryText, player2VictoryTextPosition, Color.Gold);
             }
             else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
             {
-                spriteBatch.DrawString(font, player3VictoryText, player3VictoryTextPosition, Color.Gold);
+                spriteBatch.DrawString(bigFont, player3VictoryText, player3VictoryTextPosition, Color.Gold);
             }
             else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
             {
-                spriteBatch.DrawString(font, player4VictoryText, player4VictoryTextPosition, Color.Gold);
+                spriteBatch.DrawString(bigFont, player4VictoryText, player4VictoryTextPosition, Color.Gold);
             }
             else
-                spriteBatch.DrawString(font, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
+                spriteBatch.DrawString(bigFont, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
 
             spriteBatch.End();
         }

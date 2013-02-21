@@ -59,6 +59,8 @@ namespace JAMMM.Actors
         private const float DASH_SPEED_LARGE  = 300.0f;
         private const float DASH_ACCEL_LARGE  = 350.0f;
 
+        private const float MAX_SPEAR_LENGTH  = 100.0f;
+
         private float meleeCooldown;
         public float MeleeCooldown
         {
@@ -131,6 +133,7 @@ namespace JAMMM.Actors
         public Circle spearCircle;
 
         private float meleeTime;
+        private bool canShowMeleeSpark;
         private bool canMelee;
 
         public Color color;
@@ -141,7 +144,7 @@ namespace JAMMM.Actors
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
             if (colorCode == "")
-                color = Color.White;
+                color = Color.Blue;
             else if (colorCode == "_r")
                 color = Color.Red;
             else if (colorCode == "_p")
@@ -168,7 +171,7 @@ namespace JAMMM.Actors
             resetBlink();
 
             spearPoint = Vector2.Zero;
-            spearCircle = new Circle(this.Bounds.center.X + 50, this.Bounds.center.Y, 15);
+            spearCircle = new Circle(this.Bounds.center.X + 60, this.Bounds.center.Y, 50);
             spearDeflectorAura = new Circle(0, 0, 75);
         }
 
@@ -303,6 +306,10 @@ namespace JAMMM.Actors
             {
                 meleeTime -= (float)delta.ElapsedGameTime.TotalSeconds;
 
+                float meleeRatio = 1.0f - (meleeTime / meleeCooldown);
+
+                this.spearCircle.Radius = (int)(MAX_SPEAR_LENGTH * meleeRatio);
+
                 if (meleeTime <= 0)
                 {
                     meleeTime = 0.0f;
@@ -424,6 +431,8 @@ namespace JAMMM.Actors
             meleeTime = meleeCooldown;
 
             changeAnimation(meleeAnimation);
+
+            canShowMeleeSpark = true;
 
             AudioManager.getSound("Spear_Throw").Play();
         }
@@ -692,6 +701,18 @@ namespace JAMMM.Actors
                             break;
                         }
                     }
+                }
+
+                // spawn some particles on the last frame of the melee attack animation
+                if (currentAnimation == meleeAnimation &&
+                    meleeAnimation.FrameIndex == 3 && canShowMeleeSpark)
+                {
+                    ParticleManager.Instance.createParticle(ParticleType.HitSpark,
+                        new Vector2(spearPoint.X, spearPoint.Y + 10),
+                        new Vector2(0, 0), this.Rotation, 0.0f,
+                        0.9f, 1.5f, 0.8f, 1, 0.3f, this.color.R, this.color.G, this.color.B);
+
+                    canShowMeleeSpark = false;
                 }
 
                 if (Math.Abs(Rotation) > Math.PI / 2)

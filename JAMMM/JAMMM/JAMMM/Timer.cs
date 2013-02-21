@@ -10,15 +10,13 @@ namespace JAMMM
 {
     public class Timer
     {
-
         public float elapsedsec = 0;
 
         public void Draw(SpriteBatch spriteBatch,SpriteFont font ,GraphicsDeviceManager graphics)
         {
-            spriteBatch.DrawString(font, timestring(), new Vector2(graphics.PreferredBackBufferWidth * 0.05f,
+            spriteBatch.DrawString(font, timestring(), new Vector2(graphics.PreferredBackBufferWidth * 0.5f - font.MeasureString(timestring()).X / 2.0f,
                                                          graphics.PreferredBackBufferHeight * 0.01f), Color.Yellow);
         }
-
 
         public void Update(GameTime gametime)
         {

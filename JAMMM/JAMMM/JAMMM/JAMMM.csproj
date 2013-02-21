@@ -94,6 +94,8 @@
     <Compile Include="Animation.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="Camera2D.cs" />
+    <Compile Include="Powerups\ChumPowerup.cs" />
+    <Compile Include="Powerups\MultishotPowerup.cs" />
     <Compile Include="Powerups\Powerup.cs" />
     <Compile Include="Powerups\RapidFirePowerup.cs" />
     <Compile Include="Powerups\SharkRepellantPowerup.cs" />

@@ -22,6 +22,7 @@ namespace JAMMM
         protected float acceleration;
         protected float alpha;
         protected float dim;          //dimming alpha factor
+        protected Color color;
 
         protected Animation animation;
 
@@ -36,7 +37,8 @@ namespace JAMMM
             life = 0;
         }
 
-        public void set(Vector2 location, Vector2 offsets, float direction, float speed, float size, float growth, float alphablend, float dim, float life)
+        public void set(Vector2 location, Vector2 offsets, float direction, float speed, float size, 
+            float growth, float alphablend, float dim, float life, byte r = 255, byte g = 255, byte b = 255)
         {
             this.location = location;
             this.offset = offsets;
@@ -45,6 +47,11 @@ namespace JAMMM
             this.growth = growth;
             this.alpha = alphablend;
             this.dim = dim;
+
+            this.color.R = r;
+            this.color.G = g;
+            this.color.B = b;
+            this.color.A = (byte)(255 * alphablend);
 
             this.angle = direction;
             this.speed = speed;

@@ -91,17 +91,18 @@ namespace JAMMM
                     b.draw(gameTime, spriteBatch);
         }
 
-        public void createParticle(ParticleType type, Vector2 location, Vector2 offsets, float direction, float speed, float size, float growth, float alphablend, float dim, float life)
+        public void createParticle(ParticleType type, Vector2 location, Vector2 offsets, float direction, float speed, float size, float growth, float alphablend, float dim, float life,
+            byte r = 255, byte g = 255, byte b = 255)
         {
             switch(type){
                 case ParticleType.Bubble:
-                    bubblePool[bubblePoolIndex].set(location, offsets, direction, speed, size, growth, alphablend, dim, life);
+                    bubblePool[bubblePoolIndex].set(location, offsets, direction, speed, size, growth, alphablend, dim, life, r, g, b);
                     if (++bubblePoolIndex >= BUBBLE_POOL_SIZE)
                         bubblePoolIndex = 0;
                     break;
 
                 case ParticleType.HitSpark:
-                    hitSparkPool[hitSparkPoolIndex].set(location, offsets, direction, speed, size, growth, alphablend, dim, life);
+                    hitSparkPool[hitSparkPoolIndex].set(location, offsets, direction, speed, size, growth, alphablend, dim, life, r, g, b);
                     if (++hitSparkPoolIndex >= HITSPARK_POOL_SIZE)
                         hitSparkPoolIndex = 0;
                     break;

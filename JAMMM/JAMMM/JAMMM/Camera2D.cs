@@ -108,12 +108,6 @@ namespace JAMMM
             maxView.Width = (int)(2.0f * Game.GraphicsDevice.Viewport.Width);
             maxView.Height = (int)(2.0f * Game.GraphicsDevice.Viewport.Height);
 
-            // initialize the maximum view size
-            maxView.X = (int)(-0.5f * Game.GraphicsDevice.Viewport.Width);
-            maxView.Y = (int)(-0.5f * Game.GraphicsDevice.Viewport.Height);
-            maxView.Width = (int)(2.0f * Game.GraphicsDevice.Viewport.Width);
-            maxView.Height = (int)(2.0f * Game.GraphicsDevice.Viewport.Height);
-
             // initialize the medium view size
             medView.X = (int)(-0.25f * Game.GraphicsDevice.Viewport.Width);
             medView.Y = (int)(-0.25f * Game.GraphicsDevice.Viewport.Height);
