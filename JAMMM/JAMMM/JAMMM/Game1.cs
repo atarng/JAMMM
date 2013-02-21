@@ -87,6 +87,8 @@ namespace JAMMM
         public const string POWERUP_RAPIDFIRE = "Rapid_Fire";
         public const string POWERUP_SHARKREPELLENT = "Shark_Repellent";
         public const string POWERUP_SPEARDEFLECTION = "Spear_Deflection";
+        public const string POWERUP_CHUM = "Chum";
+        public const string POWERUP_MULTISHOT = "Multi_Shot";
 
         public const string SHARKREPELLENT_AURA = "Shark_Repellent_Aura";
         public const string SPEARDEFLECTION_AURA = "Spear_Deflection_Aura";
@@ -140,6 +142,8 @@ namespace JAMMM
         private RapidFirePowerup        rapidFire;
         private SharkRepellentPowerup   sharkRepellent;
         private SpearDeflectionPowerup  spearDeflection;
+        private ChumPowerup             chum;
+        private MultishotPowerup        multishot;
 
         private bool isPlayer1Connected, isPlayer2Connected,
                      isPlayer3Connected, isPlayer4Connected;
@@ -269,6 +273,7 @@ namespace JAMMM
             AudioManager.addSound("Fish_Eat", Content.Load<SoundEffect>("Sounds/hit_1"));
             AudioManager.addSound("Power_Up", Content.Load<SoundEffect>("Sounds/powerup"));
             AudioManager.addSound("Ding", Content.Load<SoundEffect>("Sounds/ding"));
+            AudioManager.addSound("Chum_Fart", Content.Load<SoundEffect>("Sounds/chumfart"));
 
             AudioManager.addSound("Death_Penguin", Content.Load<SoundEffect>("Sounds/death_penguin"));
             AudioManager.addSound("Battle_Theme", Content.Load<SoundEffect>("Music/battletheme"));
@@ -281,6 +286,8 @@ namespace JAMMM
             SpriteManager.addTexture(POWERUP_RAPIDFIRE, Content.Load<Texture2D>("Sprites/powerup_rapidfire"));
             SpriteManager.addTexture(POWERUP_SHARKREPELLENT, Content.Load<Texture2D>("Sprites/powerup_sharkrepellent"));
             SpriteManager.addTexture(POWERUP_SPEARDEFLECTION, Content.Load<Texture2D>("Sprites/powerup_speardeflection"));
+            SpriteManager.addTexture(POWERUP_CHUM, Content.Load<Texture2D>("Sprites/powerup_chum"));
+            SpriteManager.addTexture(POWERUP_MULTISHOT, Content.Load<Texture2D>("Sprites/powerup_multishot"));
 
             SpriteManager.addTexture(SHARKREPELLENT_AURA, Content.Load<Texture2D>("Sprites/shark_repellent"));
             SpriteManager.addTexture(SPEARDEFLECTION_AURA, Content.Load<Texture2D>("Sprites/spear_deflector"));
@@ -648,7 +655,7 @@ namespace JAMMM
                     if (timeForPowerUp == POWERUP_TIME)
                     {
                         Powerup p = null;
-                        int whichPowerup = rng.Next(4);
+                        int whichPowerup = rng.Next(6);
 
                         int colorCoded = rng.Next(4);
 
@@ -660,6 +667,10 @@ namespace JAMMM
                             p = sharkRepellent;
                         else if (whichPowerup == 3)
                             p = spearDeflection;
+                        else if (whichPowerup == 4)
+                            p = chum;
+                        else if (whichPowerup == 5)
+                            p = multishot;
 
                         if (colorCoded == 0)
                             f.spawnAt(getRandomPositionWithinBounds(gameplayBoundaries), p, true);
@@ -925,6 +936,18 @@ namespace JAMMM
                     case Actor.powerupstate.SpearDeflection:
                     {
                         spriteBatch.Draw(SpriteManager.getTexture(POWERUP_SPEARDEFLECTION), 
+                            powerupRectangle, POWERUP_COLOR);
+                        break;
+                    }
+                    case Actor.powerupstate.Chum:
+                    {
+                        spriteBatch.Draw(SpriteManager.getTexture(POWERUP_CHUM),
+                            powerupRectangle, POWERUP_COLOR);
+                        break;
+                    }
+                    case Actor.powerupstate.Multishot:
+                    {
+                        spriteBatch.Draw(SpriteManager.getTexture(POWERUP_MULTISHOT),
                             powerupRectangle, POWERUP_COLOR);
                         break;
                     }

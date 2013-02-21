@@ -79,6 +79,8 @@ namespace JAMMM
             RapidFire,
             SharkRepellent,
             SpearDeflection,
+            Chum,
+            Multishot,
             None
         }
 

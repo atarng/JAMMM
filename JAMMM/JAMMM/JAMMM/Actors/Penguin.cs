@@ -683,7 +683,7 @@ namespace JAMMM.Actors
                         }
                         case powerupstate.SharkRepellent:
                         {
-                            c = Color.Purple;
+                            c = Color.Orange;
                             batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA), 
                                 auraPosition, Color.White);
                             break;
@@ -693,6 +693,18 @@ namespace JAMMM.Actors
                             c = Color.LightBlue;
                             batch.Draw(SpriteManager.getTexture(Game1.SPEARDEFLECTION_AURA), 
                                 auraPosition, Color.White);
+                            break;
+                        }
+                        case powerupstate.Chum:
+                        {
+                            c = Color.Brown;
+                            batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA),
+                                auraPosition, Color.Red);
+                            break;
+                        }
+                        case powerupstate.Multishot:
+                        {
+                            c = Color.LightGray;
                             break;
                         }
                         default:
