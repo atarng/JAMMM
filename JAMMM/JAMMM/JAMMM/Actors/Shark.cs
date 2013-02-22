@@ -10,15 +10,15 @@ namespace JAMMM.Actors
 {
     public class Shark : Actor
     {
-        public  const   int SHARK_BASE_HEALTH       = 100;
-        private const float SHARK_ATTACK_THRESHOLD  = 350;
+        public  const   int SHARK_BASE_HEALTH       = 200;
+        private const float SHARK_ATTACK_THRESHOLD  = 400;
         private const float SHARK_AGGRESS_THRESHOLD = 1200;
         private const float PENGUIN_KNOCKBACK       = 100.0f;
         private const float SHARK_DASH_SPEED        = 450.0f;
         private const float SHARK_DASH_ACCELERATION = 1500.0f;
         private const float SHARK_SPEED             = 300.0f;
         private const float SHARK_ACCELERATION      = 400.0f;
-        private const int   SHARK_FISH_CALORIES     = 4;
+        private const int   SHARK_FISH_CALORIES     = 5;
 
         public Vector2 mouthPoint;
         public Circle mouthCircle;
@@ -191,6 +191,8 @@ namespace JAMMM.Actors
             Vector2 distance = Vector2.Zero;
             Vector2 vecTowardNearest = Vector2.Zero;
 
+            float chumDist = 10000.0f;
+
             foreach (Penguin p in players)
             {
                 if (!p.IsAlive)
@@ -203,12 +205,31 @@ namespace JAMMM.Actors
 
                 currDist = distance.Length();
 
-                if (currDist < minDist)
+                // make chum have priority
+                if (p.PowerupState == powerupstate.Chum)
+                {
+                    if (currDist < chumDist)
+                    {
+                        chumDist = currDist;
+                        nearestPosition = p.Position;
+                        vecTowardNearest = distance;
+                        continue;
+                    }
+                }
+
+                if (currDist < minDist && chumDist >= 10000.0f)
                 {
                     minDist = currDist;
                     nearestPosition = p.Position;
                     vecTowardNearest = distance;
                 }
+            }
+
+            // LOL GO AFTER NO MATTER WHAT
+            if (chumDist < 10000.0f)
+            {
+                s.acceleration = vecTowardNearest;
+                return;
             }
 
             // try to aggress toward the nearest player
@@ -231,6 +252,8 @@ namespace JAMMM.Actors
             Vector2 distance = Vector2.Zero;
             Vector2 vecTowardNearest = Vector2.Zero;
 
+            float chumDist = 10000.0f;
+
             foreach (Penguin p in players)
             {
                 if (!p.IsAlive)
@@ -243,6 +266,18 @@ namespace JAMMM.Actors
 
                 currDist = distance.Length();
 
+                // make chum have priority
+                if (p.PowerupState == powerupstate.Chum)
+                {
+                    if (currDist < chumDist)
+                    {
+                        chumDist = currDist;
+                        nearestPosition = p.Position;
+                        vecTowardNearest = distance;
+                        continue;
+                    }
+                }
+
                 if (currDist < minDist)
                 {
                     minDist = currDist;
@@ -251,10 +286,19 @@ namespace JAMMM.Actors
                 }
             }
 
+            // LOL GO AFTER NO MATTER WHAT
+            if (chumDist <= SHARK_ATTACK_THRESHOLD && s.CurrState != Actor.state.Dashing
+                && s.CurrState != Actor.state.Dash)
+            {
+                s.acceleration = vecTowardNearest;
+                ((Shark)s).attack();
+                return;
+            }
+
             // try to aggress toward the nearest player
             if (minDist <= SHARK_ATTACK_THRESHOLD
                 && s.CurrState != Actor.state.Dashing
-                && s.CurrState != Actor.state.Dash)
+                && s.CurrState != Actor.state.Dash && chumDist >= 10000.0f)
             {
                 s.acceleration = vecTowardNearest;
                 ((Shark)s).attack();

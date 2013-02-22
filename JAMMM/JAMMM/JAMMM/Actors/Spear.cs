@@ -101,6 +101,18 @@ namespace JAMMM.Actors
             velocity.Y = p.Velocity.Y;
         }
 
+        public void setSpawnParameters(Size s, int id, Penguin p, float rotation)
+        {
+            this.owner = p;
+
+            this.CurrentSize = s;
+            this.id = id;
+
+            acceleration = Vector2.Normalize(Physics.AngleToVector(rotation)) * 50000F;
+            velocity.X = p.Velocity.X;
+            velocity.Y = p.Velocity.Y;
+        }
+
         public void printPhys(SpriteBatch batch)
         {
             Color c = Color.Black;
@@ -128,6 +140,10 @@ namespace JAMMM.Actors
             {
                 if (((Penguin)other).PowerupState != powerupstate.SpearDeflection)
                     die();
+            }
+            else if (other is Fish)
+            {
+                other.startDying();
             }
         }
     }

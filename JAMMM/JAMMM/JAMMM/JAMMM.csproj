@@ -94,6 +94,7 @@
     <Compile Include="Animation.cs" />
     <Compile Include="AudioManager.cs" />
     <Compile Include="Camera2D.cs" />
+    <Compile Include="HealthBar.cs" />
     <Compile Include="Powerups\ChumPowerup.cs" />
     <Compile Include="Powerups\MultishotPowerup.cs" />
     <Compile Include="Powerups\Powerup.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Powerups\SharkRepellantPowerup.cs" />
     <Compile Include="Powerups\SpearDeflectionPowerup.cs" />
     <Compile Include="Powerups\SpeedBoostPowerup.cs" />
+    <Compile Include="RectangleOverlay.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="ParticleBubble.cs" />

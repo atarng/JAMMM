@@ -20,22 +20,22 @@ namespace JAMMM.Actors
         public const int MED_SIZE   = 33;
         public const int LARGE_SIZE = 54;
 
-        private const int MELEE_DAMAGE_SMALL = 5;
-        private const int MELEE_DAMAGE_MEDIUM = 10;
-        private const int MELEE_DAMAGE_LARGE = 15;
+        private const int MELEE_DAMAGE_SMALL = 40;
+        private const int MELEE_DAMAGE_MEDIUM = 60;
+        private const int MELEE_DAMAGE_LARGE = 80;
 
         private const float KNOCKBACK_SMALL = 400.0f;
         private const float KNOCKBACK_MEDIUM = 500.0f;
         private const float KNOCKBACK_LARGE = 600.0f;
         private const float SHARK_KNOCKBACK = 150.0f;
 
-        public const int SPEAR_SMALL_COST = 5;
-        public const int SPEAR_MED_COST   = 10;
-        public const int SPEAR_LARGE_COST = 15;
+        public const int SPEAR_SMALL_COST = 2;
+        public const int SPEAR_MED_COST   = 4;
+        public const int SPEAR_LARGE_COST = 6;
 
         public const int DASH_SMALL_COST = 0;
         public const int DASH_MED_COST   = 1;
-        public const int DASH_LARGE_COST = 3;
+        public const int DASH_LARGE_COST = 2;
 
         public const int MELEE_SMALL_COST = 0;
         public const int MELEE_MED_COST   = 1;
@@ -52,12 +52,12 @@ namespace JAMMM.Actors
         public const int MEDIUM_MASS = 500;
         public const int LARGE_MASS = 1500;
 
-        private const float DASH_SPEED_SMALL  = 500.0f;
-        private const float DASH_ACCEL_SMALL  = 550.0f;
-        private const float DASH_SPEED_MEDIUM = 400.0f;
-        private const float DASH_ACCEL_MEDIUM = 450.0f;
-        private const float DASH_SPEED_LARGE  = 300.0f;
-        private const float DASH_ACCEL_LARGE  = 350.0f;
+        private const float DASH_SPEED_SMALL  = 700.0f;
+        private const float DASH_ACCEL_SMALL  = 750.0f;
+        private const float DASH_SPEED_MEDIUM = 600.0f;
+        private const float DASH_ACCEL_MEDIUM = 650.0f;
+        private const float DASH_SPEED_LARGE  = 500.0f;
+        private const float DASH_ACCEL_LARGE  = 550.0f;
 
         private const float MAX_SPEAR_LENGTH  = 100.0f;
 
@@ -140,6 +140,8 @@ namespace JAMMM.Actors
 
         public Circle spearDeflectorAura;
 
+        private float twinstickRotation;
+
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
         {
@@ -188,6 +190,21 @@ namespace JAMMM.Actors
 
                 accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
+
+                /*
+                if (gamePadState.ThumbSticks.Right.Length() != 0 && FireTime <= 0)
+                {
+                    if (this.Calories > this.SpearCost &&
+                        this.CurrState != state.MeleeAttack)
+                    {
+                        AudioManager.getSound("Spear_Throw").Play();
+                        FireTime = fireCooldown;
+                        fire = true;
+                        this.Calories -= this.SpearCost;
+                        twinstickRotation = Physics.VectorToAngle(gamePadState.ThumbSticks.Right);
+                    }
+                }
+                 * */
 
                 //if the acceleration is > max acc (means we were dashing)
                 if (!(CurrState == state.Dashing &&
@@ -558,14 +575,41 @@ namespace JAMMM.Actors
             {
                 this.Fire = false;
 
-                foreach (Spear s in spearPool)
+                if (this.powerupState == powerupstate.Multishot)
                 {
-                    if (!s.IsAlive)
+                    int count = 8;
+
+                    foreach (Spear s in spearPool)
                     {
-                        s.setSpawnParameters(this.CurrentSize, id, this);
-                        s.spawnAt(this.Position);
-                        spearAlive = true;
-                        break;
+                        if (!s.IsAlive)
+                        {
+                            count--;
+                            s.setSpawnParameters(this.CurrentSize, id, this, 
+                                (float)(count * Math.PI / 4.0f));
+                            s.spawnAt(this.Position);
+                            spearAlive = true;
+                            if (count == 0)
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (Spear s in spearPool)
+                    {
+                        if (!s.IsAlive)
+                        {
+                            if (this.twinstickRotation != 0.0f)
+                            {
+                                s.setSpawnParameters(this.CurrentSize, id, this, twinstickRotation);
+                                this.twinstickRotation = 0.0f;
+                            }
+                            else
+                                s.setSpawnParameters(this.CurrentSize, id, this);
+                            s.spawnAt(this.Position);
+                            spearAlive = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -619,6 +663,17 @@ namespace JAMMM.Actors
             {
                 this.powerupState = powerupstate.SpearDeflection;
             }
+            else if (p is Powerups.ChumPowerup)
+            {
+                this.powerupState = powerupstate.Chum;
+                AudioManager.getSound("Chum_Fart").Play();
+                return;
+            }
+            else if (p is Powerups.MultishotPowerup)
+            {
+                this.powerupState = powerupstate.Multishot;
+                this.SpearCost = Powerups.MultishotPowerup.MULTISHOT_SPEAR_COST;
+            }
 
             AudioManager.getSound("Power_Up").Play();
         }
@@ -665,7 +720,6 @@ namespace JAMMM.Actors
                 else
                 {
                     Vector2 auraPosition = this.Position;
-
                     auraPosition.X -= 75;
                     auraPosition.Y -= 75;
 
@@ -695,16 +749,16 @@ namespace JAMMM.Actors
                                 auraPosition, Color.White);
                             break;
                         }
-                        case powerupstate.Chum:
-                        {
-                            c = Color.Brown;
-                            batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA),
-                                auraPosition, Color.Red);
-                            break;
-                        }
                         case powerupstate.Multishot:
                         {
-                            c = Color.LightGray;
+                            c = Color.Gold;
+                            break;
+                        }
+                        case powerupstate.Chum:
+                        {
+                            c = Color.Green;
+                            batch.Draw(SpriteManager.getTexture(Game1.SHARKREPELLENT_AURA),
+                                auraPosition, Color.LightGreen);
                             break;
                         }
                         default:

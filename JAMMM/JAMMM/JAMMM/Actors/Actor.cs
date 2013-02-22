@@ -45,7 +45,7 @@ namespace JAMMM
         public const float MELEE_DISPLACEMENT = 50.0f;
         public const float SPEAR_DISPLACEMENT = 40.0f;
 
-        public const float FIRE_COOLDOWN = 0.5F;
+        public const float FIRE_COOLDOWN = 0.33F;
         public const float MELEE_COOLDOWN = 0.5F;
 
         public enum AnimationType
@@ -278,6 +278,10 @@ namespace JAMMM
             get { return isHit; }
         }
         protected bool isBlink;
+        public bool IsBlink
+        {
+            get { return isBlink; }
+        }
 
         protected Powerup powerup;
         public Powerup Powerup

@@ -94,8 +94,8 @@ namespace JAMMM
 
             this.powerup = p;
             this.isPoweredUp = true;
-            this.MaxVel = 777;
-            this.MaxAcc = 800;
+            this.MaxVel = 666;
+            this.MaxAcc = 700;
 
             changeState(state.Moving);
 
@@ -148,7 +148,7 @@ namespace JAMMM
             updateDelinquency();
 
             // try to avoid nearby threats
-            updateSchoolingInBounds((float)gameTime.ElapsedGameTime.TotalSeconds);
+            //updateSchoolingInBounds((float)gameTime.ElapsedGameTime.TotalSeconds);
             evading = avoidThreats();
 
             if (!evading)
@@ -158,11 +158,11 @@ namespace JAMMM
                 {
                     //if (!movingToCenter)
                     //{
-                        acceleration.X += (float)Math.Cos(randomX + gameTime.TotalGameTime.TotalSeconds * 2)
-                            * MaxAcc * ((float)randomX + 1.0f) / 6.28f;
+                    acceleration.X += (float)Math.Cos(randomX + gameTime.TotalGameTime.TotalSeconds * 2)
+                        * MaxAcc * ((float)randomX + 1.0f) / 6.28f;
 
-                        acceleration.Y += (float)Math.Sin(randomY + gameTime.TotalGameTime.TotalSeconds * 2)
-                            * MaxAcc * (float)randomY / 12.56f;
+                    acceleration.Y += (float)Math.Sin(randomY + gameTime.TotalGameTime.TotalSeconds * 2)
+                        * MaxAcc * (float)randomY / 12.56f;
                     //}
                 }
                 // if we're schooling, then just follow our partner
@@ -230,7 +230,8 @@ namespace JAMMM
             else if (nearestFish != null 
                 && (this.partner == null || 
                 (this.partner != null && (!this.partner.IsAlive || this.partner.CurrState == state.Dying)))
-                && !this.isLeader  && !nearestFish.isLeader && !nearestFish.IsSchooling
+                && !this.isLeader  && !nearestFish.isLeader 
+                && !nearestFish.IsSchooling
                 && Actor.DistanceBetween(this, nearestFish) < SCHOOLING_RANGE)
             {
                 this.partner = nearestFish;
@@ -374,7 +375,7 @@ namespace JAMMM
             if (CurrState == state.Dying || !this.IsAlive)
                 return false;
 
-            if (nearestPlayer != null)
+            if (nearestPlayer != null && nearestPlayer.PowerupState != powerupstate.Chum)
             {
                 boundsChecker.center.X = nearestPlayer.Bounds.Center.X;
                 boundsChecker.center.Y = nearestPlayer.Bounds.Center.Y;
@@ -476,7 +477,7 @@ namespace JAMMM
                 if (f == this)
                     continue;
 
-                if (!f.IsAlive)
+                if (!f.IsAlive || f.CurrState == state.Dying)
                     continue;
 
                 if (wantsLeader && !f.isLeader)
@@ -556,6 +557,14 @@ namespace JAMMM
                         else if (this.powerup is Powerups.SpearDeflectionPowerup)
                         {
                             c = Color.LightBlue;
+                        }
+                        else if (this.powerup is Powerups.ChumPowerup)
+                        {
+                            c = Color.Green;
+                        }
+                        else if (this.powerup is Powerups.MultishotPowerup)
+                        {
+                            c = Color.NavajoWhite;
                         }
                     }
                     else

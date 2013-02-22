@@ -24,21 +24,22 @@ namespace JAMMM
         }
 
         #region GAME_BALANCING_CONSTANTS
-        private const int POWERUP_RARITY                    = 2;
-        private const int POWERUP_TIME                      = 1;
+        private const int POWERUP_RARITY                    = 8;
+        private const int POWERUP_TIME                      = 7;
 
-        private const float SPEAR_DEFLECTION_DURATION       = 5.0f;
-        private const float SHARK_REPELLENT_DURATION        = 5.0f;
-        private const float SPEED_BOOST_DURATION            = 5.0f;
-        private const float RAPID_FIRE_DURATION             = 5.0f;
+        private const float SPEAR_DEFLECTION_DURATION       = 10.5f;
+        private const float SHARK_REPELLENT_DURATION        = 14.0f;
+        private const float SPEED_BOOST_DURATION            = 7.0f;
+        private const float RAPID_FIRE_DURATION             = 7.0f;
+        private const float MULTI_SHOT_DURATION             = 7.0f;
+        private const float CHUM_DURATION                   = 14.0f;
 
         private const int FISH_POOL_SIZE                    = 60;
         private const int SHARK_POOL_SIZE                   = 0;
-        private const int SPEAR_POOL_SIZE                   = 200;
-        private const int POWERUP_POOL_SIZE                 = 10;
+        private const int SPEAR_POOL_SIZE                   = 500;
 
         private const float SHARK_SPAWN_CLOSENESS_THRESHOLD = 350;
-        private const float SHARK_RESPAWN_TIME              = 1.0f;
+        private const float SHARK_RESPAWN_TIME              = 5.0f;
 
         public const int TIME_EVENT_SHARK                   = 3000;
         #endregion
@@ -89,7 +90,7 @@ namespace JAMMM
         public const string POWERUP_SPEARDEFLECTION = "Spear_Deflection";
         public const string POWERUP_CHUM = "Chum";
         public const string POWERUP_MULTISHOT = "Multi_Shot";
-
+        public const string CHUM_AURA = "Chum_Aura";
         public const string SHARKREPELLENT_AURA = "Shark_Repellent_Aura";
         public const string SPEARDEFLECTION_AURA = "Spear_Deflection_Aura";
 
@@ -100,7 +101,9 @@ namespace JAMMM
         public static int WINDOW_WIDTH = 1600;
         public static int WINDOW_HEIGHT = 900;
 
-
+        private const int HEALTH_BAR_HEIGHT = 22;
+        private const int HEALTH_BAR_WIDTH = 100;
+        private const int HEALTH_BAR_THICKNESS = 2;
 
         private Color POWERUP_COLOR;
 
@@ -127,6 +130,7 @@ namespace JAMMM
                         player4StartPosition;
 
         private Vector2[] playerPowerupPositions = new Vector2[MAX_NUM_PLAYERS];
+        private HealthBar[] healthBars = new HealthBar[MAX_NUM_PLAYERS];
 
         private Vector2 titlePosition;
 
@@ -255,7 +259,25 @@ namespace JAMMM
 
             createObjectPools();
 
+            initializeHealthBars();
+
             base.Initialize();
+        }
+
+        private void initializeHealthBars()
+        {
+            List<Color> colors = new List<Color>();
+            colors.Add(Color.Yellow);
+            colors.Add(Color.Green);
+            colors.Add(Color.Blue);
+
+            for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
+            {
+                healthBars[i] = new HealthBar(3, 100, 
+                    HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, HEALTH_BAR_THICKNESS);
+                healthBars[i].setColors(colors);
+                healthBars[i].updateHealth(100);
+            }
         }
 
         protected override void LoadContent()
@@ -288,6 +310,8 @@ namespace JAMMM
             SpriteManager.addTexture(POWERUP_SPEARDEFLECTION, Content.Load<Texture2D>("Sprites/powerup_speardeflection"));
             SpriteManager.addTexture(POWERUP_CHUM, Content.Load<Texture2D>("Sprites/powerup_chum"));
             SpriteManager.addTexture(POWERUP_MULTISHOT, Content.Load<Texture2D>("Sprites/powerup_multishot"));
+
+            SpriteManager.addTexture(CHUM_AURA, Content.Load<Texture2D>("Sprites/chum_arrow"));
 
             SpriteManager.addTexture(SHARKREPELLENT_AURA, Content.Load<Texture2D>("Sprites/shark_repellent"));
             SpriteManager.addTexture(SPEARDEFLECTION_AURA, Content.Load<Texture2D>("Sprites/spear_deflector"));
@@ -384,6 +408,8 @@ namespace JAMMM
                 f.loadContent();
             foreach (Spear s in spears)
                 s.loadContent();
+            foreach (HealthBar hb in healthBars)
+                hb.loadContent(GraphicsDevice);
 
             // load content dependent initialization
             loadContentDependentInitialization();
@@ -537,6 +563,8 @@ namespace JAMMM
             rapidFire       = new RapidFirePowerup(RAPID_FIRE_DURATION);
             sharkRepellent  = new SharkRepellentPowerup(SHARK_REPELLENT_DURATION);
             spearDeflection = new SpearDeflectionPowerup(SPEAR_DEFLECTION_DURATION);
+            chum            = new ChumPowerup(CHUM_DURATION);
+            multishot       = new MultishotPowerup(MULTI_SHOT_DURATION);
         }
 
         #endregion
@@ -623,11 +651,21 @@ namespace JAMMM
         {
             timer1.Update(gameTime);
 
+            Rectangle currRect = Rectangle.Empty;
+            Vector2 currHBPos    = Vector2.Zero;
+
             // do regular game logic updating each player
             for (int i = 0; i < players.Count; i++)
             {
                 players[i].update(gameTime);
                 Physics.applyMovement(players[i], (float)gameTime.ElapsedGameTime.TotalSeconds, true);
+                healthBars[i].updateHealth(players[i].Calories);
+
+                currRect = players[i].getBufferedRectangleBounds(0);
+                currHBPos.X = players[i].Position.X - (float)healthBars[i].totalWidth / 2.0f;
+                currHBPos.Y = players[i].Position.Y + (float)currRect.Height / 2.0f + 10;
+                healthBars[i].updatePosition(currHBPos.X, currHBPos.Y);
+
                 players[i].TrySpear(i, spears);
                 keepInBounds(players[i]);
             }
@@ -868,39 +906,22 @@ namespace JAMMM
 
             spriteBatch.Draw(background, camera.maxView, Color.White);
 
-            for (int i = 0; i < players.Count; ++i)
-            {
-                Penguin p = players.ElementAt(i);
-
-                p.draw(gameTime, spriteBatch);
-
-                if (p.CurrState != Actor.state.Dying &&
-                    p.IsAlive)
-                {
-                    spriteBatch.DrawString(Game1.font, "Calories: " + p.Calories,
-                    new Vector2(p.Position.X - 75, p.Position.Y + 60),
-                    Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-                }
-            }
+            ParticleManager.Instance.draw(gameTime, spriteBatch);
 
             foreach (Fish fish in fishPool)
                 fish.draw(gameTime, spriteBatch);
 
-            foreach (Shark s in sharkPool)
-            {
-                s.draw(gameTime, spriteBatch);
+            foreach (Shark shark in sharkPool)
+                shark.draw(gameTime, spriteBatch);
 
-                if (s.CurrState != Actor.state.Dying &&
-                    s.IsAlive)
-                    spriteBatch.DrawString(Game1.font, "Calories: " + s.Calories,
-                    new Vector2(s.Position.X - 75, s.Position.Y + 100),
-                    Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-            }
+            for (int i = 0; i < players.Count; ++i)
+                healthBars[i].draw(spriteBatch, players[i].IsBlink);
+
+            for (int i = 0; i < players.Count; ++i)
+                players[i].draw(gameTime, spriteBatch);
 
             foreach (Spear spear in spears)
                 spear.draw(gameTime, spriteBatch);
-
-            ParticleManager.Instance.draw(gameTime, spriteBatch);
 
             spriteBatch.End();
 
@@ -1471,7 +1492,7 @@ namespace JAMMM
             // fish collisions
             for (int i = 0; i < fishPool.Count; ++i)
             {
-                if (!fishPool[i].IsAlive || fishPool[i].CurrState == Actor.state.Dying)
+                if (!fishPool[i].IsAlive)
                     continue;
                 
                 // fish with players
