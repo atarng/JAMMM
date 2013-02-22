@@ -20,9 +20,9 @@ namespace JAMMM.Actors
         public const int MED_SIZE   = 33;
         public const int LARGE_SIZE = 54;
 
-        private const int MELEE_DAMAGE_SMALL = 40;
-        private const int MELEE_DAMAGE_MEDIUM = 60;
-        private const int MELEE_DAMAGE_LARGE = 80;
+        private const int MELEE_DAMAGE_SMALL = 30;
+        private const int MELEE_DAMAGE_MEDIUM = 40;
+        private const int MELEE_DAMAGE_LARGE = 50;
 
         private const float KNOCKBACK_SMALL = 400.0f;
         private const float KNOCKBACK_MEDIUM = 500.0f;
@@ -38,8 +38,8 @@ namespace JAMMM.Actors
         public const int DASH_LARGE_COST = 2;
 
         public const int MELEE_SMALL_COST = 0;
-        public const int MELEE_MED_COST   = 1;
-        public const int MELEE_LARGE_COST = 2;
+        public const int MELEE_MED_COST   = 5;
+        public const int MELEE_LARGE_COST = 10;
 
         public const int SPEAR_LENGTH_SMALL  = 26;
         public const int SPEAR_RADIUS_SMALL  = 8;
@@ -150,7 +150,7 @@ namespace JAMMM.Actors
             else if (colorCode == "_r")
                 color = Color.Red;
             else if (colorCode == "_p")
-                color = Color.Purple;
+                color = Color.Black;
             else
                 color = Color.Green;
 

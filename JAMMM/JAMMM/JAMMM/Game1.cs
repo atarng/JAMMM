@@ -915,7 +915,8 @@ namespace JAMMM
                 shark.draw(gameTime, spriteBatch);
 
             for (int i = 0; i < players.Count; ++i)
-                healthBars[i].draw(spriteBatch, players[i].IsBlink);
+                if (players[i].IsAlive)
+                    healthBars[i].draw(spriteBatch, players[i].IsBlink);
 
             for (int i = 0; i < players.Count; ++i)
                 players[i].draw(gameTime, spriteBatch);
@@ -995,7 +996,7 @@ namespace JAMMM
             }
             if (isPlayer3Connected)
             {
-                spriteBatch.DrawString(bigFont, player3Text, player3TextPosition, Color.Purple);
+                spriteBatch.DrawString(bigFont, player3Text, player3TextPosition, Color.Black);
                 spriteBatch.DrawString(bigFont, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
                 spriteBatch.DrawString(bigFont, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
             }
