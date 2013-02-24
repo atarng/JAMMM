@@ -141,6 +141,7 @@ namespace JAMMM.Actors
         public Circle spearDeflectorAura;
 
         private float twinstickRotation;
+        private Vector2 twinstickRotationVector;
 
         public Penguin(PlayerIndex playerIndex, Vector2 pos, string colorCode) 
             : base(pos.X, pos.Y, 36, 32, SMALL_SIZE, SMALL_MASS)
@@ -191,9 +192,10 @@ namespace JAMMM.Actors
                 accController.X = gamePadState.ThumbSticks.Left.X * MaxAcc;
                 accController.Y = -1 * gamePadState.ThumbSticks.Left.Y * MaxAcc;
 
-                /*
-                if (gamePadState.ThumbSticks.Right.Length() != 0 && FireTime <= 0)
+                if (gamePadState.ThumbSticks.Right.X >= 0.0001f && gamePadState.ThumbSticks.Right.Y >= 0.0001f && FireTime <= 0)
                 {
+                    twinstickRotationVector = gamePadState.ThumbSticks.Right;
+
                     if (this.Calories > this.SpearCost &&
                         this.CurrState != state.MeleeAttack)
                     {
@@ -201,10 +203,11 @@ namespace JAMMM.Actors
                         FireTime = fireCooldown;
                         fire = true;
                         this.Calories -= this.SpearCost;
-                        twinstickRotation = Physics.VectorToAngle(gamePadState.ThumbSticks.Right);
+                        Vector2 rot = gamePadState.ThumbSticks.Right;
+                        rot.Y = -rot.Y;
+                        twinstickRotation = Physics.VectorToAngle(rot);
                     }
                 }
-                 * */
 
                 //if the acceleration is > max acc (means we were dashing)
                 if (!(CurrState == state.Dashing &&
@@ -599,15 +602,15 @@ namespace JAMMM.Actors
                     {
                         if (!s.IsAlive)
                         {
-                            if (this.twinstickRotation != 0.0f)
-                            {
+                            if (this.twinstickRotationVector.X >= 0.0001f &&
+                                this.twinstickRotationVector.Y >= 0.0001f)
                                 s.setSpawnParameters(this.CurrentSize, id, this, twinstickRotation);
-                                this.twinstickRotation = 0.0f;
-                            }
                             else
                                 s.setSpawnParameters(this.CurrentSize, id, this);
+
                             s.spawnAt(this.Position);
                             spearAlive = true;
+
                             break;
                         }
                     }
@@ -787,6 +790,8 @@ namespace JAMMM.Actors
                 else
                     currentAnimation.draw(batch, this.Position,
                         c, SpriteEffects.None, this.Rotation, 1.0f);
+
+                //batch.DrawString(Game1.font, twinstickRotationVector.ToString(), this.Position, Color.Red);
 
                 if (printPhysics)
                     printPhys(batch);

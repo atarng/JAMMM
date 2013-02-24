@@ -50,14 +50,11 @@ namespace JAMMM
 
         private const string titleText = "Underwater Penguin Battle Royale!";
         private const string readyText = "Ready!";
-        private const string player1Text = "Player 1";
-        private const string player2Text = "Player 2";
-        private const string player3Text = "Player 3";
-        private const string player4Text = "Player 4";
-        private const string player1VictoryText = "Player 1 Wins!";
-        private const string player2VictoryText = "Player 2 Wins!";
-        private const string player3VictoryText = "Player 3 Wins!";
-        private const string player4VictoryText = "Player 4 Wins!";
+
+        private string[] colorCodes = new string[MAX_NUM_PLAYERS];
+
+        private string[] playerTexts = new string[MAX_NUM_PLAYERS];
+
         private const string caloriesLabelText = "Calories: ";
 
         public const string PENGUIN_MOVE_SMALL = "Penguin_Move_Small";
@@ -110,37 +107,40 @@ namespace JAMMM
         #endregion
 
         #region GAME_VARIABLES
-
         Camera2D camera;
-
-        private GameState currentGameState;
+        private GameState     currentGameState;
 
         GraphicsDeviceManager graphics;
 
-        private SpriteBatch  spriteBatch;
-        private Texture2D    background;
-        private Texture2D    title;
-        private Rectangle    screenRectangle;
+        private SpriteBatch   spriteBatch;
+        private Texture2D     background;
+        private Texture2D     title;
+        private Rectangle     screenRectangle;
 
-        public Rectangle     gameplayBoundaries;
-
-        private Vector2 player1StartPosition,
-                        player2StartPosition,
-                        player3StartPosition,
-                        player4StartPosition;
-
+        public Rectangle      gameplayBoundaries;
+        
+        private Vector2[] playerStartPositions   = new Vector2[MAX_NUM_PLAYERS];
         private Vector2[] playerPowerupPositions = new Vector2[MAX_NUM_PLAYERS];
-        private HealthBar[] healthBars = new HealthBar[MAX_NUM_PLAYERS];
+        private HealthBar[] healthBars           = new HealthBar[MAX_NUM_PLAYERS];
 
-        private Vector2 titlePosition;
+        private bool[] isPlayerConnected = new bool[MAX_NUM_PLAYERS];
+        private bool[] isPlayerReady = new bool[MAX_NUM_PLAYERS];
+
+        private Vector2[] playerReadyTextPositions = new Vector2[MAX_NUM_PLAYERS];
+        private Vector2[] playerTextPositions = new Vector2[MAX_NUM_PLAYERS];
+        private Vector2[] playerCalorieTextPositions = new Vector2[MAX_NUM_PLAYERS];
+        private Vector2[] playerCalorieValuePositions = new Vector2[MAX_NUM_PLAYERS];
+        private Vector2[] playerVictoryTextPositions = new Vector2[MAX_NUM_PLAYERS];
+
+        private Vector2                         titlePosition;
 
         private Dictionary<Actor, List<Actor>> collisions;
 
-        private List<Fish>    fishPool;
-        private List<Shark>   sharkPool;
-        private List<float>   sharkRespawnTimes;
-        private List<Penguin> players;
-        private List<Spear>   spears;
+        private List<Fish>                     fishPool;
+        private List<Shark>                    sharkPool;
+        private List<float>                    sharkRespawnTimes;
+        private List<Penguin>                  players;
+        private List<Spear>                    spears;
 
         private SpeedBoostPowerup       speedBoost;
         private RapidFirePowerup        rapidFire;
@@ -149,60 +149,26 @@ namespace JAMMM
         private ChumPowerup             chum;
         private MultishotPowerup        multishot;
 
-        private bool isPlayer1Connected, isPlayer2Connected,
-                     isPlayer3Connected, isPlayer4Connected;
-
-        private bool isPlayer1Ready, isPlayer2Ready,
-                     isPlayer3Ready, isPlayer4Ready;
-
-        private Vector2 player1ReadyTextPosition,
-                        player2ReadyTextPosition,
-                        player3ReadyTextPosition,
-                        player4ReadyTextPosition;
-
-        private Vector2 player1TextPosition,
-                        player2TextPosition,
-                        player3TextPosition,
-                        player4TextPosition;
-
-        private Vector2 player1CalorieTextPosition,
-                        player2CalorieTextPosition,
-                        player3CalorieTextPosition,
-                        player4CalorieTextPosition;
-
-        private Vector2 player1CalorieValuePosition,
-                        player2CalorieValuePosition,
-                        player3CalorieValuePosition,
-                        player4CalorieValuePosition;
-
-        private Vector2 player1VictoryTextPosition,
-                        player2VictoryTextPosition,
-                        player3VictoryTextPosition,
-                        player4VictoryTextPosition;
-
         static readonly Random rng = new Random(DateTime.Now.Millisecond);
+        SoundEffectInstance         battleTheme;
 
-        SoundEffectInstance battleTheme;
+        public static SpriteFont    font;
+        public static SpriteFont    bigFont;
 
-        public static SpriteFont font;
-        public static SpriteFont bigFont;
+        private Color               backgroundFadeColor;
+        private Color               titleFadeColor;
 
-        private Color backgroundFadeColor;
-        private Color titleFadeColor;
+        private Rectangle           expandingView = Rectangle.Empty;
+        private Rectangle           powerupRectangle;
 
-        private Rectangle expandingView = Rectangle.Empty;
+        private float               fadeTime;
 
-        private float fadeTime;
+        private bool                hasBeenCompletedOnce = false;
 
-        private bool hasBeenCompletedOnce = false;
+        private Timer               timer1;
 
-        private Timer timer1;
-
-        private int numExtraSharks;
-
-        private Rectangle powerupRectangle;
-
-#endregion
+        private int                 numExtraSharks;
+        #endregion
 
         public Game1()
         {
@@ -222,15 +188,12 @@ namespace JAMMM
 
             camera = new Camera2D(this);
 
-            isPlayer1Connected = false;
-            isPlayer2Connected = false;
-            isPlayer3Connected = false;
-            isPlayer4Connected = false;
-
-            isPlayer1Ready = false;
-            isPlayer2Ready = false;
-            isPlayer3Ready = false;
-            isPlayer4Ready = false;
+            for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
+            {
+                isPlayerConnected[i] = false;
+                isPlayerReady[i] = false;
+                playerTexts[i] = "Player " + i.ToString();
+            }
 
             graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
             graphics.PreferredBackBufferHeight = WINDOW_HEIGHT;
@@ -242,10 +205,15 @@ namespace JAMMM
 
             camera.move(new Vector2(width / 2.0f, height / 2.0f));
 
-            player1StartPosition = new Vector2(width * 0.2f, height * 0.2f);
-            player2StartPosition = new Vector2(width * 0.2f, height * 0.8f);
-            player3StartPosition = new Vector2(width * 0.8f,  height * 0.2f);
-            player4StartPosition = new Vector2(width * 0.8f,  height * 0.8f);
+            playerStartPositions[0] = new Vector2(width * 0.2f, height * 0.2f);
+            playerStartPositions[1] = new Vector2(width * 0.2f, height * 0.8f);
+            playerStartPositions[2] = new Vector2(width * 0.8f, height * 0.2f);
+            playerStartPositions[3] = new Vector2(width * 0.8f, height * 0.8f);
+
+            colorCodes[0] = "";
+            colorCodes[1] = "_r";
+            colorCodes[2] = "_p";
+            colorCodes[3] = "_g";
 
             powerupRectangle = new Rectangle(0, 0, 48, 48);
         }
@@ -426,103 +394,42 @@ namespace JAMMM
         /// </summary>
         private void loadContentDependentInitialization()
         {
-            // set the title position relative to the viewport and font size
             titlePosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
                             font.MeasureString(titleText).X / 2.0f,
                             graphics.PreferredBackBufferHeight * 0.1f);
 
-            // set the text positions 
-            /*
-            player1ReadyTextPosition = new Vector2(player1StartPosition.X +
-                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
-                player1StartPosition.Y + playerPenguin.Height + 5.0f);
-            player2ReadyTextPosition = new Vector2(player2StartPosition.X +
-                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
-                player2StartPosition.Y + playerPenguin.Height + 5.0f);
-            player3ReadyTextPosition = new Vector2(player3StartPosition.X +
-                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
-                player3StartPosition.Y + playerPenguin.Height + 5.0f);
-            player4ReadyTextPosition = new Vector2(player4StartPosition.X +
-                (playerPenguin.Width) / 2.0f - font.MeasureString(readyText).X / 2.0f,
-                player4StartPosition.Y + playerPenguin.Height + 5.0f);
-             * */
-
-            // set the victory text positions
-            player1VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     bigFont.MeasureString(player1VictoryText).X / 2.0f,
-                                                     graphics.PreferredBackBufferHeight / 2.0f -
-                                                     bigFont.MeasureString(player1VictoryText).Y / 2.0f);
-            player2VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     bigFont.MeasureString(player2VictoryText).X / 2.0f,
-                                                     graphics.PreferredBackBufferHeight / 2.0f -
-                                                     bigFont.MeasureString(player2VictoryText).Y / 2.0f);
-            player3VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     bigFont.MeasureString(player3VictoryText).X / 2.0f,
-                                                     graphics.PreferredBackBufferHeight / 2.0f -
-                                                     bigFont.MeasureString(player3VictoryText).Y / 2.0f);
-            player4VictoryTextPosition = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
-                                                     bigFont.MeasureString(player4VictoryText).X / 2.0f,
-                                                     graphics.PreferredBackBufferHeight / 2.0f -
-                                                     bigFont.MeasureString(player4VictoryText).Y / 2.0f);
-
-            // set the player name text positions
-            player1TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
-                                              bigFont.MeasureString(player1Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.92f);
-            player2TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
-                                              bigFont.MeasureString(player2Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.92f);
-            player3TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
-                                              bigFont.MeasureString(player3Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.92f);
-            player4TextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
-                                              bigFont.MeasureString(player4Text).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.92f);
-
-            // set the player powerup positions
-            playerPowerupPositions[0] = new Vector2(player1TextPosition.X - 12 - powerupRectangle.Width,
-                                                 player1TextPosition.Y);
-            playerPowerupPositions[1] = new Vector2(player2TextPosition.X - 12 - powerupRectangle.Width,
-                                                 player2TextPosition.Y);
-            playerPowerupPositions[2] = new Vector2(player3TextPosition.X - 12 - powerupRectangle.Width,
-                                                 player3TextPosition.Y);
-            playerPowerupPositions[3] = new Vector2(player4TextPosition.X - 12 - powerupRectangle.Width,
-                                                 player4TextPosition.Y);
-
-            // set the player calorie label text positions
-            player1CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f -
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player2CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f -
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player3CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f -
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player4CalorieTextPosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f -
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-
-            // set the player calorie value positions
-            player1CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.2f +
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player2CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.4f +
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player3CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.6f +
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-            player4CalorieValuePosition = new Vector2(graphics.PreferredBackBufferWidth * 0.8f +
-                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
-                                              graphics.PreferredBackBufferHeight * 0.95f);
-
-            // set the finding player penguin rectangle
-            //playerPenguinRectangle = new Rectangle(0, 0, playerPenguin.Width, playerPenguin.Height);
+            initializePlayerUIPositions();
 
             camera.initialize();
             camera.updateBounds();
             gameplayBoundaries = camera.maxView;
+        }
+
+        private void initializePlayerUIPositions()
+        {
+            // initialize all the UI positions for each player
+            for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
+            {
+                playerVictoryTextPositions[i] = new Vector2(graphics.PreferredBackBufferWidth / 2.0f -
+                                                     bigFont.MeasureString(playerTexts[i] + " Wins!").X / 2.0f,
+                                                     graphics.PreferredBackBufferHeight / 2.0f -
+                                                     bigFont.MeasureString(playerTexts[i] + " Wins!").Y / 2.0f);
+
+                playerTextPositions[i] = new Vector2(graphics.PreferredBackBufferWidth * ((i + 1) * 0.2f) -
+                                              bigFont.MeasureString(playerTexts[i]).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.92f);
+
+                playerPowerupPositions[i] = new Vector2(playerTextPositions[i].X - 12 - powerupRectangle.Width,
+                                                 playerTextPositions[i].Y);
+
+                playerCalorieTextPositions[i] = new Vector2(graphics.PreferredBackBufferWidth * ((i + 1) * 0.2f) -
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
+
+                playerCalorieValuePositions[i] = new Vector2(graphics.PreferredBackBufferWidth * ((i + 1) * 0.2f) +
+                                              bigFont.MeasureString(caloriesLabelText).X / 2.0f + 5.0f,
+                                              graphics.PreferredBackBufferHeight * 0.95f);
+            }
         }
 
         /// <summary>
@@ -861,22 +768,23 @@ namespace JAMMM
             GraphicsDevice.Clear(Color.DarkSeaGreen);
 
             spriteBatch.Begin();
-            //
-            spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
-            spriteBatch.Draw(title, titlePosition, Color.White);
+            {
+                // draw the background
+                spriteBatch.Draw(background, screenRectangle, new Color(255, 255, 255, 50));
 
-            foreach (Penguin p in players)
-                p.draw(gameTime, spriteBatch);
+                // draw title
+                spriteBatch.Draw(title, titlePosition, Color.White);
 
-            if (isPlayer1Ready)
-                spriteBatch.DrawString(font, readyText, player1ReadyTextPosition, Color.Green);
-            if (isPlayer2Ready)
-                spriteBatch.DrawString(font, readyText, player2ReadyTextPosition, Color.Green);
-            if (isPlayer3Ready)
-                spriteBatch.DrawString(font, readyText, player3ReadyTextPosition, Color.Green);
-            if (isPlayer4Ready)
-                spriteBatch.DrawString(font, readyText, player4ReadyTextPosition, Color.Green);
-            //
+                // draw each player
+                foreach (Penguin p in players)
+                    p.draw(gameTime, spriteBatch);
+
+                // draw ready text
+                for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
+                    if (isPlayerReady[i])
+                        spriteBatch.DrawString(font, readyText,
+                            playerReadyTextPositions[i], Color.Green);
+            }
             spriteBatch.End();
         }
 
@@ -885,14 +793,17 @@ namespace JAMMM
             GraphicsDevice.Clear(Color.DarkSeaGreen);
 
             spriteBatch.Begin();
+            {
+                // draw expanding background fade animation
+                spriteBatch.Draw(background, expandingView, backgroundFadeColor);
 
-            spriteBatch.Draw(background, expandingView, backgroundFadeColor);
+                // draw the title fading
+                spriteBatch.Draw(title, titlePosition, titleFadeColor);
 
-            spriteBatch.Draw(title, titlePosition, titleFadeColor);
-
-            foreach (Penguin p in players)
-                p.draw(gameTime, spriteBatch);
-
+                // draw each player
+                foreach (Penguin p in players)
+                    p.draw(gameTime, spriteBatch);
+            }
             spriteBatch.End();
         }
 
@@ -982,29 +893,11 @@ namespace JAMMM
 
             timer1.Draw(spriteBatch, bigFont, graphics);
 
-            if (isPlayer1Connected)
+            for (int i = 0; i < players.Count; ++i)
             {
-                spriteBatch.DrawString(bigFont, player1Text, player1TextPosition, Color.Blue);
-                spriteBatch.DrawString(bigFont, caloriesLabelText, player1CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(bigFont, players[0].Calories.ToString(), player1CalorieValuePosition, Color.Yellow);
-            }
-            if (isPlayer2Connected)
-            {
-                spriteBatch.DrawString(bigFont, player2Text, player2TextPosition, Color.Red);
-                spriteBatch.DrawString(bigFont, caloriesLabelText, player2CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(bigFont, players[1].Calories.ToString(), player2CalorieValuePosition, Color.Yellow);
-            }
-            if (isPlayer3Connected)
-            {
-                spriteBatch.DrawString(bigFont, player3Text, player3TextPosition, Color.Black);
-                spriteBatch.DrawString(bigFont, caloriesLabelText, player3CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(bigFont, players[2].Calories.ToString(), player3CalorieValuePosition, Color.Yellow);
-            }
-            if (isPlayer4Connected)
-            {
-                spriteBatch.DrawString(bigFont, player4Text, player4TextPosition, Color.Green);
-                spriteBatch.DrawString(bigFont, caloriesLabelText, player4CalorieTextPosition, Color.WhiteSmoke);
-                spriteBatch.DrawString(bigFont, players[3].Calories.ToString(), player4CalorieValuePosition, Color.Yellow);
+                spriteBatch.DrawString(bigFont, playerTexts[i], playerTextPositions[i], players[i].color);
+                spriteBatch.DrawString(bigFont, caloriesLabelText, playerCalorieTextPositions[i], Color.WhiteSmoke);
+                spriteBatch.DrawString(bigFont, players[i].Calories.ToString(), playerCalorieValuePositions[i], Color.Yellow);
             }
 
             spriteBatch.End();
@@ -1015,26 +908,13 @@ namespace JAMMM
             GraphicsDevice.Clear(Color.DarkSeaGreen);
 
             spriteBatch.Begin();
-
-            if (players.Count > 0 && players[0].CurrState != Actor.state.Dying)
             {
-                spriteBatch.DrawString(bigFont, player1VictoryText, player1VictoryTextPosition, Color.Gold);
+                // draw victory text
+                for (int i = 0; i < players.Count; ++i)
+                    if (players[i].IsAlive && players[i].CurrState != Actor.state.Dying)
+                        spriteBatch.DrawString(bigFont, playerTexts[i] + " Wins!",
+                            playerVictoryTextPositions[i], Color.Gold);
             }
-            else if (players.Count > 1 && players[1].CurrState != Actor.state.Dying)
-            {
-                spriteBatch.DrawString(bigFont, player2VictoryText, player2VictoryTextPosition, Color.Gold);
-            }
-            else if (players.Count > 2 && players[2].CurrState != Actor.state.Dying)
-            {
-                spriteBatch.DrawString(bigFont, player3VictoryText, player3VictoryTextPosition, Color.Gold);
-            }
-            else if (players.Count > 3 && players[3].CurrState != Actor.state.Dying)
-            {
-                spriteBatch.DrawString(bigFont, player4VictoryText, player4VictoryTextPosition, Color.Gold);
-            }
-            else
-                spriteBatch.DrawString(bigFont, "The sharks win!!!", player1VictoryTextPosition, Color.Gold);
-
             spriteBatch.End();
         }
 
@@ -1088,10 +968,11 @@ namespace JAMMM
         {
             if (hasBeenCompletedOnce)
             {
-                if (isPlayer1Connected) isPlayer1Ready = false;
-                if (isPlayer2Connected) isPlayer2Ready = false;
-                if (isPlayer3Connected) isPlayer3Ready = false;
-                if (isPlayer4Connected) isPlayer4Ready = false;
+                for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
+                {
+                    if (isPlayerConnected[i]) 
+                        isPlayerReady[i] = false;
+                }
 
                 foreach (Penguin p in players)
                 {
@@ -1109,29 +990,15 @@ namespace JAMMM
                            isNearAnotherPlayer(p))
                         p.setNewStartingPosition(getRandomPositionWithinBounds(camera.spawnView));
 
-                if (isPlayer1Connected)
+
+                Rectangle currPlayerBounds;
+                for (int i = 0; i < players.Count; ++i)
                 {
-                    player1ReadyTextPosition = players[0].Position;
-                    player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
-                }
-                if (isPlayer2Connected)
-                {
-                    player2ReadyTextPosition = players[1].Position;
-                    player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
-                }
-                if (isPlayer3Connected)
-                {
-                    player3ReadyTextPosition = players[2].Position;
-                    player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
-                }
-                if (isPlayer4Connected)
-                {
-                    player4ReadyTextPosition = players[3].Position;
-                    player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
+                    currPlayerBounds = players[i].getBufferedRectangleBounds(0);
+
+                    playerReadyTextPositions[i] = players[i].Position;
+                    playerReadyTextPositions[i].X -= currPlayerBounds.Width / 2.0f;
+                    playerReadyTextPositions[i].Y += currPlayerBounds.Height / 2.0f;
                 }
             }
         }
@@ -1171,7 +1038,6 @@ namespace JAMMM
         /// </summary>
         private void onEnteringBattle()
         {
-
             //initialize the timer
             timer1 = new Timer();
 
@@ -1228,9 +1094,7 @@ namespace JAMMM
         private void cleanExtraSharks()
         {
             while (sharkPool.Count > SHARK_POOL_SIZE)
-            {
                 sharkPool.RemoveAt(sharkPool.Count - 1);
-            }
         }
 
         private Vector2 getRandomPositionWithinBounds(Rectangle bounds)
@@ -1611,135 +1475,55 @@ namespace JAMMM
 
         private void TryToAddPlayers()
         {
-            if (!isPlayer1Connected)
+            for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
             {
-                if (GamePad.GetState(PlayerIndex.One).IsConnected)
+                if (!isPlayerConnected[i])
                 {
-                    Penguin newPlayer = 
-                        new Penguin(PlayerIndex.One, player1StartPosition, "");
+                    if (GamePad.GetState((PlayerIndex)i).IsConnected)
+                    {
+                        Penguin newPlayer = 
+                            new Penguin((PlayerIndex)i, playerStartPositions[i], colorCodes[i]);
 
-                    newPlayer.loadContent();
-                    newPlayer.respawn();
-                    newPlayer.pauseAnimation();
+                        newPlayer.loadContent();
+                        newPlayer.respawn();
+                        newPlayer.pauseAnimation();
 
-                    players.Add(newPlayer);
+                        players.Add(newPlayer);
 
-                    player1ReadyTextPosition = players[0].Position;
-                    player1ReadyTextPosition.Y += players[0].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player1ReadyTextPosition.X -= players[0].getBufferedRectangleBounds(0).Width / 2.0f;
+                        playerReadyTextPositions[i] = players[i].Position;
+                        playerReadyTextPositions[i].Y += players[i].getBufferedRectangleBounds(0).Height / 2.0f;
+                        playerReadyTextPositions[i].X -= players[i].getBufferedRectangleBounds(0).Width / 2.0f;
 
-                    isPlayer1Connected = true;
-                }
-            }
-            if (!isPlayer2Connected)
-            {
-                if (GamePad.GetState(PlayerIndex.Two).IsConnected)
-                {
-                    Penguin newPlayer = 
-                        new Penguin(PlayerIndex.Two, player2StartPosition, "_r");
-
-                    newPlayer.loadContent();
-                    newPlayer.respawn();
-                    newPlayer.pauseAnimation();
-
-                    players.Add(newPlayer);
-
-                    player2ReadyTextPosition = players[1].Position;
-                    player2ReadyTextPosition.Y += players[1].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player2ReadyTextPosition.X -= players[1].getBufferedRectangleBounds(0).Width / 2.0f;
-
-                    isPlayer2Connected = true;
-                }
-                
-            }
-            if (!isPlayer3Connected)
-            {
-                if (GamePad.GetState(PlayerIndex.Three).IsConnected)
-                {
-                    Penguin newPlayer = 
-                        new Penguin(PlayerIndex.Three, player3StartPosition, "_p");
-
-                    newPlayer.loadContent();
-                    newPlayer.respawn();
-                    newPlayer.pauseAnimation();
-
-                    players.Add(newPlayer);
-
-                    player3ReadyTextPosition = players[2].Position;
-                    player3ReadyTextPosition.Y += players[2].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player3ReadyTextPosition.X -= players[2].getBufferedRectangleBounds(0).Width / 2.0f;
-
-                    isPlayer3Connected = true;
-                }
-            }
-            if (!isPlayer4Connected)
-            {
-                if (GamePad.GetState(PlayerIndex.Four).IsConnected)
-                {
-                    Penguin newPlayer = 
-                        new Penguin(PlayerIndex.Four, player4StartPosition, "_g");
-
-                    newPlayer.loadContent();
-                    newPlayer.respawn();
-                    newPlayer.pauseAnimation();
-
-                    players.Add(newPlayer);
-
-                    player4ReadyTextPosition = players[3].Position;
-                    player4ReadyTextPosition.Y += players[3].getBufferedRectangleBounds(0).Height / 2.0f;
-                    player4ReadyTextPosition.X -= players[3].getBufferedRectangleBounds(0).Width / 2.0f;
-
-                    isPlayer4Connected = true;
+                        isPlayerConnected[i] = true;
+                    }
                 }
             }
         }
 
         private void TryToReadyPlayers()
         {
-            if (isPlayer1Connected && !isPlayer1Ready)
+            for (int i = 0; i < MAX_NUM_PLAYERS; ++i)
             {
-                if (GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A))
+                if (isPlayerConnected[i] && !isPlayerReady[i])
                 {
-                    isPlayer1Ready = true;
-                    AudioManager.getSound("Ready_Sound").Play();
-                }
-            }
-            if (isPlayer2Connected && !isPlayer2Ready)
-            {
-                if (GamePad.GetState(PlayerIndex.Two).IsButtonDown(Buttons.A) || Keyboard.GetState().IsKeyDown(Keys.Enter))
-                {
-                    isPlayer2Ready = true;
-                    AudioManager.getSound("Ready_Sound").Play();
-                }
-            }
-            if (isPlayer3Connected && !isPlayer3Ready)
-            {
-                if (GamePad.GetState(PlayerIndex.Three).IsButtonDown(Buttons.A))
-                {
-                    isPlayer3Ready = true;
-                    AudioManager.getSound("Ready_Sound").Play();
-                }
-            }
-            if (isPlayer4Connected && !isPlayer4Ready)
-            {
-                if (GamePad.GetState(PlayerIndex.Four).IsButtonDown(Buttons.A))
-                {
-                    isPlayer4Ready = true;
-                    AudioManager.getSound("Ready_Sound").Play();
+                    if (GamePad.GetState(players[i].Controller).IsButtonDown(Buttons.A))
+                    {
+                        isPlayerReady[i] = true;
+                        AudioManager.getSound("Ready_Sound").Play();
+                    }
                 }
             }
         }
 
         private void TryToStartGame()
         {
-            if (isPlayer2Connected && !isPlayer2Ready)
-                return;
-            if (isPlayer3Connected && !isPlayer3Ready)
-                return;
-            if (isPlayer4Connected && !isPlayer4Ready)
-                return;
+            // if any player isn't ready but connected then we cannot start
+            for (int i = 1; i < MAX_NUM_PLAYERS; ++i)
+                if (isPlayerConnected[i] && !isPlayerReady[i])
+                    return;
 
-            if (isPlayer1Ready && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
+            // otherwise, just check to see if start is being pressed
+            if (isPlayerReady[0] && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.Start))
                 changeState(GameState.TransitionIntoBattle);
         }
 
@@ -1769,78 +1553,4 @@ namespace JAMMM
 
         #endregion
     }
-
-
-    /**
-protected void Flock(List<Fish> _boids, GameTime gametime)
-{
-    float maxSpeed = _boids[0].MaxVel;
-    float maxAccel = _boids[0].MaxAcc;
-    float desiredSeparation = 50.0f;
-    float neighborRadius = 100.0f;
-    float separationFactor = 30.0f;
-    float alignmentFactor  = 4.0f;
-    float cohesionFactor  = 1.0f;
-
-    float elapsedTime = (float)gametime.ElapsedGameTime.TotalSeconds;            
-    for (int i = 0; i < _boids.Count; i++)
-    {
-        float count = 0;
-        float count0 = 0;
-        Vector2 cohesion = new Vector2(0, 0);
-        Vector2 separation = new Vector2(0, 0);
-        Vector2 alignment = new Vector2(0, 0);                
-
-        for (int j = 0; j < _boids.Count; j++)
-        {
-            Vector2 vecTo = _boids[j].Position - _boids[i].Position;
-            if (vecTo.Length() > 0 && vecTo.Length() < neighborRadius)
-            {
-                cohesion += _boids[j].Position;
-                alignment += _boids[j].Velocity;
-                count++;                        
-            }
-            if (vecTo.Length() > 0 && vecTo.Length() < desiredSeparation)
-            {
-                Vector2 temp = -vecTo;
-                temp.Normalize();
-                temp /= vecTo.Length();
-                separation += temp;                        
-                count0++;
-            }
-        }
-
-        if (count > 0)
-        {
-            cohesion /= count;
-            cohesion = cohesion - _boids[i].Position;
-            alignment /= count;
-            if (alignment.Length() > maxAccel)
-            {
-                alignment.Normalize();
-                alignment *= maxAccel;
-            }
-        }
-        if (count0 > 0)
-        {
-            separation /= count0;
-        }
-        if (cohesion.Length() > 0)
-        {
-            float temp = cohesion.Length();
-            cohesion.Normalize();
-            if ( temp < (desiredSeparation + neighborRadius) / 2.0f)
-            {
-                cohesion *= maxSpeed * (temp / neighborRadius);
-            }
-            else
-            {                        
-                cohesion *= maxSpeed;
-            }
-            cohesion -= _boids[i].velocity;
-        }
-        _boids[i].acceleration = cohesion * cohesionFactor + separation * separationFactor + alignment * alignmentFactor;                
-    }
-}
- * */
 }

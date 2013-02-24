@@ -217,6 +217,11 @@ namespace JAMMM
             return (float)Math.Atan2(vector.Y, vector.X);
         }
 
+        public static float VectorToAngleReverse(Vector2 vector)
+        {
+            return (float)Math.Atan2(vector.X, vector.Y);
+        }
+
         public static void RotatePoint(float cx, float cy, float angle, ref Vector2 p)
         {
             float s = (float)Math.Sin(angle);
