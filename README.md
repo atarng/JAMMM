@@ -2,9 +2,9 @@
 =====
 Game Jam
 ==================
-Authors:
-Joey Ly
-Alfred Tarng
-Matthew Religioso
-Matthew Jones
+Authors:\  
+Joey Ly\  
+Alfred Tarng\  
+Matthew Religioso\  
+Matthew Jones\  
 ... Me?
